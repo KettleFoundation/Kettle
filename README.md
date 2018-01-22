@@ -9,9 +9,9 @@
 
 ---
 
-![Minecraft Forge](https://img.shields.io/badge/Forge-1.12.2--14.23.1.2554-green.svg)
-![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)
-![JDK 1.8](https://img.shields.io/badge/JDK-8-blue.svg)
+![Minecraft Forge](https://img.shields.io/badge/Forge-1.12.2--14.23.1.2554-green.svg?style=for-the-badge)
+![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=for-the-badge)
+![JDK 1.8](https://img.shields.io/badge/JDK-8-blue.svg?style=for-the-badge)
 
 ---
 
