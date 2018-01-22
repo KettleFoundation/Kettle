@@ -5,15 +5,13 @@
 ![Kettle](http://a.rgbimg.com/cache1nGhFS/users/h/hi/hisks/300/mhY15gi.jpg)
 
 <!--![Build Status](https://travis-ci.org/djoveryde/Contigo.svg?branch=master)](https://travis-ci.org/djoveryde/Contigo)
-![Minecraft Forge v10.13.4.1614][forge]
-![Minecraft v1.7.10][mc]
-![Java JDK v1.8][java]
-![Spigot 1.7.10 Snapshot ][spigot]-->
+-->
 
 ---
 
 ![Minecraft Forge](https://img.shields.io/badge/Forge-1.12.2--14.23.1.2554-green.svg)
 ![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg)
+![JDK 1.8](https://img.shields.io/badge/JDK-8-blue.svg)
 
 ---
 
@@ -38,17 +36,9 @@ coming soon
 
 You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM)
 
-## Contributing
-
-<!--Please read the [guide](https://github.com/aolko/Kettle/blob/master/CONTRIBUTING.md) on how to contribute - Contigo always needs improvements :smile: -->
-WIP
-
-## Build Requirements
-<!--* Java 8u101 JDK or higher
-* `JAVA_HOME` defined on your OS-->
-WIP
-
 ## Building Kettle
+
+### Requirements
 <!--
 * Checkout project
   * You can use IDE or clone from console:
@@ -67,15 +57,9 @@ WIP
 <!--
 All builds will be in `build/distributions`
 -->
-WIP
+### How to build
 
-<!--
-## Updating sources
-* Update sources
-  * `git pull origin master`
-* Re apply patches & build binaries
-  * `./gradlew clean setupCauldron jar`
--->
+WIP
 
 ## Known Caveats, use provided fixes at your own risk.
 <!--
@@ -87,11 +71,3 @@ WIP
 ✔ SkinsRestorer: Latest working version is 10.4.4
 -->
 WIP
-
-<!--
-[Fixed]: http://gogs.tcpr.ca/TCPR/Fixes "Fixed"
-[forge]: https://img.shields.io/badge/Minecraft%20Forge-v10.13.4.1614-green.svg "Minecraft Forge v10.13.4.1614"
-[mc]: https://img.shields.io/badge/Minecraft-v1.7.10-green.svg "Minecraft 1.7.10"
-[java]: https://img.shields.io/badge/Java%20JDK-v1.8-blue.svg "Java JDK 8"
-[spigot]: https://img.shields.io/badge/Spigot-v1.7.10--R0.1--SNAPSHOT-lightgrey.svg "Spigot R0.1 Snapshot"
--->
