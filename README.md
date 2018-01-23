@@ -1,4 +1,7 @@
-### Since Contigo ~~Thermos~~ is no longer being actively developed or not being developed ___at all___ and servers are reduced to using SpongeForge for 1.12+ (Not SpongeVanilla, because spigot), this project is dedicated to renewing the ability for Minecraft servers to use native spigot ~~bukkit~~ plugins along with Forge mods.
+Since Contigo ~~Thermos~~ is no longer being actively developed or not being developed ___at all___ and servers are reduced to using SpongeForge for 1.12+ (Not SpongeVanilla, because spigot), this project is dedicated to renewing the ability for Minecraft servers to use native spigot ~~bukkit~~ plugins along with Forge mods.
+
+---
+
 
 # Kettle
 
@@ -39,35 +42,10 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 ## Building Kettle
 
 ### Requirements
-<!--
-* Checkout project
-  * You can use IDE or clone from console:
-  `git clone https://github.com/djoveryde/Contigo.git`
-* Setup
-  * Auto: `setup.sh`
-  * Manual:
-  `git submodule update --init --recursive`
-* Build
-  * This process downloads minecraft and apply patches
-  * If you have gradle integration in IDE - you can still use gui
-  * Auto: `build.sh`
-  * Manual:
-  `./gradlew setupCauldron jar`
--->
-<!--
-All builds will be in `build/distributions`
--->
-### How to build
-
 WIP
 
-## Known Caveats, use provided fixes at your own risk.
-<!--
-✔ BungeeCord: It's been known for years that BungeeCord barely works with Forge & seems that it'll never be supported officially. [Fixed]
-✔ BuyCraftX: Doesn't seem to work with Thermos, info on why it doesn't is unknown currently. [Fixed]
-✔ Citizens: Not compatible with forge [Fixed]
-✖ Lilypad: 100% not compatible with Forge, lead developer has declined to add support when asked.
-✔ Mobius / Opis: You can download fixed version [HERE](https://cdn.discordapp.com/attachments/172072987154055168/186577486593785857/MobiusCore-1.2.5-Thermos.jar)
-✔ SkinsRestorer: Latest working version is 10.4.4
--->
+### How to build
+WIP
+
+## Known Issues
 WIP
