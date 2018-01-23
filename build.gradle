@@ -32,6 +32,10 @@ repositories {
         name 'Tethys (drakon.io)'
         url 'https://tethys.drakon.io/maven'
     }
+    maven {
+		name = 'spigotmc-public'
+		url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+	}
     mavenCentral()
 }
 
@@ -45,6 +49,11 @@ configurations {
 }
 
 dependencies {
+    shade('org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'){
+		exclude group: 'com.google.guava'
+		exclude group: 'com.google.code.gson'
+		exclude group: 'junit'
+	}
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
