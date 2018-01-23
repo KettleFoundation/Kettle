@@ -3,9 +3,9 @@
 Since Contigo <s>Thermos</s> is no longer being actively developed or not being developed <u>at all</u> and servers are reduced to using SpongeForge for 1.12+ (Not SpongeVanilla, because spigot), this project is dedicated to renewing the ability for Minecraft servers to use native spigot <s>bukkit</s> plugins along with Forge mods.
 </div>
 
-# Kettle
+![Kettle](https://i.imgur.com/gkmTKvR.png)
 
-![Kettle](http://a.rgbimg.com/cache1nGhFS/users/h/hi/hisks/300/mhY15gi.jpg)
+# Kettle
 
 <!--![Build Status](https://travis-ci.org/djoveryde/Contigo.svg?branch=master)](https://travis-ci.org/djoveryde/Contigo)
 -->
