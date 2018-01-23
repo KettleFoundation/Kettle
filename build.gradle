@@ -8,6 +8,14 @@ buildscript {
             name = "Forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        maven {
+            name = 'prok'
+            url = 'https://djoveryde.000webhostapp.com/kcauldron/files/'
+        }
+        maven {
+            name = 'spigot'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -31,6 +39,14 @@ repositories {
     maven {
         name 'Tethys (drakon.io)'
         url 'https://tethys.drakon.io/maven'
+    }
+    maven {
+        name 'prok'
+        url 'https://djoveryde.000webhostapp.com/kcauldron/files/'
+    }
+    maven {
+        name 'spigot'
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     mavenCentral()
 }
