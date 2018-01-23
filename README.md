@@ -1,6 +1,6 @@
 
 <div style="background:yellow">
-Since Contigo ~~Thermos~~ is no longer being actively developed or not being developed ___at all___ and servers are reduced to using SpongeForge for 1.12+ (Not SpongeVanilla, because spigot), this project is dedicated to renewing the ability for Minecraft servers to use native spigot ~~bukkit~~ plugins along with Forge mods.
+Since Contigo <s>Thermos</s> is no longer being actively developed or not being developed <u>at all</u> and servers are reduced to using SpongeForge for 1.12+ (Not SpongeVanilla, because spigot), this project is dedicated to renewing the ability for Minecraft servers to use native spigot <s>bukkit</s> plugins along with Forge mods.
 </div>
 
 # Kettle
