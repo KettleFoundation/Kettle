@@ -42,7 +42,7 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 ## Building Kettle
 
 ### Requirements
-* Forge 1.12.2-14.23.1.2555
+* Forge 1.12.2-14.23.1.2603
 * Minecraft 1.12.2
 
 WIP
