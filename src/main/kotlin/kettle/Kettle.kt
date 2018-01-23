@@ -1,13 +1,9 @@
 package kettle
 
+import net.minecraftforge.fml.common.FMLCommonHandler
 import java.io.File
 import java.net.URLDecoder
 import java.util.*
-
-import org.spigotmc.RestartCommand
-
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.FMLLog
 
 object Thermos {
     val sThermosThreadGroup = ThreadGroup("Thermos")

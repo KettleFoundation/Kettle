@@ -10,7 +10,7 @@ buildscript {
         }
         maven {
             name = 'prok'
-            url = 'https://djoveryde.000webhostapp.com/kcauldron/files/'
+            url = 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
         }
         maven {
             name = 'spigot'
@@ -42,15 +42,15 @@ repositories {
     }
     maven {
         name 'prok'
-        url 'https://djoveryde.000webhostapp.com/kcauldron/files/'
+        url 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
     }
     maven {
         name 'spigot'
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
-		    name = 'spigotmc-public'
-		    url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+		name 'spigotmc-public'
+		url 'https://hub.spigotmc.org/nexus/content/groups/public/'
 	  }
     mavenCentral()
 }
