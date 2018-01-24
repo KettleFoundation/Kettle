@@ -10,8 +10,8 @@ import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.IntInsnNode
 
-import pw.prok.imagine.asm.ImagineASM
-import pw.prok.imagine.asm.Transformer
+import pw.prok.kimagine.asm.ImagineASM
+import pw.prok.kimagine.asm.Transformer
 import net.minecraftforge.fml.common.FMLLog
 
 @Transformer.RegisterTransformer

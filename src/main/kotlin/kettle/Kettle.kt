@@ -1,12 +1,13 @@
 package kettle
 
 import net.minecraftforge.fml.common.FMLCommonHandler
+import org.spigotmc.RestartCommand
 import java.io.File
 import java.net.URLDecoder
 import java.util.*
 
-object Thermos {
-    val sThermosThreadGroup = ThreadGroup("Thermos")
+object Kettle {
+    val sKettleThreadGroup = ThreadGroup("Kettle")
 
     private var sManifestParsed = false
 
@@ -28,10 +29,10 @@ object Thermos {
 
     private var sServerHome: File? = null
 
-    val serverHome: File
+    val serverHome: File?
         get() {
             if (sServerHome == null) {
-                val home = System.getenv("THERMOS_HOME")
+                val home = System.getenv("KETTLE_HOME")
                 if (home != null) {
                     sServerHome = File(home)
                 } else {
@@ -93,13 +94,13 @@ object Thermos {
         sManifestParsed = true
 
         try {
-            val resources = Thermos::class.java.classLoader
+            val resources = Kettle::class.java.classLoader
                     .getResources("META-INF/MANIFEST.MF")
             val manifest = Properties()
             while (resources.hasMoreElements()) {
                 val url = resources.nextElement()
                 manifest.load(url.openStream())
-                val version = manifest.getProperty("Thermos-Version")
+                val version = manifest.getProperty("Kettle-Version")
                 if (version != null) {
                     val path = url.path
                     var jarFilePath = path.substring(path.indexOf(":") + 1,
@@ -108,11 +109,11 @@ object Thermos {
                     sServerLocation = File(jarFilePath)
 
                     sCurrentVersion = version
-                    sGroup = manifest.getProperty("Thermos-Group")
-                    sBranch = manifest.getProperty("Thermos-Branch")
-                    sChannel = manifest.getProperty("Thermos-Channel")
-                    sLegacy = java.lang.Boolean.parseBoolean(manifest.getProperty("Thermos-Legacy"))
-                    sOfficial = java.lang.Boolean.parseBoolean(manifest.getProperty("Thermos-Official"))
+                    sGroup = manifest.getProperty("Kettle-Group")
+                    sBranch = manifest.getProperty("Kettle-Branch")
+                    sChannel = manifest.getProperty("Kettle-Channel")
+                    sLegacy = java.lang.Boolean.parseBoolean(manifest.getProperty("Kettle-Legacy"))
+                    sOfficial = java.lang.Boolean.parseBoolean(manifest.getProperty("Kettle-Official"))
                     break
                 }
                 manifest.clear()
@@ -129,11 +130,13 @@ object Thermos {
 
     fun lookupForgeRevision(): Int {
         if (sForgeRevision != 0) return sForgeRevision
-        var revision = Integer.parseInt(System.getProperty("thermos.forgeRevision", "0"))
-        if (revision != 0) return sForgeRevision = revision
+        var revision = Integer.parseInt(System.getProperty("Kettle.forgeRevision", "0"))
+        if (revision != 0) {
+            return sForgeRevision = revision
+        }
         try {
             val p = Properties()
-            p.load(Thermos::class.java
+            p.load(Kettle::class.java
                     .getResourceAsStream("/fmlversion.properties"))
             revision = Integer.parseInt(p.getProperty(
                     "fmlbuild.build.number", "0").toString())
@@ -141,7 +144,7 @@ object Thermos {
         }
 
         if (revision == 0) {
-            TLog.get().warning("Thermos: could not parse forge revision, critical error")
+            TLog.get().warning("Kettle: could not parse forge revision, critical error")
             FMLCommonHandler.instance().exitJava(1, false)
         }
         return sForgeRevision = revision
