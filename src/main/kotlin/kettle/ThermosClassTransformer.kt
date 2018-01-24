@@ -12,6 +12,7 @@ import org.objectweb.asm.tree.IntInsnNode
 
 import pw.prok.kimagine.asm.ImagineASM
 import pw.prok.kimagine.asm.Transformer
+
 import net.minecraftforge.fml.common.FMLLog
 
 @Transformer.RegisterTransformer
