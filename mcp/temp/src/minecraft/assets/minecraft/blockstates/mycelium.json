@@ -1,6 +1,0 @@
-{
-    "variants": {
-        "snowy=false": { "model": "mycelium" },
-        "snowy=true": { "model": "grass_snowed" }
-    }
-}
