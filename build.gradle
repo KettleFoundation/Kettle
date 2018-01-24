@@ -2,7 +2,6 @@ buildscript {
     ext.kotlin_version = '1.2.20'
 
     repositories {
-        mavenCentral()
         jcenter()
         maven {
             name = "Forge"
@@ -20,6 +19,11 @@ buildscript {
             name = 'destroystokyo-repo'
             url = 'https://repo.destroystokyo.com/content/repositories/snapshots/'
         }
+	flatDir {
+            dirs 'libs'
+        }
+        mavenCentral()
+        mavenLocal()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -40,6 +44,7 @@ apply plugin: 'kotlin'
 sourceCompatibility = 1.8
 
 repositories {
+    clear()
     maven {
         name 'Forge'
         url 'http://files.minecraftforge.net/maven'
@@ -64,7 +69,11 @@ repositories {
         name 'destroystokyo-repo'
         url 'https://repo.destroystokyo.com/content/repositories/snapshots/'
     }
+    flatDir {
+        dirs 'libs'
+    }
     mavenCentral()
+    mavenLocal()
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
