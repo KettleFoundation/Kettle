@@ -10,14 +10,14 @@ import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.IntInsnNode
 
-import pw.prok.kimagine.asm.ImagineASM
-import pw.prok.kimagine.asm.Transformer
+import pw.prok.imagine.asm.ImagineASM
+import pw.prok.imagine.asm.Transformer
 
 import net.minecraftforge.fml.common.FMLLog
 
 @Transformer.RegisterTransformer
 class KettleClassTransformer : Transformer {
-    fun transform(asm: ImagineASM) {
+    override fun transform(asm: ImagineASM) {
         if (asm.`is`("climateControl.utils.ChunkGeneratorExtractor")) {
             var undergroundBiomesInstalled = false
             try {

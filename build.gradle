@@ -9,7 +9,7 @@ buildscript {
         }
         maven {
             name = 'prok'
-            url = 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
+            url = 'https://djoveryde.000webhostapp.com/kcauldron/files/'
         }
         maven {
             name = 'spigot'
@@ -56,7 +56,7 @@ repositories {
     }
     maven {
         name 'prok'
-        url 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
+        url 'https://djoveryde.000webhostapp.com/kcauldron/files/'
     }
     maven {
         name 'spigot'
