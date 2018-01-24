@@ -26,6 +26,7 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         //classpath 'com.destroystokyo.paper:paper-api:1.12.2-R0.1-SNAPSHOT'
         // unbreak
+        classpath 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
     }
 }
 
@@ -80,6 +81,7 @@ dependencies {
 		exclude group: 'com.google.code.gson'
 		exclude group: 'junit'
 	}
+    compile 'net.md-5:SpecialSource:1.8.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
