@@ -16,10 +16,16 @@ buildscript {
             name = 'spigot'
             url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
+        maven {
+            name = 'destroystokyo-repo'
+            url = 'https://repo.destroystokyo.com/content/repositories/snapshots/'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        //classpath 'com.destroystokyo.paper:paper-api:1.12.2-R0.1-SNAPSHOT'
+        // unbreak
     }
 }
 
@@ -52,6 +58,10 @@ repositories {
 		name 'spigotmc-public'
 		url 'https://hub.spigotmc.org/nexus/content/groups/public/'
 	  }
+    maven {
+        name 'destroystokyo-repo'
+        url 'https://repo.destroystokyo.com/content/repositories/snapshots/'
+    }
     mavenCentral()
 }
 
