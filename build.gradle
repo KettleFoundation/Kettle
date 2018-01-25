@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.20'
+    ext.kotlin_version = '1.2.21'
 
     repositories {
         jcenter()
@@ -7,9 +7,13 @@ buildscript {
             name = "Forge"
             url = "http://files.minecraftforge.net/maven"
         }
-        maven {
+        /*maven {
             name = 'prok'
             url = 'https://djoveryde.000webhostapp.com/kcauldron/files/'
+        }*/
+        maven {
+            name = 'prok'
+            url = 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
         }
         maven {
             name = 'spigot'
@@ -18,6 +22,10 @@ buildscript {
         maven {
             name = 'destroystokyo-repo'
             url = 'https://repo.destroystokyo.com/content/repositories/snapshots/'
+        }
+        maven{
+            name = 'mvnrepository'
+            url = 'https://mvnrepository.com/artifact/'
         }
 	flatDir {
             dirs 'libs'
@@ -54,10 +62,14 @@ repositories {
         name 'Tethys (drakon.io)'
         url 'https://tethys.drakon.io/maven'
     }
-    maven {
+    /*maven {
         name 'prok'
         url 'https://djoveryde.000webhostapp.com/kcauldron/files/'
-    }
+    }*/
+    maven {
+        name 'prok'
+        url 'https://nexus.aur.rocks/service/siesta/repository/browse/kk-central/'
+        }
     maven {
         name 'spigot'
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
@@ -70,11 +82,16 @@ repositories {
         name 'destroystokyo-repo'
         url 'https://repo.destroystokyo.com/content/repositories/snapshots/'
     }
+    maven{
+        name 'mvnrepository'
+        url 'https://mvnrepository.com/artifact/'
+    }
     flatDir {
         dirs 'libs'
     }
     mavenCentral()
     mavenLocal()
+    maven { url 'https://djoveryde.000webhostapp.com/kcauldron/files/' }
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -95,6 +112,7 @@ dependencies {
     compile 'net.md-5:SpecialSource:1.8.1'
     compile 'org.luaj:luaj-jse:3.0.1'
     compile 'pw.prok:KImagine:0.2.0'
+    compile 'net.java.jinput:jinput:2.0.5'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile fileTree(dir: "libs", include: "*.jar")
