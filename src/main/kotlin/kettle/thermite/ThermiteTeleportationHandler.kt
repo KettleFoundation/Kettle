@@ -1,10 +1,10 @@
-package thermos.thermite
+package kettle.thermite
 
 import org.bukkit.World.Environment
 
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.network.FMLEmbeddedChannel
-import cpw.mods.fml.common.network.FMLOutboundHandler
+import net.minecraftforge.fml.common.FMLCommonHandler
+import net.minecraftforge.fml.common.network.FMLEmbeddedChannel
+import net.minecraftforge.fml.common.network.FMLOutboundHandler
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.network.play.server.S07PacketRespawn
@@ -13,6 +13,7 @@ import net.minecraft.network.play.server.S1FPacketSetExperience
 import net.minecraft.potion.PotionEffect
 import net.minecraft.server.management.ServerConfigurationManager
 import net.minecraft.util.MathHelper
+import net.minecraft.util.math.MathHelper
 import net.minecraft.world.WorldProvider
 import net.minecraft.world.WorldServer
 import net.minecraftforge.common.DimensionManager

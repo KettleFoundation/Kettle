@@ -1,4 +1,4 @@
-package thermos.entity
+package kettle.entity
 
 import java.util.UUID
 

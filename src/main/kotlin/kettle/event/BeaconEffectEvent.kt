@@ -1,4 +1,4 @@
-package thermos.event
+package kettle.event
 
 /**
  * Add new event from PaperSpigot, BeaconEffectEvent.

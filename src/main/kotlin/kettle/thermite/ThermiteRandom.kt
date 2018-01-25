@@ -42,7 +42,7 @@ class ThermiteRandom
     }
 
     override fun nextDouble(): Double {
-        return ((next(26).toLong() shl 27) + next(27)) * DOUBLE_UNIT
+        return (((next(26).toLong() shl 27) + next(27)) * DOUBLE_UNIT).toDouble()
     }
 
     /**
@@ -70,7 +70,7 @@ class ThermiteRandom
     /**
      * @return Returns an XSRandom object with the same state as the original
      */
-    override fun clone(): ThermiteRandom {
+    fun clone(): ThermiteRandom {
         return ThermiteRandom(getSeed())
     }
 
@@ -184,7 +184,8 @@ class ThermiteRandom
             r = (bound * r.toLong() shr 31).toInt()
         } else {
             var u = r
-            while (u - (r = u % bound) + m < 0) {
+            r = u % bound
+            while (u - r + m < 0) {
                 u = next(31)
             }
         }

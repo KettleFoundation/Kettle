@@ -1,4 +1,4 @@
-package thermos.wrapper
+package kettle.wrapper
 
 import gnu.trove.map.TLongObjectMap
 import net.minecraft.util.LongHashMap

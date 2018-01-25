@@ -1,4 +1,4 @@
-package thermos.chaud
+package kettle.chaud
 
 import java.util.*
 
