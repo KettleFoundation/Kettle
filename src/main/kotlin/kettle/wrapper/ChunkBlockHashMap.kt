@@ -1,4 +1,4 @@
-package thermos.wrapper
+package kettle.wrapper
 
 import com.koloboke.collect.map.LongObjMap
 import com.koloboke.collect.map.hash.HashLongObjMaps
@@ -108,16 +108,16 @@ class ChunkBlockHashMap {
     operator fun get(x: Int, z: Int): Chunk? {
         var x = x
         var z = z
-        if (last1 != null && last1!!.xPosition === x && last1!!.zPosition === z) {
+        if (last1 != null && last1!!.pos.x === x && last1!!.pos.z === z) {
             return last1
         }
-        if (last2 != null && last2!!.xPosition === x && last2!!.zPosition === z) {
+        if (last2 != null && last2!!.pos.x === x && last2!!.pos.z === z) {
             return last2
         }
-        if (last3 != null && last3!!.xPosition === x && last3!!.zPosition === z) {
+        if (last3 != null && last3!!.pos.x === x && last3!!.pos.z === z) {
             return last3
         }
-        if (last4 != null && last4!!.xPosition === x && last4!!.zPosition === z) {
+        if (last4 != null && last4!!.pos.x === x && last4!!.pos.z === z) {
             return last4
         }
 
@@ -140,8 +140,8 @@ class ChunkBlockHashMap {
         if (chunk == null)
             return
         size++
-        var x = chunk.xPosition
-        var z = chunk.zPosition
+        var x = chunk.pos.x
+        var z = chunk.pos.z
 
         val chunkhash = (x shr 4).toLong() shl 32L xor (z shr 4)
 
@@ -169,8 +169,8 @@ class ChunkBlockHashMap {
     }
 
     fun remove(chunk: Chunk) {
-        var x = chunk.xPosition
-        var z = chunk.zPosition
+        var x = chunk.pos.x
+        var z = chunk.pos.z
         val temp_chunk_bunch = this.map.get((x shr 4).toLong() shl 32L xor (z shr 4))
 
         x %= 16
@@ -185,7 +185,7 @@ class ChunkBlockHashMap {
                 temp_chunk_bunch!![x][z] = null
             }
         }
-        if (last1 != null && last1!!.xPosition === chunk.xPosition && last1!!.zPosition === chunk.zPosition) {
+        if (last1 != null && last1!!.pos.x === chunk.pos.x && last1!!.pos.z === chunk.zPosition) {
             last1 = null
             last1 = last2
             last2 = last3

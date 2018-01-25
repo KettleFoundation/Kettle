@@ -40,6 +40,8 @@ buildscript {
         // unbreak
         classpath 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
         classpath 'org.luaj:luaj-jse:3.0.1'
+        classpath 'com.koloboke:koloboke-api-jdk8:1.0.0'
+        classpath 'com.koloboke:koloboke-impl-jdk8:1.0.0'
         //libraries fileTree(dir: "libs", include: "*.jar")
     }
 }
@@ -113,6 +115,8 @@ dependencies {
     compile 'org.luaj:luaj-jse:3.0.1'
     compile 'pw.prok:KImagine:0.2.0'
     compile 'net.java.jinput:jinput:2.0.5'
+    compile 'com.koloboke:koloboke-api-jdk8:1.0.0'
+    compile 'com.koloboke:koloboke-impl-jdk8:1.0.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile fileTree(dir: "libs", include: "*.jar")
