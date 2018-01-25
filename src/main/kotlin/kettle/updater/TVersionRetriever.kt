@@ -1,10 +1,10 @@
-package thermos.updater
+package kettle.updater
 
 import java.io.InputStreamReader
 import java.lang.Thread.UncaughtExceptionHandler
 
-import thermos.Thermos
-import thermos.TLog
+import kettle.Kettle
+import kettle.KLog
 import net.minecraft.server.MinecraftServer
 
 import org.apache.http.HttpResponse
@@ -22,7 +22,7 @@ class TVersionRetriever(private val mCallback: IVersionCheckCallback?, private v
     init {
         if (DEBUG)
             sLogger.info("Created new version retriever")
-        mThread = Thread(Thermos.sThermosThreadGroup, this, "Thermos version retriever")
+        mThread = Thread(Kettle.sKettleThreadGroup, this, "Kettle version retriever")
         mThread.priority = Thread.MIN_PRIORITY
         mThread.isDaemon = true
         mThread.uncaughtExceptionHandler = this
@@ -47,10 +47,10 @@ class TVersionRetriever(private val mCallback: IVersionCheckCallback?, private v
         try {
             val request = RequestBuilder
                     .get()
-                    .setUri("http://th.tcpr.ca/thermos/version")
-                    .addParameter("version", Thermos.getCurrentVersion()).build()
+                    .setUri("http://th.tcpr.ca/Kettle/version")
+                    .addParameter("version", Kettle.currentVersion).build()
             val response = HttpClientBuilder.create()
-                    .setUserAgent("Thermos Version Retriever")
+                    .setUserAgent("Kettle Version Retriever")
                     .setRedirectStrategy(LaxRedirectStrategy()).build()
                     .execute(request)
             if (response.statusLine.statusCode != 200) {
@@ -61,8 +61,8 @@ class TVersionRetriever(private val mCallback: IVersionCheckCallback?, private v
             val json = sParser.parse(InputStreamReader(
                     response.entity.content)) as JSONObject
             val version = json["version"] as String
-            if (!mUpToDateSupport || Thermos.getCurrentVersion() == null
-                    || version != Thermos.getCurrentVersion()) {
+            if (!mUpToDateSupport || Kettle.currentVersion == null
+                    || version != Kettle.currentVersion) {
                 mCallback!!.newVersion(version)
             } else {
                 mCallback!!.upToDate()
@@ -88,27 +88,27 @@ class TVersionRetriever(private val mCallback: IVersionCheckCallback?, private v
 
     companion object {
         private val DEBUG: Boolean
-        private val sLogger: TLog
+        private val sLogger: KLog
         private val sParser: JSONParser
         private var sServer: MinecraftServer? = null
 
         init {
             DEBUG = false
-            sLogger = TLog.get(TVersionRetriever::class.java.simpleName)
+            sLogger = KLog.get(TVersionRetriever::class.java.simpleName)
 
             sParser = JSONParser()
         }
 
         fun init(server: MinecraftServer) {
             sServer = server
-            if (MinecraftServer.thermosConfig.updatecheckerEnable.getValue()) {
+            if (MinecraftServer.KettleConfig.updatecheckerEnable.getValue()) {
                 startServer(DefaultUpdateCallback.INSTANCE, true)
             }
         }
 
         fun startServer(callback: IVersionCheckCallback, loop: Boolean) {
-            TVersionRetriever(callback, loop, true, Thermos.getGroup(),
-                    Thermos.getChannel())
+            TVersionRetriever(callback, loop, true, Kettle.getGroup(),
+                    Kettle.getChannel())
         }
     }
 }

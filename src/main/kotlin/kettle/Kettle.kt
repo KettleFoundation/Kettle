@@ -132,7 +132,8 @@ object Kettle {
         if (sForgeRevision != 0) return sForgeRevision
         var revision = Integer.parseInt(System.getProperty("Kettle.forgeRevision", "0"))
         if (revision != 0) {
-            return sForgeRevision = revision
+            sForgeRevision = revision
+            return sForgeRevision
         }
         try {
             val p = Properties()
@@ -144,9 +145,10 @@ object Kettle {
         }
 
         if (revision == 0) {
-            TLog.get().warning("Kettle: could not parse forge revision, critical error")
+            KLog.get().warning("Kettle: could not parse forge revision, critical error")
             FMLCommonHandler.instance().exitJava(1, false)
         }
-        return sForgeRevision = revision
+        sForgeRevision = revision
+        return sForgeRevision
     }
 }

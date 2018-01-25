@@ -1,35 +1,27 @@
 package kettle
 
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.io.Writer
-
+import kettle.updater.CommandSenderUpdateCallback
+import kettle.updater.TVersionRetriever
+import net.minecraft.entity.Entity
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.world.chunk.Chunk
+import net.minecraftforge.common.DimensionManager
+import net.minecraftforge.fml.common.FMLCommonHandler
 import org.bukkit.ChatColor
 import org.bukkit.World
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.entity.CraftPlayer
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 
-import thermos.updater.CommandSenderUpdateCallback
-import thermos.updater.TVersionRetriever
-import net.minecraft.entity.Entity
-import net.minecraft.server.MinecraftServer
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.world.NextTickListEntry
-import net.minecraft.world.WorldServer
-import net.minecraft.world.chunk.Chunk
-import net.minecraftforge.common.DimensionManager
-import net.minecraftforge.common.DimensionManager.getWorlds
-import net.minecraftforge.fml.common.FMLCommonHandler
-
-class ThermosCommand : Command(NAME) {
+class KettleCommand : Command(NAME) {
     init {
 
         val builder = StringBuilder()
-        builder.append(String.format("-------------------[" + ChatColor.RED + "Thermos" + ChatColor.RESET + "]-------------------\n"))
+        builder.append(String.format("-------------------[" + ChatColor.RED + "Kettle" + ChatColor.RESET + "]-------------------\n"))
         builder.append(String.format("/%s check - Check for an update.\n", NAME))
         builder.append(String.format("/%s tps - Show tps statistics.\n", NAME))
         builder.append(String.format("/%s restart - Restart the server.\n", NAME))
@@ -43,7 +35,7 @@ class ThermosCommand : Command(NAME) {
         if (testPermissionSilent(target, permission)) {
             return true
         }
-        target.sendMessage(ChatColor.RED.toString() + "[Thermos] " + ChatColor.DARK_RED + "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is an error.")
+        target.sendMessage(ChatColor.RED.toString() + "[Kettle] " + ChatColor.DARK_RED + "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is an error.")
         return false
     }
 
@@ -61,15 +53,15 @@ class ThermosCommand : Command(NAME) {
         if (!testPermission(sender))
             return true
         if (args.size == 0) {
-            sender.sendMessage(ChatColor.RED.toString() + "[Thermos] " + ChatColor.GRAY + "Please specify action")
-            sender.sendMessage(ChatColor.RED.toString() + "[Thermos] " + ChatColor.GRAY + usageMessage)
+            sender.sendMessage(ChatColor.RED.toString() + "[Kettle] " + ChatColor.GRAY + "Please specify action")
+            sender.sendMessage(ChatColor.RED.toString() + "[Kettle] " + ChatColor.GRAY + usageMessage)
             return true
         }
         val action = args[0]
         if ("check" == action) {
             if (!testPermission(sender, CHECK))
                 return true
-            sender.sendMessage(ChatColor.RED.toString() + "[Thermos] " + ChatColor.GRAY + "Initiated version check...")
+            sender.sendMessage(ChatColor.RED.toString() + "[Kettle] " + ChatColor.GRAY + "Initiated version check...")
             TVersionRetriever.startServer(CommandSenderUpdateCallback(sender), false)
         } else if ("tps" == action) {
             if (!testPermission(sender, TPS))
@@ -121,7 +113,7 @@ class ThermosCommand : Command(NAME) {
         } else if ("restart" == action) {
             if (!testPermission(sender, RESTART))
                 return true
-            Thermos.restart()
+            Kettle.restart()
         } else if ("dump" == action) {
             if (!testPermission(sender, DUMP))
                 return true
