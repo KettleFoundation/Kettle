@@ -34,7 +34,6 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         //classpath 'com.destroystokyo.paper:paper-api:1.12.2-R0.1-SNAPSHOT'
         // unbreak
@@ -50,7 +49,6 @@ group 'me.aolko.kettle'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
-apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 
@@ -97,7 +95,6 @@ repositories {
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'kotlin'
 apply plugin: 'idea'
 
 configurations {
@@ -117,7 +114,6 @@ dependencies {
     compile 'net.java.jinput:jinput:2.0.5'
     compile 'com.koloboke:koloboke-api-jdk8:1.0.0'
     compile 'com.koloboke:koloboke-impl-jdk8:1.0.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile fileTree(dir: "libs", include: "*.jar")
 }
@@ -135,12 +131,4 @@ reobf {
         // Repackage PK lines are in repack.srg
         extraFiles file("repack.srg")
     }
-}
-
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
 }
