@@ -18,8 +18,12 @@
  */
 package thermos.wrapper;
 
-import java.util.*;
 import net.minecraft.world.ChunkPosition;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 /**
  *
  * @author Robotia
