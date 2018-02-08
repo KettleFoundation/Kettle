@@ -11,9 +11,9 @@ Since Contigo <s>Thermos</s> is no longer being actively developed or not being 
 <!--![Build Status](https://travis-ci.org/djoveryde/Contigo.svg?branch=master)](https://travis-ci.org/djoveryde/Contigo)
 -->
 
-![Minecraft Forge 1.12.2-14.23.1.2603](https://img.shields.io/badge/Forge-1.12.2--14.23.1.2603-orange.svg?style=for-the-badge)
-![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=for-the-badge)
-![JDK 1.8](https://img.shields.io/badge/JDK-8-blue.svg?style=for-the-badge)
+[![Minecraft Forge 1.12.2-14.23.2.2611](https://img.shields.io/badge/Forge-1.12.2--14.23.2.2611-orange.svg?style=for-the-badge)](http://files.minecraftforge.net/)
+[![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=for-the-badge)](http://minecraft.net)
+[![JDK 1.8](https://img.shields.io/badge/JDK-8-blue.svg?style=for-the-badge)](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 ---
 
