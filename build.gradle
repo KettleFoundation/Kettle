@@ -1,6 +1,4 @@
 buildscript {
-    ext.kotlin_version = '1.2.21'
-
     repositories {
         jcenter()
         maven {
@@ -123,7 +121,6 @@ minecraft {
     mappings = MAPPINGS_VER
     runDir = 'run'
     replace '@VERSION@', MOD_VER
-    replace '@KOTLIN@', KOTLIN_VER
 }
 
 reobf {
