@@ -1,4 +1,4 @@
-image: gradle:alpine
+image: openjdk:8-jdk
 
 stages:
 - test
