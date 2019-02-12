@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle.patcher'
+apply plugin: 'net.minecraftforge.gradle.launch4j'
+
+
+group 'kettlefoundation'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    clear()
+    mavenCentral()
+    maven {
+        name = "forge"
+        url = "https://files.minecraftforge.net/maven"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        name 'minecraft'
+        url 'https://libraries.minecraft.net/'
+    }
+    maven {
+        name 'maven'
+        url 'https://mvnrepository.com/artifact/'
+    }
+    maven {
+        name 'KettleFoundation'
+        url 'http://repo.strezz.org/artifactory/Kettle/'
+    }
+    flatDir {
+        dirs 'src/main/resources'
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile(group: 'bukkit', name: 'bukkit', version: '1.12.2-R0.1')
+}
+
+minecraft {
+    version = "1.12.2"
+    mappings = "snapshot_nodoc_20171003"
+    workspaceDir = "projects"
+    versionJson = "jsons/1.12.2-dev.json"
+
+    def common = {
+        patchPrefixOriginal "../src-base/minecraft"
+        patchPrefixChanged "../src-work/minecraft"
+        mainClassServer "net.minecraft.launchwrapper.Launch"
+        tweakClassServer "net.minecraftforge.fml.common.launcher.FMLServerTweaker"
+    }
+
+    projects {
+        forge {
+            rootDir "forge/"
+            patchDir "forge/patches/minecraft/"
+            patchAfter "clean"
+            genPatchesFrom "clean"
+            genMcpPatches = false
+            applyMcpPatches = false
+            s2sKeepImports = true
+            with common
+        }
+
+        kettle {
+            rootDir "."
+            patchDir "patches/"
+            patchAfter "forge"
+            genPatchesFrom "forge"
+            genMcpPatches = true
+            applyMcpPatches = true
+            s2sKeepImports = true
+            with common
+        }
+    }
+}
+
+processJson {
+    releaseJson = "jsons/1.12.2-rel.json"
+    addReplacements([
+            "@minecraft_version@": project.minecraft.version,
+            "@version@": project.version,
+            "@project@": "kettle",
+            "@artifact@": "kf:kettle:${project.version}",
+            "@universal_jar@": { outputJar.archiveName },
+            "@timestamp@": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+    ])
+}
