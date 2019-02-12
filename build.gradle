@@ -12,7 +12,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
     }
 }
 
@@ -25,6 +25,10 @@ group 'kettlefoundation'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+tasks.generateXmlConfig.dependsOn installer
+tasks.compileJava.enabled = false
+compileJava.options.encoding = 'UTF-8'
+tasks.reobfuscate.setProperty("extraSrg",["PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_12_R1"])
 
 repositories {
     clear()
@@ -54,9 +58,23 @@ repositories {
     }
 }
 
+configurations{
+    compile.extendsFrom libraries
+    libraries
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile(group: 'bukkit', name: 'bukkit', version: '1.12.2-R0.1')
+}
+
+jar{
+    into('lib') {
+        from configurations.libraries
+    }
+    exclude "**/configurations/**"
+    exclude "**/META-INF/**"
+    exclude "log4j2.xml"
 }
 
 minecraft {
@@ -64,6 +82,9 @@ minecraft {
     mappings = "snapshot_nodoc_20171003"
     workspaceDir = "projects"
     versionJson = "jsons/1.12.2-dev.json"
+    buildUserdev = false
+    buildInstaller = false
+    installerVersion = "1.5"
 
     def common = {
         patchPrefixOriginal "../src-base/minecraft"
@@ -89,12 +110,55 @@ minecraft {
             patchDir "patches/"
             patchAfter "forge"
             genPatchesFrom "forge"
-            genMcpPatches = true
-            applyMcpPatches = true
+            genMcpPatches = false
+            applyMcpPatches = false
             s2sKeepImports = true
             with common
         }
     }
+}
+
+installer {
+    classifier = 'installer'
+    from "forge/src/main/resources/forge_logo.png"
+    rename "forge_logo\\.png", "big_logo.png"
+}
+
+launch4j {
+    jreMinVersion = '1.8.0'
+}
+
+task signUniversal(type: SignJar, dependsOn: 'outputJar') {
+    onlyIf {
+        project.hasProperty('jarsigner')
+    }
+
+    def jarsigner = [:]
+
+    if (project.hasProperty('jarsigner'))
+        jarsigner = project.jarsigner
+
+    alias = 'forge'
+    exclude "paulscode/**"
+    storePass = jarsigner.storepass
+    keyPass = jarsigner.keypass
+    keyStore = jarsigner.keystore
+    inputFile = outputJar.archivePath
+    outputFile = outputJar.archivePath
+}
+build.dependsOn signUniversal
+installer.dependsOn signUniversal
+
+outputJar {
+    classifier = 'universal'
+
+    manifest.attributes([
+            "Implementation-Title": "Kettle",
+            "Implementation-Version": version,
+            "Main-Class": "net.minecraftforge.fml.relauncher.ServerLaunchWrapper",
+            "TweakClass": "net.minecraftforge.fml.common.launcher.FMLTweaker",
+            "Class-Path": getServerClasspath(file("jsons/1.12.2-rel.json"))
+    ])
 }
 
 processJson {
@@ -107,4 +171,31 @@ processJson {
             "@universal_jar@": { outputJar.archiveName },
             "@timestamp@": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
     ])
+}
+
+extractForgeSources {
+    exclude "**/SideOnly.java", "**/Side.java"
+}
+
+genGradleProjects {
+    addCompileDep "junit:junit:4.12"
+}
+
+import groovy.json.JsonSlurper
+
+String getServerClasspath(File file) {
+    def node = new JsonSlurper().parse(file)
+    def out = new StringBuilder()
+    node.versionInfo.libraries.each { lib ->
+        if (lib.serverreq)
+        {
+            def split = lib.name.split(':')
+            def group = split[0].replace('.', '/')
+            def artifact = split[1]
+            def version = split[2]
+            out += "libraries/$group/$artifact/$version/$artifact-${version}.jar "
+        }
+    }
+    out += "minecraft_server.1.12.2.jar"
+    return out.toString()
 }

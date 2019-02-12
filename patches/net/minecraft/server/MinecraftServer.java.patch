@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/server/MinecraftServer.java
++++ ../src-work/minecraft/net/minecraft/server/MinecraftServer.java
+@@ -485,6 +485,8 @@
+         {
+             if (this.init())
+             {
++                logInfo("Loading Kettle <3");
++                logDebug("Loading Kettle <3");
+                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
+                 this.currentTime = getCurrentTimeMillis();
+                 long i = 0L;
