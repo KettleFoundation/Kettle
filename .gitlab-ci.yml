@@ -19,14 +19,14 @@ cache:
 build:
   stage: build
   script:
-  - ./gradlew build
+  - chmod +x gradlew && ./gradlew build
   only:
   - master
 
 test:
   stage: test
   script:
-  - ./gradlew check
+  - chmod +x gradlew && ./gradlew check
 
 after_script:
 - echo "End CI"
