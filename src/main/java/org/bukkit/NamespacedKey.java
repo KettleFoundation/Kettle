@@ -17,7 +17,7 @@ import org.bukkit.plugin.Plugin;
  * underscores, hyphens, and forward slashes.
  *
  */
-public final class NamespacedKey {
+public final class NamespacedKey implements com.destroystokyo.paper.Namespaced { // Paper - implement namespaced
 
     /**
      * The namespace representing all inbuilt keys.
@@ -38,14 +38,14 @@ public final class NamespacedKey {
     /**
      * Create a key in a specific namespace.
      *
-     * @param namespace
-     * @param key
+     * @param namespace String representing a grouping of keys
+     * @param key Name for this specific key
      * @deprecated should never be used by plugins, for internal use only!!
      */
     @Deprecated
     public NamespacedKey(String namespace, String key) {
-        Preconditions.checkArgument(namespace != null && VALID_NAMESPACE.matcher(namespace).matches(), "namespace");
-        Preconditions.checkArgument(key != null && VALID_KEY.matcher(key).matches(), "key");
+        Preconditions.checkArgument(namespace != null && VALID_NAMESPACE.matcher(namespace).matches(), "Invalid namespace. Must be [a-z0-9._-]: %s", namespace);
+        Preconditions.checkArgument(key != null && VALID_KEY.matcher(key).matches(), "Invalid key. Must be [a-z0-9/._-]: %s", key);
 
         this.namespace = namespace;
         this.key = key;
@@ -56,29 +56,37 @@ public final class NamespacedKey {
 
     /**
      * Create a key in the plugin's namespace.
+     * <p>
+     * Namespaces may only contain lowercase alphanumeric characters, periods,
+     * underscores, and hyphens.
+     * <p>
+     * Keys may only contain lowercase alphanumeric characters, periods,
+     * underscores, hyphens, and forward slashes.
      *
      * @param plugin the plugin to use for the namespace
      * @param key the key to create
      */
     public NamespacedKey(Plugin plugin, String key) {
-        Preconditions.checkArgument(plugin != null, "plugin");
-        Preconditions.checkArgument(key != null, "key");
+        Preconditions.checkArgument(plugin != null, "Plugin cannot be null");
+        Preconditions.checkArgument(key != null, "Key cannot be null");
 
         this.namespace = plugin.getName().toLowerCase(Locale.ROOT);
         this.key = key.toLowerCase().toLowerCase(Locale.ROOT);
 
         // Check validity after normalization
-        Preconditions.checkArgument(VALID_NAMESPACE.matcher(this.namespace).matches(), "namespace");
-        Preconditions.checkArgument(VALID_KEY.matcher(this.key).matches(), "key");
+        Preconditions.checkArgument(VALID_NAMESPACE.matcher(this.namespace).matches(), "Invalid namespace. Must be [a-z0-9._-]: %s", this.namespace);
+        Preconditions.checkArgument(VALID_KEY.matcher(this.key).matches(), "Invalid key. Must be [a-z0-9/._-]: %s", this.key);
 
         String string = toString();
         Preconditions.checkArgument(string.length() < 256, "NamespacedKey must be less than 256 characters (%s)", string);
     }
 
+    @Override // Paper
     public String getNamespace() {
         return namespace;
     }
 
+    @Override // Paper
     public String getKey() {
         return key;
     }

@@ -13,16 +13,20 @@ public enum Statistic {
     ANIMALS_BRED,
     LEAVE_GAME,
     JUMP,
+    DROP_COUNT,
     DROP(Type.ITEM),
     PICKUP(Type.ITEM),
-    PLAY_ONE_TICK,
+    /**
+     * Name is misleading, actually records ticks played.
+     */
+    PLAY_ONE_MINUTE,
     WALK_ONE_CM,
-    SWIM_ONE_CM,
+    WALK_ON_WATER_ONE_CM,
     FALL_ONE_CM,
     SNEAK_TIME,
     CLIMB_ONE_CM,
     FLY_ONE_CM,
-    DIVE_ONE_CM,
+    WALK_UNDER_WATER_ONE_CM,
     MINECART_ONE_CM,
     BOAT_ONE_CM,
     PIG_ONE_CM,
@@ -60,7 +64,15 @@ public enum Statistic {
     CRAFTING_TABLE_INTERACTION,
     CHEST_OPENED,
     SLEEP_IN_BED,
-    SHULKER_BOX_OPENED;
+    SHULKER_BOX_OPENED,
+    TIME_SINCE_REST,
+    SWIM_ONE_CM,
+    DAMAGE_DEALT_ABSORBED,
+    DAMAGE_DEALT_RESISTED,
+    DAMAGE_BLOCKED_BY_SHIELD,
+    DAMAGE_ABSORBED,
+    DAMAGE_RESISTED,
+    CLEAN_SHULKER_BOX;
 
     private final Type type;
 

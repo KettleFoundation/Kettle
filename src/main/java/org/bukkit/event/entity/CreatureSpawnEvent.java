@@ -1,7 +1,6 @@
 package org.bukkit.event.entity;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
 /**
@@ -140,6 +139,14 @@ public class CreatureSpawnEvent extends EntitySpawnEvent {
          * perched on jumping or being damaged
          */
         SHOULDER_ENTITY,
+        /**
+         * When a creature is spawned by another entity drowning
+         */
+        DROWNED,
+        /**
+         * When an cow is spawned by shearing a mushroom cow
+         */
+        SHEARED,
         /**
          * When a creature is spawned by plugins
          */

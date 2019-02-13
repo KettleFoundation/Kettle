@@ -63,16 +63,20 @@ public interface PlayerInventory extends Inventory {
      * Indexes 36 through 39 refer to the armor slots. Though you can set armor with this method using these indexes,
      * you are encouraged to use the provided methods for those slots.
      * <p>
-     * If you attempt to use this method with an index less than 0 or greater than 39, an ArrayIndexOutOfBounds
+     * Index 40 refers to the off hand (shield) item slot. Though you can set off hand with this method using this index,
+     * you are encouraged to use the provided method for this slot.
+     * <p>
+     * If you attempt to use this method with an index less than 0 or greater than 40, an ArrayIndexOutOfBounds
      * exception will be thrown.
      *
      * @param index The index where to put the ItemStack
      * @param item The ItemStack to set
-     * @throws ArrayIndexOutOfBoundsException when index &lt; 0 || index &gt; 39
+     * @throws ArrayIndexOutOfBoundsException when index &lt; 0 || index &gt; 40
      * @see #setBoots(ItemStack)
      * @see #setChestplate(ItemStack)
      * @see #setHelmet(ItemStack)
      * @see #setLeggings(ItemStack)
+     * @see #setItemInOffHand(ItemStack)
      */
     @Override
     public void setItem(int index, ItemStack item);
@@ -197,18 +201,23 @@ public interface PlayerInventory extends Inventory {
      */
     public void setHeldItemSlot(int slot);
 
-    /**
-     * Clears all matching items from the inventory. Setting either value to
-     * -1 will skip it's check, while setting both to -1 will clear all items
-     * in your inventory unconditionally.
-     *
-     * @param id the id of the item you want to clear from the inventory
-     * @param data the data of the item you want to clear from the inventory
-     * @return The number of items cleared
-     * @deprecated Magic value
-     */
-    @Deprecated
-    public int clear(int id, int data);
-
     public HumanEntity getHolder();
+
+    // Paper start
+    /**
+     * Gets the {@link ItemStack} found in the slot.
+     *
+     * @param slot The slot
+     * @return The item stack in the slot
+     */
+    ItemStack getItem(EquipmentSlot slot);
+
+    /**
+     * Sets the {@link ItemStack} at the given {@link EquipmentSlot}.
+     *
+     * @param slot The slot for the stack
+     * @param stack The item stack to set
+     */
+    void setItem(EquipmentSlot slot, ItemStack stack);
+    // Paper end
 }

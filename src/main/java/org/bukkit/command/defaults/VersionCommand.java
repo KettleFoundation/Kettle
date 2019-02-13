@@ -22,11 +22,15 @@ import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+// Paper start
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import com.destroystokyo.paper.VersionHistoryManager;
+// Paper end
 
 public class VersionCommand extends BukkitCommand {
     public VersionCommand(String name) {
@@ -44,8 +48,8 @@ public class VersionCommand extends BukkitCommand {
 
         if (args.length == 0) {
             sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
-            sender.sendMessage(ChatColor.YELLOW + "This is a final build for 1.12.2. Please see https://www.spigotmc.org/ for details about upgrading.");
-            // sendVersion(sender);
+            tellHistory(sender); // Paper
+            sendVersion(sender);
         } else {
             StringBuilder name = new StringBuilder();
 
@@ -80,6 +84,22 @@ public class VersionCommand extends BukkitCommand {
         }
         return true;
     }
+
+    // Paper start - show version history
+    private void tellHistory(final CommandSender sender) {
+        final VersionHistoryManager.VersionData data = VersionHistoryManager.INSTANCE.getVersionData();
+        if (data == null) {
+            return;
+        }
+
+        final String oldVersion = data.getOldVersion();
+        if (oldVersion == null) {
+            return;
+        }
+
+        sender.sendMessage("Previous version: " + oldVersion);
+    }
+    // Paper end
 
     private void describeToSender(Plugin plugin, CommandSender sender) {
         PluginDescriptionFile desc = plugin.getDescription();
@@ -152,7 +172,7 @@ public class VersionCommand extends BukkitCommand {
 
     private void sendVersion(CommandSender sender) {
         if (hasVersion) {
-            if (System.currentTimeMillis() - lastCheck > 21600000) {
+            if (System.currentTimeMillis() - lastCheck > 7200000) { // Paper - Lower to 2 hours
                 lastCheck = System.currentTimeMillis();
                 hasVersion = false;
             } else {
@@ -183,24 +203,28 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 
+    // Paper start
     private void obtainVersion() {
         String version = Bukkit.getVersion();
         if (version == null) version = "Custom";
-        if (version.startsWith("git-Spigot-")) {
-            String[] parts = version.substring("git-Spigot-".length()).split("-");
-            int cbVersions = getDistance("craftbukkit", parts[1].substring(0, parts[1].indexOf(' ')));
-            int spigotVersions = getDistance("spigot", parts[0]);
-            if (cbVersions == -1 || spigotVersions == -1) {
-                setVersionMessage("Error obtaining version information");
-            } else {
-                if (cbVersions == 0 && spigotVersions == 0) {
+        if (version.startsWith("git-Paper-")) {
+            String[] parts = version.substring("git-Paper-".length()).split("[-\\s]");
+            int distance = getDistance(null, parts[0]);
+            switch (distance) {
+                case -1:
+                    setVersionMessage("Error obtaining version information");
+                    break;
+                case 0:
                     setVersionMessage("You are running the latest version");
-                } else {
-                    setVersionMessage("You are " + (cbVersions + spigotVersions) + " version(s) behind");
-                }
+                    break;
+                case -2:
+                    setVersionMessage("Unknown version");
+                    break;
+                default:
+                    setVersionMessage("You are " + distance + " version(s) behind");
             }
-
         } else if (version.startsWith("git-Bukkit-")) {
+            // Paper end
             version = version.substring("git-Bukkit-".length());
             int cbVersions = getDistance("craftbukkit", version.substring(0, version.indexOf(' ')));
             if (cbVersions == -1) {
@@ -233,8 +257,16 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 
-    private static int getDistance(String repo, String hash) {
+    // Paper start
+    private static int getDistance(String repo, String verInfo) {
         try {
+            int currentVer = Integer.decode(verInfo);
+            return getFromJenkins(currentVer);
+        } catch (NumberFormatException ex) {
+            verInfo = verInfo.replace("\"", "");
+            return getFromRepo("PaperMC/Paper", "master", verInfo);
+        }
+            /*
             BufferedReader reader = Resources.asCharSource(
                     new URL("https://hub.spigotmc.org/stash/rest/api/1.0/projects/SPIGOT/repos/" + repo + "/commits?since=" + URLEncoder.encode(hash, "UTF-8") + "&withCounts=true"),
                     Charsets.UTF_8
@@ -248,9 +280,57 @@ public class VersionCommand extends BukkitCommand {
             } finally {
                 reader.close();
             }
+            */
+    }
+
+    private static int getFromJenkins(int currentVer) {
+        try {
+            BufferedReader reader = Resources.asCharSource(
+                    new URL("https://ci.destroystokyo.com/job/Paper-1.13/lastSuccessfulBuild/buildNumber"), // Paper
+                    Charsets.UTF_8
+            ).openBufferedStream();
+            try {
+                int newVer = Integer.decode(reader.readLine());
+                return newVer - currentVer;
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                return -2;
+            } finally {
+                reader.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return -1;
         }
     }
+
+    // Contributed by Techcable <Techcable@outlook.com> in GH PR #65
+    private static int getFromRepo(String repo, String branch, String hash) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + branch + "..." + hash).openConnection();
+            connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+            try (
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
+            ) {
+                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
+                String status = (String) obj.get("status");
+                switch (status) {
+                    case "identical":
+                        return 0;
+                    case "behind":
+                        return ((Number) obj.get("behind_by")).intValue();
+                    default:
+                        return -1;
+                }
+            } catch (ParseException | NumberFormatException e) {
+                e.printStackTrace();
+                return -1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    // Paper end
 }

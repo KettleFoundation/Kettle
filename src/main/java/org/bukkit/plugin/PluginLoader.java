@@ -73,4 +73,19 @@ public interface PluginLoader {
      * @param plugin Plugin to disable
      */
     public void disablePlugin(Plugin plugin);
+
+    // Paper start - close Classloader on disable
+    /**
+     * Disables the specified plugin
+     * <p>
+     * Attempting to disable a plugin that is not enabled will have no effect
+     *
+     * @param plugin Plugin to disable
+     * @param closeClassloader if the classloader for the Plugin should be closed
+     */
+    // provide default to allow other PluginLoader implementations to work
+    default public void disablePlugin(Plugin plugin, boolean closeClassloader) {
+        disablePlugin(plugin);
+    }
+    // Paper end - close Classloader on disable
 }

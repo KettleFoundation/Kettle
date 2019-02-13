@@ -114,4 +114,18 @@ public interface WorldBorder {
      * @return if this location is inside the border or not
      */
     public boolean isInside(Location location);
+
+    // Paper start
+    /**
+     * Checks if the location is within the boundaries of this border.
+     * 
+     * @param location specific location to check
+     * @return true if the location is within the bounds of this border, false otherwise.
+     * @deprecated use {@link #isInside(Location)} for an upstream compatible replacement
+     */
+    @Deprecated
+    public default boolean isInBounds(Location location) {
+        return this.isInside(location);
+    }
+    // Paper end
 }

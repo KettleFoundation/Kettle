@@ -10,12 +10,31 @@ import org.bukkit.event.HandlerList;
 public class PlayerResourcePackStatusEvent extends PlayerEvent {
 
     private static final HandlerList handlers = new HandlerList();
+    @Deprecated
+    private final String hash; // Paper
     private final Status status;
 
     public PlayerResourcePackStatusEvent(final Player who, Status resourcePackStatus) {
         super(who);
+        this.hash = null; // Paper
         this.status = resourcePackStatus;
     }
+
+    @Deprecated // Paper
+    public PlayerResourcePackStatusEvent(final Player who, Status resourcePackStatus, String hash) {
+        super(who);
+        this.hash = hash; // Paper
+        this.status = resourcePackStatus;
+    }
+
+    @Deprecated
+    /**
+     * @deprecated Hash does not seem to ever be set
+     */
+    public String getHash() {
+        return this.hash;
+    }
+    // Paper end
 
     /**
      * Gets the status of this pack.

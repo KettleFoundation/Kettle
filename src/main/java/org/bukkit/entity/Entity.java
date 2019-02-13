@@ -1,12 +1,16 @@
 package org.bukkit.entity;
 
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.EntityEffect;
 import org.bukkit.Nameable;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.material.Directional;
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.List;
@@ -68,6 +72,16 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
     public double getWidth();
 
     /**
+     * Gets the entity's current bounding box.
+     * <p>
+     * The returned bounding box reflects the entity's current location and
+     * size.
+     *
+     * @return the entity's current bounding box
+     */
+    public BoundingBox getBoundingBox();
+
+    /**
      * Returns true if the entity is supported by a block. This value is a
      * state updated by the server and is not recalculated unless the entity
      * moves.
@@ -120,6 +134,28 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
      * @return <code>true</code> if the teleport was successful
      */
     public boolean teleport(Entity destination, TeleportCause cause);
+
+    // Paper start
+    /**
+     * Loads/Generates(in 1.13+) the Chunk asynchronously, and then teleports the entity when the chunk is ready.
+     * @param loc Location to teleport to
+     * @return A future that will be completed with the result of the teleport
+     */
+    public default java.util.concurrent.CompletableFuture<Boolean> teleportAsync(Location loc) {
+        return teleportAsync(loc, TeleportCause.PLUGIN);
+    }
+    /**
+     * Loads/Generates(in 1.13+) the Chunk asynchronously, and then teleports the entity when the chunk is ready.
+     * @param loc Location to teleport to
+     * @param cause Reason for teleport
+     * @return A future that will be completed with the result of the teleport
+     */
+    public default java.util.concurrent.CompletableFuture<Boolean> teleportAsync(Location loc, TeleportCause cause) {
+        java.util.concurrent.CompletableFuture<Boolean> future = new java.util.concurrent.CompletableFuture<>();
+        loc.getWorld().getChunkAtAsync(loc).thenAccept((chunk) -> future.complete(teleport(loc, cause)));
+        return future;
+    }
+    // Paper end
 
     /**
      * Returns a list of entities within a bounding box centered around this
@@ -188,6 +224,37 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
      * @return Server instance running this Entity
      */
     public Server getServer();
+
+    /**
+     * Returns true if the entity gets persisted.
+     * <p>
+     * By default all entities are persistent. An entity will also not get
+     * persisted, if it is riding an entity that is not persistent.
+     * <p>
+     * The persistent flag on players controls whether or not to save their
+     * playerdata file when they quit. If a player is directly or indirectly
+     * riding a non-persistent entity, the vehicle at the root and all its
+     * passengers won't get persisted.
+     * <p>
+     * <b>This should not be confused with
+     * {@link LivingEntity#setRemoveWhenFarAway(boolean)} which controls
+     * despawning of living entities. </b>
+     *
+     * @return true if this entity is persistent
+     * @deprecated draft API
+     */
+    @Deprecated
+    public boolean isPersistent();
+
+    /**
+     * Sets whether or not the entity gets persisted.
+     *
+     * @param persistent the persistence status
+     * @see #isPersistent()
+     * @deprecated draft API
+     */
+    @Deprecated
+    public void setPersistent(boolean persistent);
 
     /**
      * Gets the primary passenger of a vehicle. For vehicles that could have
@@ -479,6 +546,22 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
      */
     PistonMoveReaction getPistonMoveReaction();
 
+    /**
+     * Get the closest cardinal {@link BlockFace} direction an entity is
+     * currently facing.
+     * <br>
+     * This will not return any non-cardinal directions such as
+     * {@link BlockFace#UP} or {@link BlockFace#DOWN}.
+     * <br>
+     * {@link Hanging} entities will override this call and thus their behavior
+     * may be different.
+     *
+     * @return the entity's current cardinal facing.
+     * @see Hanging
+     * @see Directional#getFacing()
+     */
+    BlockFace getFacing();
+
     // Spigot start
     public class Spigot extends CommandSender.Spigot
     {
@@ -487,7 +570,9 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
          * Returns whether this entity is invulnerable.
          *
          * @return True if the entity is invulnerable.
+         * @deprecated {@link Entity#isInvulnerable()}
          */
+        @Deprecated
         public boolean isInvulnerable()
         {
             throw new UnsupportedOperationException( "Not supported yet." );
@@ -497,4 +582,29 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
     @Override
     Spigot spigot();
     // Spigot end
+
+    // Paper start
+    /**
+     * Gets the location where this entity originates from.
+     * <p>
+     * This value can be null if the entity hasn't yet been added to the world.
+     *
+     * @return Location where entity originates or null if not yet added
+     */
+    Location getOrigin();
+
+    /**
+     * Returns whether this entity was spawned from a mob spawner.
+     *
+     * @return True if entity spawned from a mob spawner
+     */
+    boolean fromMobSpawner();
+
+    /**
+     * Gets the latest chunk an entity is currently or was in.
+     *
+     * @return The current, or most recent chunk if the entity is invalid (which may load the chunk)
+     */
+    Chunk getChunk();
+    // Paper end
 }

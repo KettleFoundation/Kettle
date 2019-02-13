@@ -9,7 +9,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
-import org.bukkit.util.NumberConversions;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -28,7 +27,6 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
     private boolean cancelled;
     private final DamageCause cause;
 
-    @Deprecated
     public EntityDamageEvent(final Entity damagee, final DamageCause cause, final double damage) {
         this(damagee, cause, new EnumMap<DamageModifier, Double>(ImmutableMap.of(DamageModifier.BASE, damage)), new EnumMap<DamageModifier, Function<? super Double, Double>>(ImmutableMap.of(DamageModifier.BASE, ZERO)));
     }
@@ -410,7 +408,7 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
          */
         FLY_INTO_WALL,
         /**
-         * Damage caused when an entity steps on {@link Material#MAGMA}.
+         * Damage caused when an entity steps on {@link Material#MAGMA_BLOCK}.
          * <p>
          * Damage: 1
          */
@@ -421,6 +419,12 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
          * <p>
          * Damage: 6
          */
-        CRAMMING
+        CRAMMING,
+        /**
+         * Damage caused when an entity that should be in water is not.
+         * <p>
+         * Damage: 1
+         */
+        DRYOUT
     }
 }

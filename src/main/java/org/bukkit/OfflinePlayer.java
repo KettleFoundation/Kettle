@@ -1,6 +1,5 @@
 package org.bukkit;
 
-import java.util.Date;
 import java.util.UUID;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -40,6 +39,56 @@ public interface OfflinePlayer extends ServerOperator, AnimalTamer, Configuratio
      * @return true if banned, otherwise false
      */
     public boolean isBanned();
+    // Paper start
+
+    /**
+     * Permanently Bans this player from the server
+     *
+     * @param reason Reason for Ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayer(String reason) {
+        return banPlayer(reason, null, null);
+    }
+
+    /**
+     * Permanently Bans this player from the server
+     * @param reason Reason for Ban
+     * @param source Source of the ban, or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayer(String reason, String source) {
+        return banPlayer(reason, null, source);
+    }
+
+    /**
+     * Bans this player from the server
+     * @param reason Reason for Ban
+     * @param expires When to expire the ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayer(String reason, java.util.Date expires) {
+        return banPlayer(reason, expires, null);
+    }
+
+    /**
+     * Bans this player from the server
+     * @param reason Reason for Ban
+     * @param expires When to expire the ban
+     * @param source Source of the ban or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayer(String reason, java.util.Date expires, String source) {
+        return banPlayer(reason, expires, source, true);
+    }
+    public default BanEntry banPlayer(String reason, java.util.Date expires, String source, boolean kickIfOnline) {
+        BanEntry banEntry = Bukkit.getServer().getBanList(BanList.Type.NAME).addBan(getName(), reason, expires, source);
+        if (kickIfOnline && isOnline()) {
+            getPlayer().kickPlayer(reason);
+        }
+        return banEntry;
+    }
+    // Paper end
 
     /**
      * Checks if this player is whitelisted or not
@@ -86,7 +135,9 @@ public interface OfflinePlayer extends ServerOperator, AnimalTamer, Configuratio
      * UTC.
      *
      * @return Date of last log-in for this player, or 0
+     * @deprecated The API contract is ambiguous and the implementation may or may not return the correct value given this API ambiguity. It is instead recommended use {@link #getLastLogin()} or {@link #getLastSeen()} depending on your needs.
      */
+    @Deprecated
     public long getLastPlayed();
 
     /**
@@ -103,5 +154,31 @@ public interface OfflinePlayer extends ServerOperator, AnimalTamer, Configuratio
      * @return Bed Spawn Location if bed exists, otherwise null.
      */
     public Location getBedSpawnLocation();
+
+    // Paper start
+
+    /**
+     * Gets the last date and time that this player logged into the server.
+     * <p>
+     * If the player has never played before, this will return 0. Otherwise,
+     * it will be the amount of milliseconds since midnight, January 1, 1970
+     * UTC.
+     *
+     * @return last login time
+     */
+    public long getLastLogin();
+
+    /**
+     * Gets the last date and time that this player was seen on the server.
+     * <p>
+     * If the player has never played before, this will return 0. If the
+     * player is currently online, this will return the current time.
+     * Otherwise it will be the amount of milliseconds since midnight,
+     * January 1, 1970 UTC.
+     *
+     * @return last seen time
+     */
+    public long getLastSeen();
+    // Paper end
 
 }

@@ -1,8 +1,10 @@
 package org.bukkit.entity;
 
+import java.util.Collection;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.Inventory;
@@ -10,12 +12,11 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.permissions.Permissible;
 
 /**
  * Represents a human entity, such as an NPC or a player
  */
-public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, InventoryHolder {
+public interface HumanEntity extends LivingEntity, AnimalTamer, InventoryHolder {
 
     /**
      * Returns the name of this player
@@ -137,6 +138,15 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      */
     public void closeInventory();
 
+    // Paper start
+    /**
+     * Force-closes the currently open inventory view for this player, if any.
+     *
+     * @param reason why the inventory is closing
+     */
+    public void closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason reason);
+    // Paper end
+
     /**
      * Returns the ItemStack currently in your hand, can be empty.
      *
@@ -221,6 +231,61 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
     public int getSleepTicks();
 
     /**
+     * Gets the Location where the player will spawn at their bed, null if
+     * they have not slept in one or their current bed spawn is invalid.
+     *
+     * @return Bed Spawn Location if bed exists, otherwise null.
+     */
+    public Location getBedSpawnLocation();
+
+    /**
+     * Sets the Location where the player will spawn at their bed.
+     *
+     * @param location where to set the respawn location
+     */
+    public void setBedSpawnLocation(Location location);
+
+    /**
+     * Sets the Location where the player will spawn at their bed.
+     *
+     * @param location where to set the respawn location
+     * @param force whether to forcefully set the respawn location even if a
+     *     valid bed is not present
+     */
+    public void setBedSpawnLocation(Location location, boolean force);
+
+    /**
+     * Attempts to make the entity sleep at the given location.
+     * <br>
+     * The location must be in the current world and have a bed placed at the
+     * location. The game may also enforce other requirements such as proximity
+     * to bed, monsters, and dimension type if force is not set.
+     *
+     * @param location the location of the bed
+     * @param force whether to try and sleep at the location even if not
+     * normally possible
+     * @return whether the sleep was successful
+     */
+    public boolean sleep(Location location, boolean force);
+
+    /**
+     * Causes the player to wakeup if they are currently sleeping.
+     *
+     * @param setSpawnLocation whether to set their spawn location to the bed
+     * they are currently sleeping in
+     * @throws IllegalStateException if not sleeping
+     */
+    public void wakeup(boolean setSpawnLocation);
+
+    /**
+     * Gets the location of the bed the player is currently sleeping in
+     *
+     * @return location
+     * @throws IllegalStateException if not sleeping
+     */
+    public Location getBedLocation();
+
+    /**
      * Gets this human's current {@link GameMode}
      *
      * @return Current game mode
@@ -255,6 +320,75 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * @return Experience required to level up
      */
     public int getExpToLevel();
+
+    // Paper start
+    /**
+     * If there is an Entity on this entities left shoulder, it will be released to the world and returned.
+     * If no Entity is released, null will be returned.
+     *
+     * @return The released entity, or null
+     */
+    public Entity releaseLeftShoulderEntity();
+
+    /**
+     * If there is an Entity on this entities left shoulder, it will be released to the world and returned.
+     * If no Entity is released, null will be returned.
+     *
+     * @return The released entity, or null
+     */
+    public Entity releaseRightShoulderEntity();
+    // Paper end
+
+    /**
+     * Discover a recipe for this player such that it has not already been
+     * discovered. This method will add the key's associated recipe to the
+     * player's recipe book.
+     *
+     * @param recipe the key of the recipe to discover
+     *
+     * @return whether or not the recipe was newly discovered
+     */
+    public boolean discoverRecipe(NamespacedKey recipe);
+
+    /**
+     * Discover a collection of recipes for this player such that they have not
+     * already been discovered. This method will add the keys' associated
+     * recipes to the player's recipe book. If a recipe in the provided
+     * collection has already been discovered, it will be silently ignored.
+     *
+     * @param recipes the keys of the recipes to discover
+     *
+     * @return the amount of newly discovered recipes where 0 indicates that
+     * none were newly discovered and a number equal to {@code recipes.size()}
+     * indicates that all were new
+     */
+    public int discoverRecipes(Collection<NamespacedKey> recipes);
+
+    /**
+     * Undiscover a recipe for this player such that it has already been
+     * discovered. This method will remove the key's associated recipe from the
+     * player's recipe book.
+     *
+     * @param recipe the key of the recipe to undiscover
+     *
+     * @return whether or not the recipe was successfully undiscovered (i.e. it
+     * was previously discovered)
+     */
+    public boolean undiscoverRecipe(NamespacedKey recipe);
+
+    /**
+     * Undiscover a collection of recipes for this player such that they have
+     * already been discovered. This method will remove the keys' associated
+     * recipes from the player's recipe book. If a recipe in the provided
+     * collection has not yet been discovered, it will be silently ignored.
+     *
+     * @param recipes the keys of the recipes to undiscover
+     *
+     * @return the amount of undiscovered recipes where 0 indicates that none
+     * were undiscovered and a number equal to {@code recipes.size()} indicates
+     * that all were undiscovered
+     */
+    public int undiscoverRecipes(Collection<NamespacedKey> recipes);
 
     /**
      * Gets the entity currently perched on the left shoulder or null if no
@@ -317,4 +451,13 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      */
     @Deprecated
     public void setShoulderEntityRight(Entity entity);
+
+    // Paper start - Add method to open already placed sign
+    /**
+     * Opens an editor window for the specified sign
+     *
+     * @param sign The sign to open
+     */
+    void openSign(org.bukkit.block.Sign sign);
+    // Paper end
 }

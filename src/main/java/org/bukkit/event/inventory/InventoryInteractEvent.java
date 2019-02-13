@@ -2,9 +2,7 @@ package org.bukkit.event.inventory;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event.Result;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * An abstract base class for events that describe an interaction between a
@@ -31,14 +29,14 @@ public abstract class InventoryInteractEvent extends InventoryEvent implements C
      * event is considered cancelled.
      *
      * @see #isCancelled()
-     * @param newResult the new {@link Result} for this event
+     * @param newResult the new {@link org.bukkit.event.Event.Result} for this event
      */
     public void setResult(Result newResult) {
         result = newResult;
     }
 
     /**
-     * Gets the {@link Result} of this event. The Result describes the
+     * Gets the {@link org.bukkit.event.Event.Result} of this event. The Result describes the
      * behavior that will be applied to the inventory in relation to this
      * event.
      *

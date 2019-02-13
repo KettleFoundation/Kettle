@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -16,6 +17,12 @@ public class PlayerBucketFillEvent extends PlayerBucketEvent {
     public PlayerBucketFillEvent(final Player who, final Block blockClicked, final BlockFace blockFace, final Material bucket, final ItemStack itemInHand) {
         super(who, blockClicked, blockFace, bucket, itemInHand);
     }
+
+    // Paper start - add EquipmentSlot
+    public PlayerBucketFillEvent(final Player who, final Block blockClicked, final BlockFace blockFace, final Material bucket, final ItemStack itemInHand, final EquipmentSlot hand) {
+        super(who, blockClicked, blockFace, bucket, itemInHand, hand);
+    }
+    // Paper end
 
     @Override
     public HandlerList getHandlers() {

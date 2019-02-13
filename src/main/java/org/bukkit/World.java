@@ -2,27 +2,60 @@ package org.bukkit;
 
 import java.io.File;
 import org.bukkit.generator.ChunkGenerator;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.messaging.PluginMessageRecipient;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Consumer;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 /**
  * Represents a world, which may contain entities, chunks and blocks
  */
 public interface World extends PluginMessageRecipient, Metadatable {
+
+    // Paper start
+    /**
+     * @return The amount of Entities in this world
+     */
+    int getEntityCount();
+
+    /**
+     * @return The amount of Tile Entities in this world
+     */
+    int getTileEntityCount();
+
+    /**
+     * @return The amount of Tickable Tile Entities in this world
+     */
+    int getTickableTileEntityCount();
+
+    /**
+     * @return The amount of Chunks in this world
+     */
+    int getChunkCount();
+
+    /**
+     * @return The amount of Players in this world
+     */
+    int getPlayerCount();
+    // Paper end
 
     /**
      * Gets the {@link Block} at the given coordinates
@@ -31,8 +64,6 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param y Y-coordinate of the block
      * @param z Z-coordinate of the block
      * @return Block at the given coordinates
-     * @see #getBlockTypeIdAt(int, int, int) Returns the current type ID of
-     *     the block
      */
     public Block getBlockAt(int x, int y, int z);
 
@@ -41,36 +72,39 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param location Location of the block
      * @return Block at the given location
-     * @see #getBlockTypeIdAt(org.bukkit.Location) Returns the current type ID
-     *     of the block
      */
     public Block getBlockAt(Location location);
 
+    // Paper start
     /**
-     * Gets the block type ID at the given coordinates
+     * Gets the {@link Block} at the given block key
      *
-     * @param x X-coordinate of the block
-     * @param y Y-coordinate of the block
-     * @param z Z-coordinate of the block
-     * @return Type ID of the block at the given coordinates
-     * @see #getBlockAt(int, int, int) Returns a live Block object at the
-     *     given location
-     * @deprecated Magic value
+     * @param key The block key. See {@link Block#getBlockKey()}
+     * @return Block at the key
+     * @see Location#toBlockKey()
+     * @see Block#getBlockKey()
      */
-    @Deprecated
-    public int getBlockTypeIdAt(int x, int y, int z);
-
+    public default Block getBlockAtKey(long key) {
+        int x = (int) ((key << 37) >> 37);
+        int y = (int) (key >>> 54);
+        int z = (int) ((key << 10) >> 37);
+        return getBlockAt(x, y, z);
+    }
     /**
-     * Gets the block type ID at the given {@link Location}
+     * Gets the {@link Location} at the given block key
      *
-     * @param location Location of the block
-     * @return Type ID of the block at the given location
-     * @see #getBlockAt(org.bukkit.Location) Returns a live Block object at
-     *     the given location
-     * @deprecated Magic value
+     * @param key The block key. See {@link Location#toBlockKey()}
+     * @return Location at the key
+     * @see Location#toBlockKey()
+     * @see Block#getBlockKey()
      */
-    @Deprecated
-    public int getBlockTypeIdAt(Location location);
+    public default Location getLocationAtKey(long key) {
+        int x = (int) ((key << 37) >> 37);
+        int y = (int) (key >>> 54);
+        int z = (int) ((key << 10) >> 37);
+        return new Location(this, x, y, z);
+    }
+    // Paper end
 
     /**
      * Gets the y coordinate of the lowest block at this position such that the
@@ -136,6 +170,378 @@ public interface World extends PluginMessageRecipient, Metadatable {
      */
     public Chunk getChunkAt(Block block);
 
+    // Paper start
+    /**
+     * Gets the chunk at the specified chunk key, which is the X and Z packed into a long.
+     *
+     * See {@link Chunk#getChunkKey()} for easy access to the key, or you may calculate it as:
+     * long chunkKey = (long) chunkX &amp; 0xffffffffL | ((long) chunkZ &amp; 0xffffffffL) &gt;&gt; 32;
+     *
+     * @param chunkKey The Chunk Key to look up the chunk by
+     * @return The chunk at the specified key
+     */
+    public default Chunk getChunkAt(long chunkKey) {
+        return getChunkAt((int) chunkKey, (int) (chunkKey >> 32));
+    }
+
+    /**
+     * Checks if a {@link Chunk} has been generated at the specified chunk key,
+     * which is the X and Z packed into a long.
+     *
+     * @param chunkKey The Chunk Key to look up the chunk by
+     * @return true if the chunk has been generated, otherwise false
+     */
+    public default boolean isChunkGenerated(long chunkKey) {
+        return isChunkGenerated((int) chunkKey, (int) (chunkKey >> 32));
+    }
+
+    /**
+     * This is the Legacy API before Java 8 was supported. Java 8 Consumer is provided,
+     * as well as future support
+     *
+     * Used by {@link World#getChunkAtAsync(Location,ChunkLoadCallback)} methods
+     * to request a {@link Chunk} to be loaded, with this callback receiving
+     * the chunk when it is finished.
+     *
+     * This callback will be executed on synchronously on the main thread.
+     *
+     * Timing and order this callback is fired is intentionally not defined and
+     * and subject to change.
+     *
+     * @deprecated Use either the Future or the Consumer based methods
+     */
+    @Deprecated
+    public static interface ChunkLoadCallback extends java.util.function.Consumer<Chunk> {
+        public void onLoad(Chunk chunk);
+
+        // backwards compat to old api
+        @Override
+        default void accept(Chunk chunk) {
+            onLoad(chunk);
+        }
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link ChunkLoadCallback} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @deprecated Use either the Future or the Consumer based methods
+     * @param x Chunk X-coordinate of the chunk - (world coordinate / 16)
+     * @param z Chunk Z-coordinate of the chunk - (world coordinate / 16)
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    @Deprecated
+    public default void getChunkAtAsync(int x, int z, ChunkLoadCallback cb) {
+        getChunkAtAsync(x, z, true).thenAccept(cb::onLoad);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given {@link Location}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link ChunkLoadCallback} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @deprecated Use either the Future or the Consumer based methods
+     * @param loc Location of the chunk
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    @Deprecated
+    public default void getChunkAtAsync(Location loc, ChunkLoadCallback cb) {
+        getChunkAtAsync(loc, true).thenAccept(cb::onLoad);
+    }
+
+    /**
+     * Requests {@link Chunk} to be loaded that contains the given {@link Block}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link ChunkLoadCallback} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @deprecated Use either the Future or the Consumer based methods
+     * @param block Block to get the containing chunk from
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    @Deprecated
+    public default void getChunkAtAsync(Block block, ChunkLoadCallback cb) {
+        getChunkAtAsync(block, true).thenAccept(cb::onLoad);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param x Chunk X-coordinate of the chunk - (world coordinate / 16)
+     * @param z Chunk Z-coordinate of the chunk - (world coordinate / 16)
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(int x, int z, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync(x, z, true).thenAccept(cb);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param x Chunk X-coordinate of the chunk - (world coordinate / 16)
+     * @param z Chunk Z-coordinate of the chunk - (world coordinate / 16)
+     * @param gen Should we generate a chunk if it doesn't exists or not
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(int x, int z, boolean gen, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync(x, z, gen).thenAccept(cb);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given {@link Location}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param loc Location of the chunk
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(Location loc, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync((int)loc.getX() >> 4, (int)Math.floor(loc.getZ()) >> 4, true, cb);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given {@link Location}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param loc Location of the chunk
+     * @param gen Should the chunk generate
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(Location loc, boolean gen, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync((int)loc.getX() >> 4, (int)Math.floor(loc.getZ()) >> 4, gen, cb);
+    }
+
+    /**
+     * Requests {@link Chunk} to be loaded that contains the given {@link Block}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param block Block to get the containing chunk from
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(Block block, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync(block.getX() >> 4, block.getZ() >> 4, true, cb);
+    }
+
+    /**
+     * Requests {@link Chunk} to be loaded that contains the given {@link Block}
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The {@link java.util.function.Consumer} will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param block Block to get the containing chunk from
+     * @param gen Should the chunk generate
+     * @param cb Callback to receive the chunk when it is loaded.
+     *           will be executed synchronously
+     */
+    public default void getChunkAtAsync(Block block, boolean gen, java.util.function.Consumer<Chunk> cb) {
+        getChunkAtAsync(block.getX() >> 4, block.getZ() >> 4, gen, cb);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     * @param loc Location to load the corresponding chunk from
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public default java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(Location loc) {
+        return getChunkAtAsync((int)loc.getX() >> 4, (int)Math.floor(loc.getZ()) >> 4, true);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     * @param loc Location to load the corresponding chunk from
+     * @param gen Should the chunk generate
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public default java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(Location loc, boolean gen) {
+        return getChunkAtAsync((int)loc.getX() >> 4, (int)Math.floor(loc.getZ()) >> 4, gen);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     * @param block Block to load the corresponding chunk from
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public default java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(Block block) {
+        return getChunkAtAsync(block.getX() >> 4, block.getZ() >> 4, true);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     * @param block Block to load the corresponding chunk from
+     * @param gen Should the chunk generate
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public default java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(Block block, boolean gen) {
+        return getChunkAtAsync(block.getX() >> 4, block.getZ() >> 4, gen);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param x X Coord
+     * @param z Z Coord
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public default java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(int x, int z) {
+        return getChunkAtAsync(x, z, true);
+    }
+
+    /**
+     * Requests a {@link Chunk} to be loaded at the given coordinates
+     *
+     * This method makes no guarantee on how fast the chunk will load,
+     * and will return the chunk to the callback at a later time.
+     *
+     * You should use this method if you need a chunk but do not need it
+     * immediately, and you wish to let the server control the speed
+     * of chunk loads, keeping performance in mind.
+     *
+     * The future will always be executed synchronously
+     * on the main Server Thread.
+     *
+     * @param x Chunk X-coordinate of the chunk - (world coordinate / 16)
+     * @param z Chunk Z-coordinate of the chunk - (world coordinate / 16)
+     * @param gen Should we generate a chunk if it doesn't exists or not
+     * @return Future that will resolve when the chunk is loaded
+     */
+    public java.util.concurrent.CompletableFuture<Chunk> getChunkAtAsync(int x, int z, boolean gen);
+    // Paper end
+
     /**
      * Checks if the specified {@link Chunk} is loaded
      *
@@ -166,6 +572,15 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @return true if the chunk is loaded, otherwise false
      */
     public boolean isChunkLoaded(int x, int z);
+
+    /**
+     * Checks if the {@link Chunk} at the specified coordinates is generated
+     *
+     * @param x X-coordinate of the chunk
+     * @param z Z-coordinate of the chunk
+     * @return true if the chunk is generated, otherwise false
+     */
+    public boolean isChunkGenerated(int x, int z);
 
     /**
      * Checks if the {@link Chunk} at the specified coordinates is loaded and
@@ -274,7 +689,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param z Z-coordinate of the chunk
      * @param safe Controls whether to queue the chunk when players are nearby
      * @return Whether the chunk was actually queued
+     * @deprecated it is never safe to remove a chunk in use
      */
+    @Deprecated
     public boolean unloadChunkRequest(int x, int z, boolean safe);
 
     /**
@@ -283,7 +700,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param x X-coordinate of the chunk
      * @param z Z-coordinate of the chunk
      * @return Whether the chunk was actually regenerated
+     *
+     * @deprecated regenerating a single chunk is not likely to produce the same
+     * chunk as before as terrain decoration may be spread across chunks. Use of
+     * this method should be avoided as it is known to produce buggy results.
      */
+    @Deprecated
     public boolean regenerateChunk(int x, int z);
 
     /**
@@ -297,6 +719,39 @@ public interface World extends PluginMessageRecipient, Metadatable {
      */
     @Deprecated
     public boolean refreshChunk(int x, int z);
+
+    /**
+     * Gets whether the chunk at the specified chunk coordinates is force
+     * loaded.
+     * <p>
+     * A force loaded chunk will not be unloaded due to lack of player activity.
+     *
+     * @param x X-coordinate of the chunk
+     * @param z Z-coordinate of the chunk
+     * @return force load status
+     */
+    public boolean isChunkForceLoaded(int x, int z);
+
+    /**
+     * Sets whether the chunk at the specified chunk coordinates is force
+     * loaded.
+     * <p>
+     * A force loaded chunk will not be unloaded due to lack of player activity.
+     *
+     * @param x X-coordinate of the chunk
+     * @param z Z-coordinate of the chunk
+     * @param forced
+     */
+    public void setChunkForceLoaded(int x, int z, boolean forced);
+
+    /**
+     * Returns all force loaded chunks in this world.
+     * <p>
+     * A force loaded chunk will not be unloaded due to lack of player activity.
+     *
+     * @return unmodifiable collection of force loaded chunks
+     */
+    public Collection<Chunk> getForceLoadedChunks();
 
     /**
      * Drops an item at the specified {@link Location}
@@ -358,9 +813,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param delegate A class to call for each block changed as a result of
      *     this method
      * @return true if the tree was created successfully, otherwise false
-     * @deprecated rarely used API that was largely for implementation purposes
      */
-    @Deprecated
     public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate);
 
     /**
@@ -435,6 +888,238 @@ public interface World extends PluginMessageRecipient, Metadatable {
      */
     public Collection<Entity> getEntitiesByClasses(Class<?>... classes);
 
+    // Paper start
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param radius Radius
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double radius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, radius, radius, radius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xzRadius X/Z Radius
+     * @param yRadius Y Radius
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xzRadius, yRadius, xzRadius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xRadius X Radius
+     * @param yRadius Y Radius
+     * @param zRadius Z radius
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xRadius, yRadius, zRadius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param radius X Radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of living entities near location. This will always be a non-null collection
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double radius, Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, radius, radius, radius, predicate);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xzRadius X/Z Radius
+     * @param yRadius Y Radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of living entities near location. This will always be a non-null collection
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double xzRadius, double yRadius, Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xRadius X Radius
+     * @param yRadius Y Radius
+     * @param zRadius Z radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of living entities near location. This will always be a non-null collection.
+     */
+    public default Collection<LivingEntity> getNearbyLivingEntities(Location loc, double xRadius, double yRadius, double zRadius, Predicate<LivingEntity> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, loc, xRadius, yRadius, zRadius, predicate);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param radius X/Y/Z Radius
+     * @return the collection of living entities near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double radius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, radius, radius, radius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xzRadius X/Z Radius
+     * @param yRadius Y Radius
+     * @return the collection of living entities near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xzRadius, yRadius, xzRadius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xRadius X Radius
+     * @param yRadius Y Radius
+     * @param zRadius Z Radius
+     * @return the collection of players near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xRadius, yRadius, zRadius);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param radius X/Y/Z Radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of players near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double radius, Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, radius, radius, radius, predicate);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xzRadius X/Z Radius
+     * @param yRadius Y Radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of players near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double xzRadius, double yRadius, Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+    /**
+     * Gets nearby players within the specified radius (bounding box)
+     * @param loc Center location
+     * @param xRadius X Radius
+     * @param yRadius Y Radius
+     * @param zRadius Z Radius
+     * @param predicate a predicate used to filter results
+     * @return the collection of players near location. This will always be a non-null collection.
+     */
+    public default Collection<Player> getNearbyPlayers(Location loc, double xRadius, double yRadius, double zRadius, Predicate<Player> predicate) {
+        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, loc, xRadius, yRadius, zRadius, predicate);
+    }
+
+    /**
+     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
+     * @param clazz Type to filter by
+     * @param loc Center location
+     * @param radius X/Y/Z radius to search within
+     * @param <T> the entity type
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, Location loc, double radius) {
+        return getNearbyEntitiesByType(clazz, loc, radius, radius, radius, null);
+    }
+
+    /**
+     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
+     * @param clazz Type to filter by
+     * @param loc Center location
+     * @param xzRadius X/Z radius to search within
+     * @param yRadius Y radius to search within
+     * @param <T> the entity type
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, Location loc, double xzRadius, double yRadius) {
+        return getNearbyEntitiesByType(clazz, loc, xzRadius, yRadius, xzRadius, null);
+    }
+
+    /**
+     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
+     * @param clazz Type to filter by
+     * @param loc Center location
+     * @param xRadius X Radius
+     * @param yRadius Y Radius
+     * @param zRadius Z Radius
+     * @param <T> the entity type
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, Location loc, double xRadius, double yRadius, double zRadius) {
+        return getNearbyEntitiesByType(clazz, loc, xRadius, yRadius, zRadius, null);
+    }
+
+    /**
+     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
+     * @param clazz Type to filter by
+     * @param loc Center location
+     * @param radius X/Y/Z radius to search within
+     * @param predicate a predicate used to filter results
+     * @param <T> the entity type
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, Location loc, double radius, Predicate<T> predicate) {
+        return getNearbyEntitiesByType(clazz, loc, radius, radius, radius, predicate);
+    }
+
+    /**
+     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
+     * @param clazz Type to filter by
+     * @param loc Center location
+     * @param xzRadius X/Z radius to search within
+     * @param yRadius Y radius to search within
+     * @param predicate a predicate used to filter results
+     * @param <T> the entity type
+     * @return the collection of entities near location. This will always be a non-null collection.
+     */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, Location loc, double xzRadius, double yRadius, Predicate<T> predicate) {
+        return getNearbyEntitiesByType(clazz, loc, xzRadius, yRadius, xzRadius, predicate);
+    }
+
+     /**
+      * Gets all nearby entities of the specified type, within the specified radius (bounding box)
+      * @param clazz Type to filter by
+      * @param loc Center location
+      * @param xRadius X Radius
+      * @param yRadius Y Radius
+      * @param zRadius Z Radius
+      * @param predicate a predicate used to filter results
+      * @param <T> the entity type
+      * @return the collection of entities near location. This will always be a non-null collection.
+      */
+    public default <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends Entity> clazz, Location loc, double xRadius, double yRadius, double zRadius, Predicate<T> predicate) {
+        if (clazz == null) {
+            clazz = Entity.class;
+        }
+        List<T> nearby = new ArrayList<>();
+        for (Entity bukkitEntity : getNearbyEntities(loc, xRadius, yRadius, zRadius)) {
+            //noinspection unchecked
+            if (clazz.isAssignableFrom(bukkitEntity.getClass()) && (predicate == null || predicate.test((T) bukkitEntity))) {
+                //noinspection unchecked
+                nearby.add((T) bukkitEntity);
+            }
+        }
+        return nearby;
+    }
+    // Paper end
+
     /**
      * Get a list of all players in this World
      *
@@ -443,17 +1128,241 @@ public interface World extends PluginMessageRecipient, Metadatable {
     public List<Player> getPlayers();
 
     /**
-     * Returns a list of entities within a bounding box centered around a Location.
-     *
-     * Some implementations may impose artificial restrictions on the size of the search bounding box.
+     * Returns a list of entities within a bounding box centered around a
+     * Location.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the size of the
+     * search bounding box.
      *
      * @param location The center of the bounding box
      * @param x 1/2 the size of the box along x axis
      * @param y 1/2 the size of the box along y axis
      * @param z 1/2 the size of the box along z axis
-     * @return the collection of entities near location. This will always be a non-null collection.
+     * @return the collection of entities near location. This will always be a
+     *      non-null collection.
      */
     public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z);
+
+    // Paper start - getEntity by UUID API
+    /**
+     * Gets an entity in this world by its UUID
+     *
+     * @param uuid the UUID of the entity
+     * @return the entity with the given UUID, or null if it isn't found
+     */
+    public Entity getEntity(UUID uuid);
+    // Paper end
+
+    /**
+     * Returns a list of entities within a bounding box centered around a
+     * Location.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the size of the
+     * search bounding box.
+     *
+     * @param location The center of the bounding box
+     * @param x 1/2 the size of the box along x axis
+     * @param y 1/2 the size of the box along y axis
+     * @param z 1/2 the size of the box along z axis
+     * @param filter only entities that fulfill this predicate are considered,
+     *     or <code>null</code> to consider all entities
+     * @return the collection of entities near location. This will always be a
+     *     non-null collection.
+     */
+    public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z, Predicate<Entity> filter);
+
+    /**
+     * Returns a list of entities within the given bounding box.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the size of the
+     * search bounding box.
+     *
+     * @param boundingBox the bounding box
+     * @return the collection of entities within the bounding box, will always
+     *     be a non-null collection
+     */
+    public Collection<Entity> getNearbyEntities(BoundingBox boundingBox);
+
+    /**
+     * Returns a list of entities within the given bounding box.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the size of the
+     * search bounding box.
+     *
+     * @param boundingBox the bounding box
+     * @param filter only entities that fulfill this predicate are considered,
+     *     or <code>null</code> to consider all entities
+     * @return the collection of entities within the bounding box, will always
+     *     be a non-null collection
+     */
+    public Collection<Entity> getNearbyEntities(BoundingBox boundingBox, Predicate<Entity> filter);
+
+    /**
+     * Performs a ray trace that checks for entity collisions.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the maximum
+     * distance.
+     *
+     * @param start the start position
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @return the closest ray trace hit result, or <code>null</code> if there
+     *     is no hit
+     * @see #rayTraceEntities(Location, Vector, double, double, Predicate)
+     */
+    public RayTraceResult rayTraceEntities(Location start, Vector direction, double maxDistance);
+
+    /**
+     * Performs a ray trace that checks for entity collisions.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the maximum
+     * distance.
+     *
+     * @param start the start position
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param raySize entity bounding boxes will be uniformly expanded (or
+     *     shrinked) by this value before doing collision checks
+     * @return the closest ray trace hit result, or <code>null</code> if there
+     *     is no hit
+     * @see #rayTraceEntities(Location, Vector, double, double, Predicate)
+     */
+    public RayTraceResult rayTraceEntities(Location start, Vector direction, double maxDistance, double raySize);
+
+    /**
+     * Performs a ray trace that checks for entity collisions.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the maximum
+     * distance.
+     *
+     * @param start the start position
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param filter only entities that fulfill this predicate are considered,
+     *     or <code>null</code> to consider all entities
+     * @return the closest ray trace hit result, or <code>null</code> if there
+     *     is no hit
+     * @see #rayTraceEntities(Location, Vector, double, double, Predicate)
+     */
+    public RayTraceResult rayTraceEntities(Location start, Vector direction, double maxDistance, Predicate<Entity> filter);
+
+    /**
+     * Performs a ray trace that checks for entity collisions.
+     * <p>
+     * This may not consider entities in currently unloaded chunks. Some
+     * implementations may impose artificial restrictions on the maximum
+     * distance.
+     *
+     * @param start the start position
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param raySize entity bounding boxes will be uniformly expanded (or
+     *     shrinked) by this value before doing collision checks
+     * @param filter only entities that fulfill this predicate are considered,
+     *     or <code>null</code> to consider all entities
+     * @return the closest ray trace hit result, or <code>null</code> if there
+     *     is no hit
+     */
+    public RayTraceResult rayTraceEntities(Location start, Vector direction, double maxDistance, double raySize, Predicate<Entity> filter);
+
+    /**
+     * Performs a ray trace that checks for block collisions using the blocks'
+     * precise collision shapes.
+     * <p>
+     * This takes collisions with passable blocks into account, but ignores
+     * fluids.
+     * <p>
+     * This may cause loading of chunks! Some implementations may impose
+     * artificial restrictions on the maximum distance.
+     *
+     * @param start the start location
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @return the ray trace hit result, or <code>null</code> if there is no hit
+     * @see #rayTraceBlocks(Location, Vector, double, FluidCollisionMode, boolean)
+     */
+    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance);
+
+    /**
+     * Performs a ray trace that checks for block collisions using the blocks'
+     * precise collision shapes.
+     * <p>
+     * This takes collisions with passable blocks into account.
+     * <p>
+     * This may cause loading of chunks! Some implementations may impose
+     * artificial restrictions on the maximum distance.
+     *
+     * @param start the start location
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param fluidCollisionMode the fluid collision mode
+     * @return the ray trace hit result, or <code>null</code> if there is no hit
+     * @see #rayTraceBlocks(Location, Vector, double, FluidCollisionMode, boolean)
+     */
+    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode);
+
+    /**
+     * Performs a ray trace that checks for block collisions using the blocks'
+     * precise collision shapes.
+     * <p>
+     * If collisions with passable blocks are ignored, fluid collisions are
+     * ignored as well regardless of the fluid collision mode.
+     * <p>
+     * Portal blocks are only considered passable if the ray starts within
+     * them. Apart from that collisions with portal blocks will be considered
+     * even if collisions with passable blocks are otherwise ignored.
+     * <p>
+     * This may cause loading of chunks! Some implementations may impose
+     * artificial restrictions on the maximum distance.
+     *
+     * @param start the start location
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param fluidCollisionMode the fluid collision mode
+     * @param ignorePassableBlocks whether to ignore passable but collidable
+     *     blocks (ex. tall grass, signs, fluids, ..)
+     * @return the ray trace hit result, or <code>null</code> if there is no hit
+     */
+    public RayTraceResult rayTraceBlocks(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode, boolean ignorePassableBlocks);
+
+    /**
+     * Performs a ray trace that checks for both block and entity collisions.
+     * <p>
+     * Block collisions use the blocks' precise collision shapes. The
+     * <code>raySize</code> parameter is only taken into account for entity
+     * collision checks.
+     * <p>
+     * If collisions with passable blocks are ignored, fluid collisions are
+     * ignored as well regardless of the fluid collision mode.
+     * <p>
+     * Portal blocks are only considered passable if the ray starts within them.
+     * Apart from that collisions with portal blocks will be considered even if
+     * collisions with passable blocks are otherwise ignored.
+     * <p>
+     * This may cause loading of chunks! Some implementations may impose
+     * artificial restrictions on the maximum distance.
+     *
+     * @param start the start location
+     * @param direction the ray direction
+     * @param maxDistance the maximum distance
+     * @param fluidCollisionMode the fluid collision mode
+     * @param ignorePassableBlocks whether to ignore passable but collidable
+     *     blocks (ex. tall grass, signs, fluids, ..)
+     * @param raySize entity bounding boxes will be uniformly expanded (or
+     *     shrinked) by this value before doing collision checks
+     * @param filter only entities that fulfill this predicate are considered,
+     *     or <code>null</code> to consider all entities
+     * @return the closest ray trace hit result with either a block or an
+     *     entity, or <code>null</code> if there is no hit
+     */
+    public RayTraceResult rayTrace(Location start, Vector direction, double maxDistance, FluidCollisionMode fluidCollisionMode, boolean ignorePassableBlocks, double raySize, Predicate<Entity> filter);
 
     /**
      * Gets the unique name of this world
@@ -539,6 +1448,16 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @see #setTime(long) Sets the relative time of this world
      */
     public void setFullTime(long time);
+
+    // Paper start
+
+    /**
+     * Check if it is currently daytime in this world
+     *
+     * @return True if it is daytime
+     */
+    public boolean isDayTime();
+    // Paper end
 
     /**
      * Returns whether the world has an ongoing storm.
@@ -655,6 +1574,102 @@ public interface World extends PluginMessageRecipient, Metadatable {
      */
     public boolean createExplosion(Location loc, float power, boolean setFire);
 
+    // Paper start
+    /**
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source The source entity of the explosion
+     * @param loc Location to blow up
+     * @param power The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
+    public boolean createExplosion(Entity source, Location loc, float power, boolean setFire, boolean breakBlocks);
+
+    /**
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * Will destroy other blocks
+     *
+     * @param source The source entity of the explosion
+     * @param loc Location to blow up
+     * @param power The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Entity source, Location loc, float power, boolean setFire) {
+        return createExplosion(source, loc, power, setFire, true);
+    }
+    /**
+     * Creates explosion at given location with given power, with the specified entity as the source.
+     * Will set blocks on fire and destroy blocks.
+     *
+     * @param source The source entity of the explosion
+     * @param loc Location to blow up
+     * @param power The power of explosion, where 4F is TNT
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Entity source, Location loc, float power) {
+        return createExplosion(source, loc, power, true, true);
+    }
+    /**
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source The source entity of the explosion
+     * @param power The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Entity source, float power, boolean setFire, boolean breakBlocks) {
+        return createExplosion(source, source.getLocation(), power, setFire, breakBlocks);
+    }
+    /**
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * Will destroy blocks.
+     *
+     * @param source The source entity of the explosion
+     * @param power The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Entity source, float power, boolean setFire) {
+        return createExplosion(source, source.getLocation(), power, setFire, true);
+    }
+
+    /**
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source The source entity of the explosion
+     * @param power The power of explosion, where 4F is TNT
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Entity source, float power) {
+        return createExplosion(source, source.getLocation(), power, true, true);
+    }
+
+    /**
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire or breaking blocks.
+     *
+     * @param loc Location to blow up
+     * @param power The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
+    public default boolean createExplosion(Location loc, float power, boolean setFire, boolean breakBlocks) {
+        return createExplosion(loc.getX(), loc.getY(), loc.getZ(), power, setFire, breakBlocks);
+    }
+    // Paper end
+
     /**
      * Gets the {@link Environment} type of this world
      *
@@ -757,6 +1772,22 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * material.isBlock()}. The Material may not be air.
      *
      * @param location The {@link Location} to spawn the FallingBlock
+     * @param data The block data
+     * @return The spawned {@link FallingBlock} instance
+     * @throws IllegalArgumentException if {@link Location} or {@link
+     *     BlockData} are null
+     */
+    public FallingBlock spawnFallingBlock(Location location, BlockData data) throws IllegalArgumentException;
+
+    /**
+     * Spawn a {@link FallingBlock} entity at the given {@link Location} of the
+     * specified {@link Material}. The material dictates what is falling.
+     * When the FallingBlock hits the ground, it will place that block.
+     * <p>
+     * The Material must be a block type, check with {@link Material#isBlock()
+     * material.isBlock()}. The Material may not be air.
+     *
+     * @param location The {@link Location} to spawn the FallingBlock
      * @param material The block {@link Material} type
      * @param data The block data
      * @return The spawned {@link FallingBlock} instance
@@ -766,22 +1797,6 @@ public interface World extends PluginMessageRecipient, Metadatable {
      */
     @Deprecated
     public FallingBlock spawnFallingBlock(Location location, Material material, byte data) throws IllegalArgumentException;
-
-    /**
-     * Spawn a {@link FallingBlock} entity at the given {@link Location} of
-     * the specified blockId (converted to {@link Material})
-     *
-     * @param location The {@link Location} to spawn the FallingBlock
-     * @param blockId The id of the intended material
-     * @param blockData The block data
-     * @return The spawned FallingBlock instance
-     * @throws IllegalArgumentException if location is null, or blockId is
-     *     invalid
-     * @see #spawnFallingBlock(org.bukkit.Location, org.bukkit.Material, byte)
-     * @deprecated Magic value
-     */
-    @Deprecated
-    public FallingBlock spawnFallingBlock(Location location, int blockId, byte blockData) throws IllegalArgumentException;
 
     /**
      * Plays an effect to all players within a default radius around a given
@@ -838,11 +1853,11 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param z - chunk z coordinate
      * @param includeBiome - if true, snapshot includes per-coordinate biome
      *     type
-     * @param includeBiomeTempRain - if true, snapshot includes per-coordinate
-     *     raw biome temperature and rainfall
+     * @param includeBiomeTemp - if true, snapshot includes per-coordinate
+     *     raw biome temperature
      * @return The empty snapshot.
      */
-    public ChunkSnapshot getEmptyChunkSnapshot(int x, int z, boolean includeBiome, boolean includeBiomeTempRain);
+    public ChunkSnapshot getEmptyChunkSnapshot(int x, int z, boolean includeBiome, boolean includeBiomeTemp);
 
     /**
      * Sets the spawn flags for this.
@@ -891,6 +1906,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * It is safe to run this method when the block does not exist, it will
      * not create the block.
+     * <p>
+     * This method will return the raw temperature without adjusting for block
+     * height effects.
      *
      * @param x X coordinate of the block
      * @param z Z coordinate of the block
@@ -1232,9 +2250,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
     void playSound(Location location, String sound, SoundCategory category, float volume, float pitch);
 
     /**
-     * Get existing rules
+     * Get an array containing the names of all the {@link GameRule}s.
      *
-     * @return An array of rules
+     * @return An array of {@link GameRule} names.
      */
     public String[] getGameRules();
 
@@ -1245,7 +2263,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param rule Rule to look up value of
      * @return String value of rule
+     * @deprecated use {@link #getGameRuleValue(GameRule)} instead
      */
+    @Deprecated
     public String getGameRuleValue(String rule);
 
     /**
@@ -1259,7 +2279,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param rule Rule to set
      * @param value Value to set rule to
      * @return True if rule was set
+     * @deprecated use {@link #setGameRule(GameRule, Object)} instead.
      */
+    @Deprecated
     public boolean setGameRuleValue(String rule, String value);
 
     /**
@@ -1269,6 +2291,35 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @return True if rule exists
      */
     public boolean isGameRule(String rule);
+
+    /**
+     * Get the current value for a given {@link GameRule}.
+     *
+     * @param rule the GameRule to check
+     * @param <T> the GameRule's type
+     * @return the current value
+     */
+    public <T> T getGameRuleValue(GameRule<T> rule);
+
+    /**
+     * Get the default value for a given {@link GameRule}. This value is not
+     * guaranteed to match the current value.
+     *
+     * @param rule the rule to return a default value for
+     * @param <T> the type of GameRule
+     * @return the default value
+     */
+    public <T> T getGameRuleDefault(GameRule<T> rule);
+
+    /**
+     * Set the given {@link GameRule}'s new value.
+     *
+     * @param rule the GameRule to update
+     * @param newValue the new value
+     * @param <T> the value type of the GameRule
+     * @return true if the value was successfully set
+     */
+    public <T> boolean setGameRule(GameRule<T> rule, T newValue);
 
     /**
      * Gets the world border for this world.
@@ -1308,6 +2359,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param count the number of particles
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, T data);
 
@@ -1323,6 +2375,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param count the number of particles
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, T data);
 
@@ -1372,6 +2425,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param offsetZ the maximum random offset on the Z axis
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1391,6 +2445,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param offsetZ the maximum random offset on the Z axis
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1446,6 +2501,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *              particle used (normally speed)
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
@@ -1467,58 +2523,137 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *              particle used (normally speed)
      * @param data the data to use for the particle or null,
      *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
      */
-    public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
+    public default <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data) { spawnParticle(particle, null, null, x, y, z, count, offsetX, offsetY, offsetZ, extra, data, true); }// Paper start - Expand Particle API
+    /**
+     * Spawns the particle (the number of times specified by count)
+     * at the target location. The position of each particle will be
+     * randomized positively and negatively by the offset parameters
+     * on each axis.
+     *
+     * @param particle the particle to spawn
+     * @param receivers List of players to receive the particles, or null for all in world
+     * @param source Source of the particles to be used in visibility checks, or null if no player source
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
+     */
+    public default <T> void spawnParticle(Particle particle, List<Player> receivers, Player source, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data) { spawnParticle(particle, receivers, source, x, y, z, count, offsetX, offsetY, offsetZ, extra, data, true); }
+    /**
+     * Spawns the particle (the number of times specified by count)
+     * at the target location. The position of each particle will be
+     * randomized positively and negatively by the offset parameters
+     * on each axis.
+     *
+     * @param particle the particle to spawn
+     * @param receivers List of players to receive the particles, or null for all in world
+     * @param source Source of the particles to be used in visibility checks, or null if no player source
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
+     * @param <T> Type
+     * @param force allows the particle to be seen further away from the player
+     *              and shows to players using any vanilla client particle settings
+     */
+    public <T> void spawnParticle(Particle particle, List<Player> receivers, Player source, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force);
+    // Paper end
+
+
+    /**
+     * Spawns the particle (the number of times specified by count)
+     * at the target location. The position of each particle will be
+     * randomized positively and negatively by the offset parameters
+     * on each axis.
+     *
+     * @param particle the particle to spawn
+     * @param location the location to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
+     * @param force whether to send the particle to players within an extended
+     *              range and encourage their client to render it regardless of
+     *              settings
+     * @param <T> Particle data type
+     */
+    public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force);
+
+    /**
+     * Spawns the particle (the number of times specified by count)
+     * at the target location. The position of each particle will be
+     * randomized positively and negatively by the offset parameters
+     * on each axis.
+     *
+     * @param particle the particle to spawn
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
+     * @param force whether to send the particle to players within an extended
+     *              range and encourage their client to render it regardless of
+     *              settings
+     * @param <T> Particle data type
+     */
+    public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data, boolean force);
+
+    /**
+     * Find the closest nearby structure of a given {@link StructureType}.
+     * Finding unexplored structures can, and will, block if the world is
+     * looking in chunks that gave not generated yet. This can lead to the world
+     * temporarily freezing while locating an unexplored structure.
+     * <p>
+     * The {@code radius} is not a rigid square radius. Each structure may alter
+     * how many chunks to check for each iteration. Do not assume that only a
+     * radius x radius chunk area will be checked. For example,
+     * {@link StructureType#WOODLAND_MANSION} can potentially check up to 20,000
+     * blocks away (or more) regardless of the radius used.
+     * <p>
+     * This will <i>not</i> load or generate chunks. This can also lead to
+     * instances where the server can hang if you are only looking for
+     * unexplored structures. This is because it will keep looking further and
+     * further out in order to find the structure.
+     *
+     * @param origin where to start looking for a structure
+     * @param structureType the type of structure to find
+     * @param radius the radius, in chunks, around which to search
+     * @param findUnexplored true to only find unexplored structures
+     * @return the closest {@link Location}, or null if no structure of the
+     * specified type exists.
+     */
+    public Location locateNearestStructure(Location origin, StructureType structureType, int radius, boolean findUnexplored);
 
     // Spigot start
     public class Spigot
     {
-
-        /**
-         * Plays an effect to all players within a default radius around a given
-         * location.
-         *
-         * @param location the {@link Location} around which players must be to
-         * see the effect
-         * @param effect the {@link Effect}
-         * @throws IllegalArgumentException if the location or effect is null.
-         * It also throws when the effect requires a material or a material data
-         * @deprecated Spigot specific API, use {@link Particle}.
-         */
-        @Deprecated
-        public void playEffect(Location location, Effect effect)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
-        }
-
-        /**
-         * Plays an effect to all players within a default radius around a given
-         * location. The effect will use the provided material (and material
-         * data if required). The particle's position on the client will be the
-         * given location, adjusted on each axis by a normal distribution with
-         * mean 0 and standard deviation given in the offset parameters, each
-         * particle has independently calculated offsets. The effect will have
-         * the given speed and particle count if the effect is a particle. Some
-         * effect will create multiple particles.
-         *
-         * @param location the {@link Location} around which players must be to
-         * see the effect
-         * @param effect effect the {@link Effect}
-         * @param id the item/block/data id for the effect
-         * @param data the data value of the block/item for the effect
-         * @param offsetX the amount to be randomly offset by in the X axis
-         * @param offsetY the amount to be randomly offset by in the Y axis
-         * @param offsetZ the amount to be randomly offset by in the Z axis
-         * @param speed the speed of the particles
-         * @param particleCount the number of particles
-         * @param radius the radius around the location
-         * @deprecated Spigot specific API, use {@link Particle}.
-         */
-        @Deprecated
-        public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
-        }
 
         /**
          * Strikes lightning at the given {@link Location} and possibly without sound
@@ -1526,12 +2661,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
          * @param loc The location to strike lightning
          * @param isSilent Whether this strike makes no sound
          * @return The lightning entity.
-         */        
+         */
         public LightningStrike strikeLightning(Location loc, boolean isSilent)
         {
             throw new UnsupportedOperationException( "Not supported yet." );
         }
-        
+
         /**
          * Strikes lightning at the given {@link Location} without doing damage and possibly without sound
          *

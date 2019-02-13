@@ -50,4 +50,32 @@ public interface Creeper extends Monster {
      * @return the explosion radius
      */
     public int getExplosionRadius();
+
+    // Paper start
+    /**
+     * Set whether creeper is ignited or not (armed to explode)
+     *
+     * @param ignited New ignited state
+     */
+    public void setIgnited(boolean ignited);
+
+    /**
+     * Check if creeper is ignited or not (armed to explode)
+     *
+     * @return Ignited state
+     */
+    public boolean isIgnited();
+
+    /**
+     * Get the number of ticks this creeper has been ignited (armed to explode)
+     *
+     * @return Ticks creeper has been ignited
+     */
+    public int getFuseTicks();
+
+    /**
+     * Make the creeper explode (no waiting for fuse)
+     */
+    public void explode();
+    // Paper end
 }

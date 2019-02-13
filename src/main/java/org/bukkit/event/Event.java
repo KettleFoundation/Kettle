@@ -1,5 +1,6 @@
 package org.bukkit.event;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
 /**
@@ -32,6 +33,22 @@ public abstract class Event {
     public Event(boolean isAsync) {
         this.async = isAsync;
     }
+
+    // Paper start
+    /**
+     * Calls the event and tests if cancelled.
+     *
+     * @return false if event was cancelled, if cancellable. otherwise true.
+     */
+    public boolean callEvent() {
+        Bukkit.getPluginManager().callEvent(this);
+        if (this instanceof Cancellable) {
+            return !((Cancellable) this).isCancelled();
+        } else {
+            return true;
+        }
+    }
+    // Paper end
 
     /**
      * Convenience method for providing a user-friendly identifier. By

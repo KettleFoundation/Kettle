@@ -1,6 +1,9 @@
 package org.bukkit.command;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 
@@ -9,6 +12,7 @@ public class FormattedCommandAlias extends Command {
 
     public FormattedCommandAlias(String alias, String[] formatStrings) {
         super(alias);
+        timings = co.aikar.timings.TimingsManager.getCommandTiming("minecraft", this); // Spigot
         this.formatStrings = formatStrings;
     }
 
@@ -18,7 +22,7 @@ public class FormattedCommandAlias extends Command {
         ArrayList<String> commands = new ArrayList<String>();
         for (String formatString : formatStrings) {
             try {
-                commands.add(buildCommand(formatString, args));
+                commands.add(buildCommand(sender, formatString, args)); // Paper
             } catch (Throwable throwable) {
                 if (throwable instanceof IllegalArgumentException) {
                     sender.sendMessage(throwable.getMessage());
@@ -36,7 +40,10 @@ public class FormattedCommandAlias extends Command {
         return result;
     }
 
-    private String buildCommand(String formatString, String[] args) {
+    private String buildCommand(CommandSender sender, String formatString, String[] args) { // Paper
+        if (formatString.contains("$sender")) { // Paper
+            formatString = formatString.replaceAll(Pattern.quote("$sender"), Matcher.quoteReplacement(sender.getName())); // Paper
+        } // Paper
         int index = formatString.indexOf('$');
         while (index != -1) {
             int start = index;
@@ -112,6 +119,9 @@ public class FormattedCommandAlias extends Command {
 
         return formatString;
     }
+
+    @Override // Spigot
+    public String getTimingName() {return "Command Forwarder - " + super.getTimingName();} // Spigot
 
     private static boolean inRange(int i, int j, int k) {
         return i >= j && i <= k;

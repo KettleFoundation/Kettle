@@ -78,6 +78,7 @@ public class Potion {
     }
 
     /**
+     * @param name Unused, always uses {@link PotionType#WATER}
      * @deprecated
      */
     @Deprecated

@@ -32,7 +32,7 @@ public interface Merchant {
      *
      * @param i the index
      * @return the recipe
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException Throws when specified index is larger than Merchant's inventory
      */
     MerchantRecipe getRecipe(int i) throws IndexOutOfBoundsException;
 
@@ -41,7 +41,7 @@ public interface Merchant {
      *
      * @param i the index
      * @param recipe the recipe
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException Throws when specified index is larger than Merchant's inventory
      */
     void setRecipe(int i, MerchantRecipe recipe) throws IndexOutOfBoundsException;
 

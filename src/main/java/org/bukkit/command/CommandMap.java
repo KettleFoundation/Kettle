@@ -123,4 +123,13 @@ public interface CommandMap {
      * @throws IllegalArgumentException if either sender or cmdLine are null
      */
     public List<String> tabComplete(CommandSender sender, String cmdLine, Location location) throws IllegalArgumentException;
+
+    // Paper start - Expose Known Commands
+    /**
+     * Return a Map of known commands
+     *
+     * @return known commands
+     */
+    public java.util.Map<String, Command> getKnownCommands();
+    // Paper end
 }

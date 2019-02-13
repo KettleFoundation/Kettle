@@ -1,9 +1,11 @@
 package org.bukkit;
 
-import java.util.List;
-
 import org.bukkit.advancement.Advancement;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.plugin.InvalidPluginException;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
  * This interface provides value conversions that may be specific to a
@@ -16,17 +18,23 @@ import org.bukkit.inventory.ItemStack;
 @Deprecated
 public interface UnsafeValues {
 
-    Material getMaterialFromInternalName(String name);
+    Material toLegacy(Material material);
 
-    List<String> tabCompleteInternalMaterialName(String token, List<String> completions);
+    Material fromLegacy(Material material);
+
+    Material fromLegacy(MaterialData material);
+
+    Material fromLegacy(MaterialData material, boolean itemPriority);
+
+    BlockData fromLegacy(Material material, byte data);
+
+    int getDataVersion();
 
     ItemStack modifyItemStack(ItemStack stack, String arguments);
 
-    Statistic getStatisticFromInternalName(String name);
+    void checkSupported(PluginDescriptionFile pdf) throws InvalidPluginException;
 
-    Achievement getAchievementFromInternalName(String name);
-
-    List<String> tabCompleteInternalStatisticOrAchievementName(String token, List<String> completions);
+    byte[] processClass(PluginDescriptionFile pdf, String path, byte[] clazz);
 
     /**
      * Load an advancement represented by the specified string into the server.
@@ -59,4 +67,10 @@ public interface UnsafeValues {
      * @return true if a file matching this key was found and deleted
      */
     boolean removeAdvancement(NamespacedKey key);
+
+    // Paper start - Add legacy check util
+    static boolean isLegacyPlugin(org.bukkit.plugin.Plugin plugin) {
+        return !("1.13".equals(plugin.getDescription().getAPIVersion()));
+    }
+    // Paper end
 }

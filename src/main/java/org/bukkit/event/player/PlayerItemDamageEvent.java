@@ -5,6 +5,10 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Called when an item used by the player takes durability damage as a result of
+ * being used.
+ */
 public class PlayerItemDamageEvent extends PlayerEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
@@ -18,6 +22,11 @@ public class PlayerItemDamageEvent extends PlayerEvent implements Cancellable {
         this.damage = damage;
     }
 
+    /**
+     * Gets the item being damaged.
+     *
+     * @return the item
+     */
     public ItemStack getItem() {
         return item;
     }
@@ -35,10 +44,12 @@ public class PlayerItemDamageEvent extends PlayerEvent implements Cancellable {
         this.damage = damage;
     }
 
+    @Override
     public boolean isCancelled() {
         return cancelled;
     }
 
+    @Override
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }

@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
+import com.destroystokyo.paper.event.server.ServerExceptionEvent;
+import com.destroystokyo.paper.exception.ServerCommandException;
+import com.destroystokyo.paper.exception.ServerTabCompleteException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -18,7 +20,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 public class SimpleCommandMap implements CommandMap {
-    private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
     protected final Map<String, Command> knownCommands = new HashMap<String, Command>();
     private final Server server;
 
@@ -31,7 +32,7 @@ public class SimpleCommandMap implements CommandMap {
         register("bukkit", new VersionCommand("version"));
         register("bukkit", new ReloadCommand("reload"));
         register("bukkit", new PluginsCommand("plugins"));
-        register("bukkit", new TimingsCommand("timings"));
+        register("bukkit", new co.aikar.timings.TimingsCommand("timings")); // Spigot
     }
 
     public void setFallbackCommands() {
@@ -60,6 +61,7 @@ public class SimpleCommandMap implements CommandMap {
      * {@inheritDoc}
      */
     public boolean register(String label, String fallbackPrefix, Command command) {
+        command.timings = co.aikar.timings.TimingsManager.getCommandTiming(fallbackPrefix, command); // Spigot
         label = label.toLowerCase(java.util.Locale.ENGLISH).trim();
         fallbackPrefix = fallbackPrefix.toLowerCase(java.util.Locale.ENGLISH).trim();
         boolean registered = register(label, command, false, fallbackPrefix);
@@ -122,7 +124,7 @@ public class SimpleCommandMap implements CommandMap {
      * {@inheritDoc}
      */
     public boolean dispatch(CommandSender sender, String commandLine) throws CommandException {
-        String[] args = PATTERN_ON_SPACE.split(commandLine);
+        String[] args = commandLine.split(" ");
 
         if (args.length == 0) {
             return false;
@@ -135,17 +137,26 @@ public class SimpleCommandMap implements CommandMap {
             return false;
         }
 
+        // Paper start - Plugins do weird things to workaround normal registration
+        if (target.timings == null) {
+            target.timings = co.aikar.timings.TimingsManager.getCommandTiming(null, target);
+        }
+        // Paper end
+
         try {
             target.timings.startTiming(); // Spigot
             // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
             target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
             target.timings.stopTiming(); // Spigot
         } catch (CommandException ex) {
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
             target.timings.stopTiming(); // Spigot
             throw ex;
         } catch (Throwable ex) {
             target.timings.stopTiming(); // Spigot
-            throw new CommandException("Unhandled exception executing '" + commandLine + "' in " + target, ex);
+            String msg = "Unhandled exception executing '" + commandLine + "' in " + target;
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
+            throw new CommandException(msg, ex);
         }
 
         // return true as command was handled
@@ -210,15 +221,16 @@ public class SimpleCommandMap implements CommandMap {
             return null;
         }
 
-        String argLine = cmdLine.substring(spaceIndex + 1, cmdLine.length());
-        String[] args = PATTERN_ON_SPACE.split(argLine, -1);
+        String[] args = cmdLine.substring(spaceIndex + 1, cmdLine.length()).split(" ", -1);
 
         try {
             return target.tabComplete(sender, commandName, args, location);
         } catch (CommandException ex) {
             throw ex;
         } catch (Throwable ex) {
-            throw new CommandException("Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target, ex);
+            String msg = "Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target;
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerTabCompleteException(msg, ex, target, sender, args))); // Paper
+            throw new CommandException(msg, ex);
         }
     }
 
@@ -267,4 +279,10 @@ public class SimpleCommandMap implements CommandMap {
             }
         }
     }
+
+    // Paper start - Expose Known Commands
+    public Map<String, Command> getKnownCommands() {
+        return knownCommands;
+    }
+    // Paper end
 }

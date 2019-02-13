@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -16,13 +17,21 @@ public abstract class PlayerBucketEvent extends PlayerEvent implements Cancellab
     private final Block blockClicked;
     private final BlockFace blockFace;
     private final Material bucket;
+    private final EquipmentSlot hand; // Paper - add EquipmentSlot
 
     public PlayerBucketEvent(final Player who, final Block blockClicked, final BlockFace blockFace, final Material bucket, final ItemStack itemInHand) {
+        // Paper start - add EquipmentSlot
+        this(who, blockClicked, blockFace, bucket, itemInHand, null);
+    }
+
+    public PlayerBucketEvent(final Player who, final Block blockClicked, final BlockFace blockFace, final Material bucket, final ItemStack itemInHand, final EquipmentSlot hand) {
+        // Paper end
         super(who);
         this.blockClicked = blockClicked;
         this.blockFace = blockFace;
         this.itemStack = itemInHand;
         this.bucket = bucket;
+        this.hand = hand == null ? player.getInventory().getItemInMainHand().equals(itemInHand) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND : hand; // Paper - add EquipmentSlot
     }
 
     /**
@@ -69,6 +78,17 @@ public abstract class PlayerBucketEvent extends PlayerEvent implements Cancellab
     public BlockFace getBlockFace() {
         return blockFace;
     }
+
+    // Paper start
+    /**
+     * The hand used to perform this action.
+     *
+     * @return the hand used
+     */
+    public EquipmentSlot getHand() {
+        return hand;
+    }
+    // Paper end
 
     public boolean isCancelled() {
         return cancelled;
