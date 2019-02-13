@@ -179,6 +179,8 @@ extractForgeSources {
 
 genGradleProjects {
     addCompileDep "junit:junit:4.12"
+    addCompileDep "bukkit:bukkit:1.12.2-R0.1"
+    addRepo("KettleFoundation", "http://repo.strezz.org/artifactory/Kettle/")
 }
 
 import groovy.json.JsonSlurper
