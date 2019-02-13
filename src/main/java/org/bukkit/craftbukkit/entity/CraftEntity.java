@@ -282,11 +282,19 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         // If this entity is riding another entity, we must dismount before teleporting.
         entity.stopRiding();
 
-        entity.world = ((CraftWorld) location.getWorld()).getHandle();
+        // Spigot start
+        if (!location.getWorld().equals(getWorld())) {
+          entity.teleportTo(location, cause.equals(TeleportCause.NETHER_PORTAL));
+          return true;
+        }
+
+        // entity.world = ((CraftWorld) location.getWorld()).getHandle();
+        // Spigot end
         // entity.setLocation() throws no event, and so cannot be cancelled
         entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         // SPIGOT-619: Force sync head rotation also
         entity.setHeadRotation(location.getYaw());
+        entity.world.entityJoinedWorld(entity, false); // Spigot - register to new chunk
 
         return true;
     }
@@ -720,4 +728,30 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         return perm;
     }
+
+    // Spigot start
+    private final Spigot spigot = new Spigot()
+    {
+        @Override
+        public boolean isInvulnerable()
+        {
+            return getHandle().isInvulnerable(net.minecraft.server.DamageSource.GENERIC);
+        }
+
+        @Override
+        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component)
+        {
+        }
+
+        @Override
+        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components)
+        {
+        }
+    };
+
+    public Spigot spigot()
+    {
+        return spigot;
+    }
+    // Spigot end
 }

@@ -133,7 +133,7 @@ public class CraftChunk implements Chunk {
     @Override
     public boolean isSlimeChunk() {
         // 987234911L is deterimined in EntitySlime when seeing if a slime can spawn in a chunk
-        return getHandle().a(987234911L).nextInt(10) == 0;
+        return getHandle().a(worldServer.spigotConfig.slimeSeed).nextInt(10) == 0;
     }
 
     public boolean unload(boolean save) {

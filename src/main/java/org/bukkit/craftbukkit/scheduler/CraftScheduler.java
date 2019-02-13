@@ -79,7 +79,7 @@ public class CraftScheduler implements BukkitScheduler {
      */
     private volatile CraftTask currentTask = null;
     private volatile int currentTick = -1;
-    private final Executor executor = Executors.newCachedThreadPool();
+    private final Executor executor = Executors.newCachedThreadPool(new com.google.common.util.concurrent.ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").build()); // Spigot
     private CraftAsyncDebugger debugHead = new CraftAsyncDebugger(-1, null, null) {@Override StringBuilder debugTo(StringBuilder string) {return string;}};
     private CraftAsyncDebugger debugTail = debugHead;
     private static final int RECENT_TICKS;
@@ -357,7 +357,9 @@ public class CraftScheduler implements BukkitScheduler {
             if (task.isSync()) {
                 currentTask = task;
                 try {
+                    task.timings.startTiming(); // Spigot
                     task.run();
+                    task.timings.stopTiming(); // Spigot
                 } catch (final Throwable throwable) {
                     task.getOwner().getLogger().log(
                             Level.WARNING,

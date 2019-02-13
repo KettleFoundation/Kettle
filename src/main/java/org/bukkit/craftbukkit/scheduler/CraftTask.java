@@ -1,11 +1,13 @@
 package org.bukkit.craftbukkit.scheduler;
 
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.SpigotTimings; // Spigot
+import org.spigotmc.CustomTimingsHandler; // Spigot
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 
-class CraftTask implements BukkitTask, Runnable {
+public class CraftTask implements BukkitTask, Runnable { // Spigot
 
     private volatile CraftTask next = null;
     public static final int ERROR = 0;
@@ -27,6 +29,7 @@ class CraftTask implements BukkitTask, Runnable {
     private final Plugin plugin;
     private final int id;
 
+    final CustomTimingsHandler timings; // Spigot
     CraftTask() {
         this(null, null, CraftTask.NO_REPEATING, CraftTask.NO_REPEATING);
     }
@@ -35,11 +38,26 @@ class CraftTask implements BukkitTask, Runnable {
         this(null, task, CraftTask.NO_REPEATING, CraftTask.NO_REPEATING);
     }
 
-    CraftTask(final Plugin plugin, final Runnable task, final int id, final long period) {
+    // Spigot start
+    public String timingName = null;
+    CraftTask(String timingName) {
+        this(timingName, null, null, -1, -1);
+    }
+    CraftTask(String timingName, final Runnable task) {
+        this(timingName, null, task, -1, -1);
+    }
+    CraftTask(String timingName, final Plugin plugin, final Runnable task, final int id, final long period) {
         this.plugin = plugin;
         this.task = task;
         this.id = id;
         this.period = period;
+        this.timingName = timingName == null && task == null ? "Unknown" : timingName;
+        timings = this.isSync() ? SpigotTimings.getPluginTaskTimings(this, period) : null;
+    }
+
+    CraftTask(final Plugin plugin, final Runnable task, final int id, final long period) {
+        this(null, plugin, task, id, period);
+    // Spigot end
     }
 
     public final int getTaskId() {
@@ -104,4 +122,13 @@ class CraftTask implements BukkitTask, Runnable {
         setPeriod(CraftTask.CANCEL);
         return true;
     }
+
+    // Spigot start
+    public String getTaskName() {
+        if (timingName != null) {
+            return timingName;
+        }
+        return task.getClass().getName();
+    }
+    // Spigot end
 }
