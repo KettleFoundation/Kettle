@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.chunkio;
 
 import java.io.IOException;
+
+import co.aikar.timings.Timing;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordIntPair;
 import net.minecraft.server.ChunkRegionLoader;
@@ -16,9 +18,9 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
 
     // async stuff
     public Chunk callStage1(QueuedChunk queuedChunk) throws RuntimeException {
-        try {
+        try (Timing ignored = queuedChunk.provider.world.timings.chunkIOStage1.startTimingIfSync()) { // Paper
             ChunkRegionLoader loader = queuedChunk.loader;
-            Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z);
+            Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z, (chunk) -> {});
             
             if (data != null) {
                 queuedChunk.compound = (NBTTagCompound) data[1];
@@ -33,24 +35,18 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
 
     // sync stuff
     public void callStage2(QueuedChunk queuedChunk, Chunk chunk) throws RuntimeException {
-        if (chunk == null) {
+        if (chunk == null || queuedChunk.provider.chunks.containsKey(ChunkCoordIntPair.a(queuedChunk.x, queuedChunk.z))) { // Paper - also call original if it was already loaded
             // If the chunk loading failed just do it synchronously (may generate)
-            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
+            queuedChunk.provider.getChunkAt(queuedChunk.x, queuedChunk.z, true, true); // Paper - actually call original if it was already loaded
             return;
         }
+        try (Timing ignored = queuedChunk.provider.world.timings.chunkIOStage2.startTimingIfSync()) { // Paper
 
-        queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompound("Level"), queuedChunk.world);
+        queuedChunk.loader.loadEntities(queuedChunk.compound.getCompound("Level"), chunk);
         chunk.setLastSaved(queuedChunk.provider.world.getTime());
         queuedChunk.provider.chunks.put(ChunkCoordIntPair.a(queuedChunk.x, queuedChunk.z), chunk);
         chunk.addEntities();
-
-        if (queuedChunk.provider.chunkGenerator != null) {
-            queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.startTiming(); // Spigot
-            queuedChunk.provider.chunkGenerator.recreateStructures(chunk, queuedChunk.x, queuedChunk.z);
-            queuedChunk.provider.world.timings.syncChunkLoadStructuresTimer.stopTiming(); // Spigot
-        }
-
-        chunk.loadNearby(queuedChunk.provider, queuedChunk.provider.chunkGenerator, false);
+        } // Paper
     }
 
     public void callStage3(QueuedChunk queuedChunk, Chunk chunk, Runnable runnable) throws RuntimeException {

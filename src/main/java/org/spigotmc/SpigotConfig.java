@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.server.AttributeRanged;
 import net.minecraft.server.GenericAttributes;
+import net.minecraft.server.IRegistry;
+import net.minecraft.server.MinecraftKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.StatisticList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -83,6 +83,7 @@ public class SpigotConfig
             MinecraftServer.getServer().server.getCommandMap().register( entry.getKey(), "Spigot", entry.getValue() );
         }
 
+        /* // Paper - Replace with our own
         if ( metrics == null )
         {
             try
@@ -94,6 +95,7 @@ public class SpigotConfig
                 Bukkit.getServer().getLogger().log( Level.SEVERE, "Could not start metrics service", ex );
             }
         }
+        */ // Paper end
     }
 
     static void readConfig(Class<?> clazz, Object instance)
@@ -170,6 +172,7 @@ public class SpigotConfig
     }
 
     public static int tabComplete;
+    public static boolean sendNamespaced;
     private static void tabComplete()
     {
         if ( version < 6 )
@@ -184,6 +187,7 @@ public class SpigotConfig
             }
         }
         tabComplete = getInt( "commands.tab-complete", 0 );
+        sendNamespaced = getBoolean( "commands.send-namespaced", true );
     }
 
     public static String whitelistMessage;
@@ -221,7 +225,7 @@ public class SpigotConfig
         restartScript = getString( "settings.restart-script", restartScript );
         restartMessage = transform( getString( "messages.restart", "Server is restarting" ) );
         commands.put( "restart", new RestartCommand( "restart" ) );
-        WatchdogThread.doStart( timeoutTime, restartOnCrash );
+        //WatchdogThread.doStart( timeoutTime, restartOnCrash ); // Paper - moved to PaperConfig
     }
 
     public static boolean bungee;
@@ -247,7 +251,7 @@ public class SpigotConfig
     }
 
     public static boolean disableStatSaving;
-    public static TObjectIntHashMap<String> forcedStats = new TObjectIntHashMap<String>();
+    public static Map<MinecraftKey, Integer> forcedStats = new HashMap<>();
     private static void stats()
     {
         disableStatSaving = getBoolean( "stats.disable-saving", false );
@@ -261,12 +265,19 @@ public class SpigotConfig
         {
             if ( section.isInt( name ) )
             {
-                if ( StatisticList.getStatistic(name) == null )
+                try
                 {
-                    Bukkit.getLogger().log(Level.WARNING, "Ignoring non existent stats.forced-stats " + name);
-                    continue;
+                    MinecraftKey key = new MinecraftKey( name );
+                    if ( IRegistry.CUSTOM_STAT.get( key ) == null )
+                    {
+                        Bukkit.getLogger().log(Level.WARNING, "Ignoring non existent stats.forced-stats " + name);
+                        continue;
+                    }
+                    forcedStats.put( key, section.getInt( name ) );
+                } catch (Exception ex)
+                {
+                    Bukkit.getLogger().log(Level.WARNING, "Ignoring invalid stats.forced-stats " + name);
                 }
-                forcedStats.put( name, section.getInt( name ) );
             }
         }
     }
@@ -279,8 +290,8 @@ public class SpigotConfig
     public static int playerSample;
     private static void playerSample()
     {
-        playerSample = getInt( "settings.sample-count", 12 );
-        System.out.println( "Server Ping Player Sample Count: " + playerSample );
+        playerSample = Math.max(getInt( "settings.sample-count", 12 ), 0); // Paper - Avoid negative counts
+        Bukkit.getLogger().log( Level.INFO, "Server Ping Player Sample Count: {0}", playerSample ); // Paper - Use logger
     }
 
     public static int playerShuffle;
@@ -302,12 +313,6 @@ public class SpigotConfig
     private static void silentCommandBlocks()
     {
         silentCommandBlocks = getBoolean( "commands.silent-commandblock-console", false );
-    }
-
-    public static boolean filterCreativeItems;
-    private static void filterCreativeItems()
-    {
-        filterCreativeItems = getBoolean( "settings.filter-creative-items", true );
     }
 
     public static Set<String> replaceCommands;
@@ -334,12 +339,6 @@ public class SpigotConfig
         saveUserCacheOnStopOnly = getBoolean( "settings.save-user-cache-on-stop-only", false );
     }
 
-    public static int intCacheLimit;
-    private static void intCacheLimit()
-    {
-        intCacheLimit = getInt( "settings.int-cache-limit", 1024 );
-    }
-
     public static double movedWronglyThreshold;
     private static void movedWronglyThreshold()
     {
@@ -358,11 +357,11 @@ public class SpigotConfig
     private static void attributeMaxes()
     {
         maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );
-        ( (AttributeRanged) GenericAttributes.maxHealth ).b = maxHealth;
+        ( (AttributeRanged) GenericAttributes.maxHealth ).maximum = maxHealth;
         movementSpeed = getDouble( "settings.attribute.movementSpeed.max", movementSpeed );
-        ( (AttributeRanged) GenericAttributes.MOVEMENT_SPEED ).b = movementSpeed;
+        ( (AttributeRanged) GenericAttributes.MOVEMENT_SPEED ).maximum = movementSpeed;
         attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
-        ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).b = attackDamage;
+        ( (AttributeRanged) GenericAttributes.ATTACK_DAMAGE ).maximum = attackDamage;
     }
 
     public static boolean debug;
@@ -386,11 +385,6 @@ public class SpigotConfig
         {
             Bukkit.getLogger().info( "Debug logging is disabled" );
         }
-    }
-
-    public static int itemDirtyTicks;
-    private static void itemDirtyTicks() {
-        itemDirtyTicks = getInt("settings.item-dirty-ticks", 20);
     }
 
     public static boolean disableAdvancementSaving;

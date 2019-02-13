@@ -184,23 +184,6 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
         setSlots(items, getInventory().items.size() + getInventory().armor.size(), getInventory().extraSlots.size());
     }
 
-    public int clear(int id, int data) {
-        int count = 0;
-        ItemStack[] items = getContents();
-
-        for (int i = 0; i < items.length; i++) {
-            ItemStack item = items[i];
-            if (item == null) continue;
-            if (id > -1 && item.getTypeId() != id) continue;
-            if (data > -1 && item.getData().getData() != data) continue;
-
-            count += item.getAmount();
-            setItem(i, null);
-        }
-
-        return count;
-    }
-
     @Override
     public HumanEntity getHolder() {
         return (HumanEntity) inventory.getOwner();
@@ -223,7 +206,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public void setItemInMainHandDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
 
     @Override
@@ -233,7 +216,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public void setItemInOffHandDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
 
     public float getHelmetDropChance() {
@@ -241,7 +224,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     }
 
     public void setHelmetDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
 
     public float getChestplateDropChance() {
@@ -249,7 +232,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     }
 
     public void setChestplateDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
 
     public float getLeggingsDropChance() {
@@ -257,7 +240,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     }
 
     public void setLeggingsDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
 
     public float getBootsDropChance() {
@@ -265,6 +248,56 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     }
 
     public void setBootsDropChance(float chance) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Cannot set drop chance for PlayerInventory");
     }
+
+    // Paper start
+    @Override
+    public ItemStack getItem(org.bukkit.inventory.EquipmentSlot slot) {
+        Preconditions.checkNotNull(slot, "slot");
+        switch (slot) {
+            case HAND:
+                return this.getItemInMainHand();
+            case OFF_HAND:
+                return this.getItemInOffHand();
+            case HEAD:
+                return this.getHelmet();
+            case CHEST:
+                return this.getChestplate();
+            case LEGS:
+                return this.getLeggings();
+            case FEET:
+                return this.getBoots();
+        }
+
+        throw new UnsupportedOperationException(slot.name());
+    }
+
+    @Override
+    public void setItem(org.bukkit.inventory.EquipmentSlot slot, ItemStack stack) {
+        Preconditions.checkNotNull(slot, "slot");
+        switch (slot) {
+            case HAND:
+                this.setItemInMainHand(stack);
+                return;
+            case OFF_HAND:
+                this.setItemInOffHand(stack);
+                return;
+            case HEAD:
+                this.setHelmet(stack);
+                return;
+            case CHEST:
+                this.setChestplate(stack);
+                return;
+            case LEGS:
+                this.setLeggings(stack);
+                return;
+            case FEET:
+                this.setBoots(stack);
+                return;
+        }
+
+        throw new UnsupportedOperationException(slot.name());
+    }
+    // Paper end
 }

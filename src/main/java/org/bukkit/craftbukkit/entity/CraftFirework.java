@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import net.minecraft.server.EntityFireworks;
+import net.minecraft.server.EntityLiving;
 import net.minecraft.server.ItemStack;
 import net.minecraft.server.Items;
 
@@ -9,9 +10,11 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class CraftFirework extends CraftEntity implements Firework {
 
@@ -24,15 +27,15 @@ public class CraftFirework extends CraftEntity implements Firework {
         ItemStack item = getHandle().getDataWatcher().get(EntityFireworks.FIREWORK_ITEM);
 
         if (item.isEmpty()) {
-            item = new ItemStack(Items.FIREWORKS);
+            item = new ItemStack(Items.FIREWORK_ROCKET);
             getHandle().getDataWatcher().set(EntityFireworks.FIREWORK_ITEM, item);
         }
 
         this.item = CraftItemStack.asCraftMirror(item);
 
         // Ensure the item is a firework...
-        if (this.item.getType() != Material.FIREWORK) {
-            this.item.setType(Material.FIREWORK);
+        if (this.item.getType() != Material.FIREWORK_ROCKET) {
+            this.item.setType(Material.FIREWORK_ROCKET);
         }
     }
 
@@ -70,4 +73,18 @@ public class CraftFirework extends CraftEntity implements Firework {
     public void detonate() {
         getHandle().expectedLifespan = 0;
     }
+
+    // Paper start
+
+    @Override
+    public UUID getSpawningEntity() {
+        return getHandle().spawningEntity;
+    }
+
+    @Override
+    public LivingEntity getBoostedEntity() {
+        EntityLiving boostedEntity = getHandle().getBoostedEntity();
+        return boostedEntity != null ? (LivingEntity) boostedEntity.getBukkitEntity() : null;
+    }
+    // Paper end
 }

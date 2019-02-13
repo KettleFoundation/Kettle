@@ -31,6 +31,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
     static final ItemMetaKey AMBIENT = new ItemMetaKey("Ambient", "ambient");
     static final ItemMetaKey DURATION = new ItemMetaKey("Duration", "duration");
     static final ItemMetaKey SHOW_PARTICLES = new ItemMetaKey("ShowParticles", "has-particles");
+    static final ItemMetaKey SHOW_ICON = new ItemMetaKey("ShowIcon", "has-icon");
     static final ItemMetaKey POTION_EFFECTS = new ItemMetaKey("CustomPotionEffects", "custom-effects");
     static final ItemMetaKey POTION_COLOR = new ItemMetaKey("CustomPotionColor", "custom-color");
     static final ItemMetaKey ID = new ItemMetaKey("Id", "potion-id");
@@ -69,7 +70,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
             customEffects = new ArrayList<PotionEffect>(length);
 
             for (int i = 0; i < length; i++) {
-                NBTTagCompound effect = list.get(i);
+                NBTTagCompound effect = list.getCompound(i);
                 PotionEffectType type = PotionEffectType.getById(effect.getByte(ID.NBT));
                 // SPIGOT-4047: Vanilla just disregards these
                 if (type == null) {
@@ -79,8 +80,9 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
                 int amp = effect.getByte(AMPLIFIER.NBT);
                 int duration = effect.getInt(DURATION.NBT);
                 boolean ambient = effect.getBoolean(AMBIENT.NBT);
-                boolean particles = effect.getBoolean(SHOW_PARTICLES.NBT);
-                customEffects.add(new PotionEffect(type, duration, amp, ambient, particles));
+                boolean particles = tag.hasKeyOfType(SHOW_PARTICLES.NBT, CraftMagicNumbers.NBT.TAG_BYTE) ? effect.getBoolean(SHOW_PARTICLES.NBT) : true;
+                boolean icon = tag.hasKeyOfType(SHOW_ICON.NBT, CraftMagicNumbers.NBT.TAG_BYTE) ? effect.getBoolean(SHOW_ICON.NBT) : particles;
+                customEffects.add(new PotionEffect(type, duration, amp, ambient, particles, icon));
             }
         }
     }
@@ -128,6 +130,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
                 effectData.setInt(DURATION.NBT, effect.getDuration());
                 effectData.setBoolean(AMBIENT.NBT, effect.isAmbient());
                 effectData.setBoolean(SHOW_PARTICLES.NBT, effect.hasParticles());
+                effectData.setBoolean(SHOW_ICON.NBT, effect.hasIcon());
                 effectList.add(effectData);
             }
         }

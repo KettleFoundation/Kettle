@@ -5,8 +5,10 @@ import net.minecraft.server.ScoreboardObjective;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Score;
 
 final class CraftObjective extends CraftScoreboardComponent implements Objective {
@@ -32,15 +34,15 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
     public String getDisplayName() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        return objective.getDisplayName();
+        return CraftChatMessage.fromComponent(objective.getDisplayName());
     }
 
     public void setDisplayName(String displayName) throws IllegalStateException, IllegalArgumentException {
         Validate.notNull(displayName, "Display name cannot be null");
-        Validate.isTrue(displayName.length() <= 32, "Display name '" + displayName + "' is longer than the limit of 32 characters");
+        Validate.isTrue(displayName.length() <= 128, "Display name '" + displayName + "' is longer than the limit of 128 characters");
         CraftScoreboard scoreboard = checkState();
 
-        objective.setDisplayName(displayName);
+        objective.setDisplayName(CraftChatMessage.fromString(displayName)[0]); // SPIGOT-4112: not nullable
     }
 
     public String getCriteria() throws IllegalStateException {
@@ -84,6 +86,21 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
         return null;
     }
 
+    @Override
+    public void setRenderType(RenderType renderType) throws IllegalStateException {
+        Validate.notNull(renderType, "RenderType cannot be null");
+        CraftScoreboard scoreboard = checkState();
+
+        this.objective.setRenderType(CraftScoreboardTranslations.fromBukkitRender(renderType));
+    }
+
+    @Override
+    public RenderType getRenderType() throws IllegalStateException {
+        CraftScoreboard scoreboard = checkState();
+
+        return CraftScoreboardTranslations.toBukkitRender(this.objective.getRenderType());
+    }
+
     public Score getScore(OfflinePlayer player) throws IllegalArgumentException, IllegalStateException {
         Validate.notNull(player, "Player cannot be null");
         CraftScoreboard scoreboard = checkState();
@@ -93,7 +110,7 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
 
     public Score getScore(String entry) throws IllegalArgumentException, IllegalStateException {
         Validate.notNull(entry, "Entry cannot be null");
-        if (entry.length() > 40) throw new IllegalArgumentException("Entry cannot be longer than 40 characters!"); // Spigot
+        Validate.isTrue(entry.length() <= 40, "Score '" + entry + "' is longer than the limit of 40 characters");
         CraftScoreboard scoreboard = checkState();
 
         return new CraftScore(this, entry);
@@ -111,7 +128,7 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
         if (getScoreboard().board.getObjective(objective.getName()) == null) {
             throw new IllegalStateException("Unregistered scoreboard component");
         }
-        
+
         return getScoreboard();
     }
 

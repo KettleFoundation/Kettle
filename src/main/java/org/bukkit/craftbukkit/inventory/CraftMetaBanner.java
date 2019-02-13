@@ -47,13 +47,13 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
         NBTTagCompound entityTag = tag.getCompound("BlockEntityTag");
 
-        base = entityTag.hasKey(BASE.NBT) ? DyeColor.getByDyeData((byte) entityTag.getInt(BASE.NBT)) : null;
+        base = entityTag.hasKey(BASE.NBT) ? DyeColor.getByWoolData((byte) entityTag.getInt(BASE.NBT)) : null;
 
         if (entityTag.hasKey(PATTERNS.NBT)) {
             NBTTagList patterns = entityTag.getList(PATTERNS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
             for (int i = 0; i < Math.min(patterns.size(), 20); i++) {
-                NBTTagCompound p = patterns.get(i);
-                this.patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt(COLOR.NBT)), PatternType.getByIdentifier(p.getString(PATTERN.NBT))));
+                NBTTagCompound p = patterns.getCompound(i);
+                this.patterns.add(new Pattern(DyeColor.getByWoolData((byte) p.getInt(COLOR.NBT)), PatternType.getByIdentifier(p.getString(PATTERN.NBT))));
             }
         }
     }
@@ -63,7 +63,7 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
         String baseStr = SerializableMeta.getString(map, BASE.BUKKIT, true);
         if (baseStr != null) {
-            base = DyeColor.valueOf(baseStr);
+            base = DyeColor.legacyValueOf(baseStr);
         }
 
         Iterable<?> rawPatternList = SerializableMeta.getObject(Iterable.class, map, PATTERNS.BUKKIT, true);
@@ -84,14 +84,14 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
         NBTTagCompound entityTag = new NBTTagCompound();
         if (base != null) {
-            entityTag.setInt(BASE.NBT, base.getDyeData());
+            entityTag.setInt(BASE.NBT, base.getWoolData());
         }
 
         NBTTagList newPatterns = new NBTTagList();
 
         for (Pattern p : patterns) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setInt(COLOR.NBT, p.getColor().getDyeData());
+            compound.setInt(COLOR.NBT, p.getColor().getWoolData());
             compound.setString(PATTERN.NBT, p.getPattern().getIdentifier());
             newPatterns.add(compound);
         }
@@ -198,7 +198,43 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
     @Override
     boolean applicableTo(Material type) {
-        return type == Material.BANNER;
+        switch (type) {
+            case BLACK_BANNER:
+            case BLACK_WALL_BANNER:
+            case BLUE_BANNER:
+            case BLUE_WALL_BANNER:
+            case BROWN_BANNER:
+            case BROWN_WALL_BANNER:
+            case CYAN_BANNER:
+            case CYAN_WALL_BANNER:
+            case GRAY_BANNER:
+            case GRAY_WALL_BANNER:
+            case GREEN_BANNER:
+            case GREEN_WALL_BANNER:
+            case LIGHT_BLUE_BANNER:
+            case LIGHT_BLUE_WALL_BANNER:
+            case LIGHT_GRAY_BANNER:
+            case LIGHT_GRAY_WALL_BANNER:
+            case LIME_BANNER:
+            case LIME_WALL_BANNER:
+            case MAGENTA_BANNER:
+            case MAGENTA_WALL_BANNER:
+            case ORANGE_BANNER:
+            case ORANGE_WALL_BANNER:
+            case PINK_BANNER:
+            case PINK_WALL_BANNER:
+            case PURPLE_BANNER:
+            case PURPLE_WALL_BANNER:
+            case RED_BANNER:
+            case RED_WALL_BANNER:
+            case WHITE_BANNER:
+            case WHITE_WALL_BANNER:
+            case YELLOW_BANNER:
+            case YELLOW_WALL_BANNER:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override

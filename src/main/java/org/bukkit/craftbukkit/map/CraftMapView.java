@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import net.minecraft.server.DimensionManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.WorldMap;
+import net.minecraft.server.WorldServer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -28,11 +31,12 @@ public final class CraftMapView implements MapView {
         addRenderer(new CraftMapRenderer(this, worldMap));
     }
 
-    public short getId() {
-        String text = worldMap.id;
+    @Override
+    public int getId() {
+        String text = worldMap.getId();
         if (text.startsWith("map_")) {
             try {
-                return Short.parseShort(text.substring("map_".length()));
+                return Integer.parseInt(text.substring("map_".length()));
             }
             catch (NumberFormatException ex) {
                 throw new IllegalStateException("Map has non-numeric ID");
@@ -55,17 +59,14 @@ public final class CraftMapView implements MapView {
     }
 
     public World getWorld() {
-        byte dimension = worldMap.map;
-        for (World world : Bukkit.getServer().getWorlds()) {
-            if (((CraftWorld) world).getHandle().dimension == dimension) {
-                return world;
-            }
-        }
-        return null;
+        DimensionManager dimension = worldMap.map;
+        WorldServer world = MinecraftServer.getServer().getWorldServer(dimension);
+
+        return (world == null) ? null : world.getWorld();
     }
 
     public void setWorld(World world) {
-        worldMap.map = (byte) ((CraftWorld) world).getHandle().dimension;
+        worldMap.map = ((CraftWorld) world).getHandle().dimension;
     }
 
     public int getCenterX() {

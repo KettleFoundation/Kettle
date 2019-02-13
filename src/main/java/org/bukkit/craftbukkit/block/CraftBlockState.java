@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.server.BlockPosition;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -7,8 +8,10 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.MaterialData;
@@ -16,28 +19,22 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
+import net.minecraft.server.GeneratorAccess;
 import net.minecraft.server.IBlockData;
 
 public class CraftBlockState implements BlockState {
     private final CraftWorld world;
     private final CraftChunk chunk;
-    private final int x;
-    private final int y;
-    private final int z;
-    protected int type;
-    protected MaterialData data;
+    private final BlockPosition position;
+    protected IBlockData data;
     protected int flag;
 
     public CraftBlockState(final Block block) {
         this.world = (CraftWorld) block.getWorld();
-        this.x = block.getX();
-        this.y = block.getY();
-        this.z = block.getZ();
-        this.type = block.getTypeId();
+        this.position = ((CraftBlock) block).getPosition();
+        this.data = ((CraftBlock) block).getNMS();
         this.chunk = (CraftChunk) block.getChunk();
         this.flag = 3;
-
-        createData(block.getData());
     }
 
     public CraftBlockState(final Block block, int flag) {
@@ -47,17 +44,17 @@ public class CraftBlockState implements BlockState {
 
     public CraftBlockState(Material material) {
         world = null;
-        type = material.getId();
+        data = CraftMagicNumbers.getBlock(material).getBlockData();
         chunk = null;
-        x = y = z = 0;
+        position = BlockPosition.ZERO;
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z));
+    public static CraftBlockState getBlockState(GeneratorAccess world, net.minecraft.server.BlockPosition pos) {
+        return new CraftBlockState(CraftBlock.at(world, pos));
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z, int flag) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z), flag);
+    public static CraftBlockState getBlockState(net.minecraft.server.World world, net.minecraft.server.BlockPosition pos, int flag) {
+        return new CraftBlockState(world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), flag);
     }
 
     public World getWorld() {
@@ -66,15 +63,15 @@ public class CraftBlockState implements BlockState {
     }
 
     public int getX() {
-        return x;
+        return position.getX();
     }
 
     public int getY() {
-        return y;
+        return position.getY();
     }
 
     public int getZ() {
-        return z;
+        return position.getZ();
     }
 
     public Chunk getChunk() {
@@ -82,14 +79,37 @@ public class CraftBlockState implements BlockState {
         return chunk;
     }
 
+    public void setData(IBlockData data) {
+        this.data = data;
+    }
+
+    public BlockPosition getPosition() {
+        return this.position;
+    }
+
+    public IBlockData getHandle() {
+        return this.data;
+    }
+
+    @Override
+    public BlockData getBlockData() {
+        return CraftBlockData.fromData(data);
+    }
+
+    @Override
+    public void setBlockData(BlockData data) {
+        Preconditions.checkArgument(data != null, "BlockData cannot be null");
+        this.data = ((CraftBlockData) data).getState();
+    }
+
     public void setData(final MaterialData data) {
-        Material mat = getType();
+        Material mat = CraftMagicNumbers.getMaterial(this.data).getItemType();
 
         if ((mat == null) || (mat.getData() == null)) {
-            this.data = data;
+            this.data = CraftMagicNumbers.getBlock(data);
         } else {
             if ((data.getClass() == mat.getData()) || (data.getClass() == MaterialData.class)) {
-                this.data = data;
+                this.data = CraftMagicNumbers.getBlock(data);
             } else {
                 throw new IllegalArgumentException("Provided data is not of type "
                         + mat.getData().getName() + ", found " + data.getClass().getName());
@@ -98,24 +118,20 @@ public class CraftBlockState implements BlockState {
     }
 
     public MaterialData getData() {
-        return data;
+        return CraftMagicNumbers.getMaterial(data);
     }
 
     public void setType(final Material type) {
-        setTypeId(type.getId());
-    }
+        Preconditions.checkArgument(type != null, "Material cannot be null");
+        Preconditions.checkArgument(type.isBlock(), "Material must be a block!");
 
-    public boolean setTypeId(final int type) {
-        if (this.type != type) {
-            this.type = type;
-
-            createData((byte) 0);
+        if (this.getType() != type) {
+            this.data = CraftMagicNumbers.getBlock(type).getBlockData();
         }
-        return true;
     }
 
     public Material getType() {
-        return Material.getMaterial(getTypeId());
+        return CraftMagicNumbers.getMaterial(data.getBlock());
     }
 
     public void setFlag(int flag) {
@@ -126,17 +142,13 @@ public class CraftBlockState implements BlockState {
         return flag;
     }
 
-    public int getTypeId() {
-        return type;
-    }
-
     public byte getLightLevel() {
         return getBlock().getLightLevel();
     }
 
-    public Block getBlock() {
+    public CraftBlock getBlock() {
         requirePlaced();
-        return world.getBlockAt(x, y, z);
+        return CraftBlock.at(world.getHandle(), position);
     }
 
     public boolean update() {
@@ -151,7 +163,7 @@ public class CraftBlockState implements BlockState {
         if (!isPlaced()) {
             return true;
         }
-        Block block = getBlock();
+        CraftBlock block = getBlock();
 
         if (block.getType() != getType()) {
             if (!force) {
@@ -159,47 +171,37 @@ public class CraftBlockState implements BlockState {
             }
         }
 
-        BlockPosition pos = new BlockPosition(x, y, z);
-        IBlockData newBlock = CraftMagicNumbers.getBlock(getType()).fromLegacyData(getRawData());
-        block.setTypeIdAndData(getTypeId(), getRawData(), applyPhysics);
+        IBlockData newBlock = this.data;
+        block.setTypeAndData(newBlock, applyPhysics);
         world.getHandle().notify(
-                pos,
-                CraftMagicNumbers.getBlock(block).fromLegacyData(block.getData()),
+                position,
+                block.getNMS(),
                 newBlock,
                 3
         );
 
         // Update levers etc
-        if (applyPhysics && getData() instanceof Attachable) {
-            world.getHandle().applyPhysics(pos.shift(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock(), false);
+        if (false && applyPhysics && getData() instanceof Attachable) { // Call does not map to new API
+            world.getHandle().applyPhysics(position.shift(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
         }
 
         return true;
     }
 
-    private void createData(final byte data) {
-        Material mat = getType();
-        if (mat == null || mat.getData() == null) {
-            this.data = new MaterialData(type, data);
-        } else {
-            this.data = mat.getNewData(data);
-        }
-    }
-
     public byte getRawData() {
-        return data.getData();
+        return CraftMagicNumbers.toLegacyData(data);
     }
 
     public Location getLocation() {
-        return new Location(world, x, y, z);
+        return new Location(world, getX(), getY(), getZ());
     }
 
     public Location getLocation(Location loc) {
         if (loc != null) {
             loc.setWorld(world);
-            loc.setX(x);
-            loc.setY(y);
-            loc.setZ(z);
+            loc.setX(getX());
+            loc.setY(getY());
+            loc.setZ(getZ());
             loc.setYaw(0);
             loc.setPitch(0);
         }
@@ -208,7 +210,7 @@ public class CraftBlockState implements BlockState {
     }
 
     public void setRawData(byte data) {
-        this.data.setData(data);
+        this.data = CraftMagicNumbers.getBlock(getType(), data);
     }
 
     @Override
@@ -223,16 +225,7 @@ public class CraftBlockState implements BlockState {
         if (this.world != other.world && (this.world == null || !this.world.equals(other.world))) {
             return false;
         }
-        if (this.x != other.x) {
-            return false;
-        }
-        if (this.y != other.y) {
-            return false;
-        }
-        if (this.z != other.z) {
-            return false;
-        }
-        if (this.type != other.type) {
+        if (this.position != other.position && (this.position == null || !this.position.equals(other.position))) {
             return false;
         }
         if (this.data != other.data && (this.data == null || !this.data.equals(other.data))) {
@@ -245,10 +238,7 @@ public class CraftBlockState implements BlockState {
     public int hashCode() {
         int hash = 7;
         hash = 73 * hash + (this.world != null ? this.world.hashCode() : 0);
-        hash = 73 * hash + this.x;
-        hash = 73 * hash + this.y;
-        hash = 73 * hash + this.z;
-        hash = 73 * hash + this.type;
+        hash = 73 * hash + (this.position != null ? this.position.hashCode() : 0);
         hash = 73 * hash + (this.data != null ? this.data.hashCode() : 0);
         return hash;
     }

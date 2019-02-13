@@ -7,8 +7,8 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.projectiles.ProjectileSource;
 
 public class CraftArrow extends AbstractProjectile implements Arrow {
@@ -26,6 +26,17 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
         return getHandle().knockbackStrength;
     }
 
+    @Override
+    public double getDamage() {
+        return getHandle().getDamage();
+    }
+
+    @Override
+    public void setDamage(double damage) {
+        Preconditions.checkArgument(damage >= 0, "Damage must be positive");
+        getHandle().setDamage(damage);
+    }
+
     public boolean isCritical() {
         return getHandle().isCritical();
     }
@@ -39,10 +50,10 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
     }
 
     public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof LivingEntity) {
-            getHandle().shooter = ((CraftLivingEntity) shooter).getHandle();
+        if (shooter instanceof Entity) {
+            getHandle().setShooter(((CraftEntity) shooter).getHandle());
         } else {
-            getHandle().shooter = null;
+            getHandle().setShooter(null);
         }
         getHandle().projectileSource = shooter;
     }
@@ -59,7 +70,7 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
         }
 
         EntityArrow handle = getHandle();
-        return getWorld().getBlockAt(handle.h, handle.at, handle.au); // PAIL: rename tileX, tileY, tileZ
+        return getWorld().getBlockAt(handle.tileX, handle.tileY, handle.tileZ);
     }
 
     @Override
@@ -71,6 +82,14 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
     public void setPickupStatus(PickupStatus status) {
         Preconditions.checkNotNull(status, "status");
         getHandle().fromPlayer = EntityArrow.PickupStatus.a(status.ordinal());
+    }
+
+    @Override
+    public void setTicksLived(int value) {
+        super.setTicksLived(value);
+
+        // Second field for EntityArrow
+        getHandle().despawnCounter = value;
     }
 
     @Override
@@ -93,13 +112,13 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
         @Override
         public double getDamage()
         {
-            return getHandle().k();
+            return getHandle().getDamage();
         }
 
         @Override
         public void setDamage(double damage)
         {
-            getHandle().c( damage );
+            getHandle().setDamage( damage );
         }
     };
 

@@ -46,6 +46,16 @@ public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway>
     }
 
     @Override
+    public long getAge() {
+        return this.getSnapshot().age;
+    }
+
+    @Override
+    public void setAge(long age) {
+        this.getSnapshot().age = age;
+    }
+
+    @Override
     public void applyTo(TileEntityEndGateway endGateway) {
         super.applyTo(endGateway);
 

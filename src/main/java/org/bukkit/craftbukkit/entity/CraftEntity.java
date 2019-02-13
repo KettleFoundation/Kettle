@@ -9,13 +9,17 @@ import java.util.UUID;
 
 import net.minecraft.server.*;
 
+import org.bukkit.Chunk;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.CraftBlock;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.metadata.MetadataValue;
@@ -25,6 +29,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.ServerOperator;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 public abstract class CraftEntity implements org.bukkit.entity.Entity {
@@ -37,6 +42,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     public CraftEntity(final CraftServer server, final Entity entity) {
         this.server = server;
         this.entity = entity;
+    }
+
+    @Override
+    public Chunk getChunk() {
+        net.minecraft.server.Chunk currentChunk = entity.getCurrentChunk();
+        return currentChunk != null ? currentChunk.bukkitChunk : getLocation().getChunk();
     }
 
     public static CraftEntity getEntity(CraftServer server, Entity entity) {
@@ -52,6 +63,14 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Water Animals
             else if (entity instanceof EntityWaterAnimal) {
                 if (entity instanceof EntitySquid) { return new CraftSquid(server, (EntitySquid) entity); }
+                else if (entity instanceof EntityFish) {
+                    if (entity instanceof EntityCod) { return new CraftCod(server, (EntityCod) entity); }
+                    else if (entity instanceof EntityPufferFish) { return new CraftPufferFish(server, (EntityPufferFish) entity); }
+                    else if (entity instanceof EntitySalmon) { return new CraftSalmon(server, (EntitySalmon) entity); }
+                    else if (entity instanceof EntityTropicalFish) { return new CraftTropicalFish(server, (EntityTropicalFish) entity); }
+                    else { return new CraftFish(server, (EntityFish) entity); }
+                }
+                else if (entity instanceof EntityDolphin) { return new CraftDolphin(server, (EntityDolphin) entity); }
                 else { return new CraftWaterMob(server, (EntityWaterAnimal) entity); }
             }
             else if (entity instanceof EntityCreature) {
@@ -80,6 +99,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     }
                     else if (entity instanceof EntityRabbit) { return new CraftRabbit(server, (EntityRabbit) entity); }
                     else if (entity instanceof EntityPolarBear) { return new CraftPolarBear(server, (EntityPolarBear) entity); }
+                    else if (entity instanceof EntityTurtle) { return new CraftTurtle(server, (EntityTurtle) entity); }
                     else  { return new CraftAnimals(server, (EntityAnimal) entity); }
                 }
                 // Monsters
@@ -88,6 +108,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                         if (entity instanceof EntityPigZombie) { return new CraftPigZombie(server, (EntityPigZombie) entity); }
                         else if (entity instanceof EntityZombieHusk) { return new CraftHusk(server, (EntityZombieHusk) entity); }
                         else if (entity instanceof EntityZombieVillager) { return new CraftVillagerZombie(server, (EntityZombieVillager) entity); }
+                        else if (entity instanceof EntityDrowned) { return new CraftDrowned(server, (EntityDrowned) entity); }
                         else { return new CraftZombie(server, (EntityZombie) entity); }
                     }
                     else if (entity instanceof EntityCreeper) { return new CraftCreeper(server, (EntityCreeper) entity); }
@@ -140,6 +161,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Flying
             else if (entity instanceof EntityFlying) {
                 if (entity instanceof EntityGhast) { return new CraftGhast(server, (EntityGhast) entity); }
+                else if (entity instanceof EntityPhantom) { return new CraftPhantom(server, (EntityPhantom) entity); }
                 else { return new CraftFlying(server, (EntityFlying) entity); }
             }
             else if (entity instanceof EntityEnderDragon) {
@@ -164,7 +186,10 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         	else { return new CraftArrow(server, (EntityArrow) entity); }
         }
         else if (entity instanceof EntitySpectralArrow) { return new CraftSpectralArrow(server, (EntitySpectralArrow) entity); }
-        else if (entity instanceof EntityArrow) { return new CraftArrow(server, (EntityArrow) entity); }
+        else if (entity instanceof EntityArrow) {
+            if (entity instanceof EntityThrownTrident) { return new CraftTrident(server, (EntityThrownTrident) entity); }
+            else { return new CraftArrow(server, (EntityArrow) entity); }
+        }
         else if (entity instanceof EntityBoat) { return new CraftBoat(server, (EntityBoat) entity); }
         else if (entity instanceof EntityProjectile) {
             if (entity instanceof EntityEgg) { return new CraftEgg(server, (EntityEgg) entity); }
@@ -186,7 +211,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         else if (entity instanceof EntityEnderSignal) { return new CraftEnderSignal(server, (EntityEnderSignal) entity); }
         else if (entity instanceof EntityEnderCrystal) { return new CraftEnderCrystal(server, (EntityEnderCrystal) entity); }
-        else if (entity instanceof EntityFishingHook) { return new CraftFish(server, (EntityFishingHook) entity); }
+        else if (entity instanceof EntityFishingHook) { return new CraftFishHook(server, (EntityFishingHook) entity); }
         else if (entity instanceof EntityItem) { return new CraftItem(server, (EntityItem) entity); }
         else if (entity instanceof EntityWeather) {
             if (entity instanceof EntityLightning) { return new CraftLightningStrike(server, (EntityLightning) entity); }
@@ -240,11 +265,43 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     public void setVelocity(Vector velocity) {
         Preconditions.checkArgument(velocity != null, "velocity");
         velocity.checkFinite();
+
+        // Paper start - Warn server owners when plugins try to set super high velocities
+        if (!(this instanceof org.bukkit.entity.Projectile) && isUnsafeVelocity(velocity)) {
+            CraftServer.excessiveVelEx = new Exception("Excessive velocity set detected: tried to set velocity of entity " + entity.getName() + " id #" + getEntityId() + " to (" + velocity.getX() + "," + velocity.getY() + "," + velocity.getZ() + ").");
+        }
+        // Paper end
+
         entity.motX = velocity.getX();
         entity.motY = velocity.getY();
         entity.motZ = velocity.getZ();
         entity.velocityChanged = true;
     }
+
+    // Paper start
+    /**
+     * Checks if the given velocity is not necessarily safe in all situations.
+     * This function returning true does not mean the velocity is dangerous or to be avoided, only that it may be
+     * a detriment to performance on the server.
+     *
+     * It is not to be used as a hard rule of any sort.
+     * Paper only uses it to warn server owners in watchdog crashes.
+     *
+     * @param vel incoming velocity to check
+     * @return if the velocity has the potential to be a performance detriment
+     */
+    private static boolean isUnsafeVelocity(Vector vel) {
+        final double x = vel.getX();
+        final double y = vel.getY();
+        final double z = vel.getZ();
+
+        if (x > 4 || x < -4 || y > 4 || y < -4 || z > 4 || z < -4) {
+            return true;
+        }
+
+        return false;
+    }
+    // Paper end
 
     @Override
     public double getHeight() {
@@ -254,6 +311,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     @Override
     public double getWidth() {
         return getHandle().width;
+    }
+
+    @Override
+    public BoundingBox getBoundingBox() {
+        AxisAlignedBB bb = getHandle().getBoundingBox();
+        return new BoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ);
     }
 
     public boolean isOnGround() {
@@ -282,14 +345,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         // If this entity is riding another entity, we must dismount before teleporting.
         entity.stopRiding();
 
-        // Spigot start
+        // Let the server handle cross world teleports
         if (!location.getWorld().equals(getWorld())) {
-          entity.teleportTo(location, cause.equals(TeleportCause.NETHER_PORTAL));
-          return true;
+            entity.teleportTo(location, false);
+            return true;
         }
 
-        // entity.world = ((CraftWorld) location.getWorld()).getHandle();
-        // Spigot end
         // entity.setLocation() throws no event, and so cannot be cancelled
         entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         // SPIGOT-619: Force sync head rotation also
@@ -347,6 +408,16 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
     public Server getServer() {
         return server;
+    }
+
+    @Override
+    public boolean isPersistent() {
+        return entity.persist;
+    }
+
+    @Override
+    public void setPersistent(boolean persistent) {
+        entity.persist = persistent;
     }
 
     public Vector getMomentum() {
@@ -471,14 +542,15 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             return false;
         }
         final CraftEntity other = (CraftEntity) obj;
-        return (this.getEntityId() == other.getEntityId());
+        return (this.getHandle() == other.getHandle()); // Paper - while logically the same, this is clearer
     }
 
+    // Paper - Fix hashCode. entity ID's are not static.
+    // A CraftEntity can change reference to a new entity with a new ID, and hash codes should never change
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 29 * hash + this.getEntityId();
-        return hash;
+        return getUniqueId().hashCode();
+        // Paper end
     }
 
     public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
@@ -515,27 +587,28 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             return null;
         }
 
-        return getHandle().bJ().getBukkitEntity(); // PAIL: rename getVehicle() -> getRootVehicle(), bJ() -> getVehicle()
+        return getHandle().getVehicle().getBukkitEntity();
     }
 
     @Override
     public void setCustomName(String name) {
-        if (name == null) {
-            name = "";
+        // sane limit for name length
+        if (name != null && name.length() > 256) {
+            name = name.substring(0, 256);
         }
 
-        getHandle().setCustomName(name);
+        getHandle().setCustomName(CraftChatMessage.fromStringOrNull(name));
     }
 
     @Override
     public String getCustomName() {
-        String name = getHandle().getCustomName();
+        IChatBaseComponent name = getHandle().getCustomName();
 
-        if (name == null || name.length() == 0) {
+        if (name == null) {
             return null;
         }
 
-        return name;
+        return CraftChatMessage.fromComponent(name);
     }
 
     @Override
@@ -560,7 +633,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
     @Override
     public String getName() {
-        return getHandle().getName();
+        return CraftChatMessage.fromComponent(getHandle().getDisplayName(), EnumChatFormat.WHITE);
     }
 
     @Override
@@ -702,6 +775,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return PistonMoveReaction.getById(getHandle().getPushReaction().ordinal());
     }
 
+    @Override
+    public BlockFace getFacing() {
+        // Use this method over getDirection because it handles boats and minecarts.
+        return CraftBlock.notchToBlockFace(getHandle().getAdjustedDirection());
+    }
+
     protected NBTTagCompound save() {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
 
@@ -754,4 +833,17 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return spigot;
     }
     // Spigot end
+
+    // Paper start
+    @Override
+    public Location getOrigin() {
+        Location origin = getHandle().origin;
+        return origin == null ? null : origin.clone();
+    }
+
+    @Override
+    public boolean fromMobSpawner() {
+        return getHandle().spawnedViaMobSpawner;
+    }
+    // Paper end
 }

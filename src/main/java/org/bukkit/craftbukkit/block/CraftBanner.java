@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.server.EnumColor;
@@ -30,13 +31,15 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
     public void load(TileEntityBanner banner) {
         super.load(banner);
 
-        base = DyeColor.getByDyeData((byte) banner.color.getInvColorIndex());
+        if (banner.color != null) {
+            base = DyeColor.getByWoolData((byte) banner.color.getColorIndex());
+        }
         patterns = new ArrayList<Pattern>();
 
         if (banner.patterns != null) {
             for (int i = 0; i < banner.patterns.size(); i++) {
                 NBTTagCompound p = (NBTTagCompound) banner.patterns.get(i);
-                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
+                patterns.add(new Pattern(DyeColor.getByWoolData((byte) p.getInt("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
             }
         }
     }
@@ -48,6 +51,7 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
 
     @Override
     public void setBaseColor(DyeColor color) {
+        Preconditions.checkArgument(color != null, "color");
         this.base = color;
     }
 
@@ -90,13 +94,13 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
     public void applyTo(TileEntityBanner banner) {
         super.applyTo(banner);
 
-        banner.color = EnumColor.fromInvColorIndex(base.getDyeData());
+        banner.color = EnumColor.fromColorIndex(base.getWoolData());
 
         NBTTagList newPatterns = new NBTTagList();
 
         for (Pattern p : patterns) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setInt("Color", p.getColor().getDyeData());
+            compound.setInt("Color", p.getColor().getWoolData());
             compound.setString("Pattern", p.getPattern().getIdentifier());
             newPatterns.add(compound);
         }

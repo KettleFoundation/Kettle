@@ -1,63 +1,45 @@
 package org.bukkit.craftbukkit.util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
-import net.minecraft.server.Block;
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.IBlockData;
+import net.minecraft.server.World;
 
-import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.block.CraftBlockState;
 
-public class BlockStateListPopulator {
+public class BlockStateListPopulator extends DummyGeneratorAccess {
     private final World world;
-    private final List<BlockState> list;
+    private final LinkedHashMap<BlockPosition, CraftBlockState> list;
 
     public BlockStateListPopulator(World world) {
-        this(world, new ArrayList<BlockState>());
+        this(world, new LinkedHashMap<>());
     }
 
-    public BlockStateListPopulator(World world, List<BlockState> list) {
+    public BlockStateListPopulator(World world, LinkedHashMap<BlockPosition, CraftBlockState> list) {
         this.world = world;
         this.list = list;
     }
 
-    public void setTypeAndData(int x, int y, int z, Block block, int data, int light) {
-        BlockState state = world.getBlockAt(x, y, z).getState();
-        state.setTypeId(Block.getId(block));
-        state.setRawData((byte) data);
-        list.add(state);
-    }
-    public void setTypeId(int x, int y, int z, int type) {
-        BlockState state = world.getBlockAt(x, y, z).getState();
-        state.setTypeId(type);
-        list.add(state);
-    }
-
-    public void setTypeUpdate(int x, int y, int z, Block block) {
-        this.setType(x, y, z, block);
-    }    
-    
-    public void setTypeUpdate(BlockPosition position, IBlockData data) { 
-        setTypeAndData(position.getX(), position.getY(), position.getZ(), data.getBlock(), data.getBlock().toLegacyData(data), 0);
-        
-    }
-
-    public void setType(int x, int y, int z, Block block) {
-        BlockState state = world.getBlockAt(x, y, z).getState();
-        state.setTypeId(Block.getId(block));
-        list.add(state);
+    @Override
+    public boolean setTypeAndData(BlockPosition position, IBlockData data, int flag) {
+        CraftBlockState state = CraftBlockState.getBlockState(world, position, flag);
+        state.setData(data);
+        list.put(position, state);
+        return true;
     }
 
     public void updateList() {
-        for (BlockState state : list) {
+        for (BlockState state : list.values()) {
             state.update(true);
         }
     }
 
-    public List<BlockState> getList() {
-        return list;
+    public List<CraftBlockState> getList() {
+        return new ArrayList<>(list.values());
     }
 
     public World getWorld() {

@@ -31,7 +31,7 @@ public class SpigotCommand extends Command {
 
             MinecraftServer console = MinecraftServer.getServer();
             org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings"));
-            for (WorldServer world : console.worlds) {
+            for (WorldServer world : console.getWorlds()) {
                 world.spigotConfig.init();
             }
             console.server.reloadCount++;

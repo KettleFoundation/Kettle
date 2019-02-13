@@ -25,6 +25,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
+import org.bukkit.craftbukkit.util.CraftLegacy;
 
 public class CraftInventory implements Inventory {
     protected final IInventory inventory;
@@ -42,7 +44,7 @@ public class CraftInventory implements Inventory {
     }
 
     public String getName() {
-        return getInventory().getName();
+        return CraftChatMessage.fromComponent(getInventory().getDisplayName());
     }
 
     public ItemStack getItem(int index) {
@@ -96,18 +98,15 @@ public class CraftInventory implements Inventory {
         getInventory().setItem(index, CraftItemStack.asNMSCopy(item));
     }
 
-    public boolean contains(int materialId) {
+    public boolean contains(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         for (ItemStack item : getStorageContents()) {
-            if (item != null && item.getTypeId() == materialId) {
+            if (item != null && item.getType() == material) {
                 return true;
             }
         }
         return false;
-    }
-
-    public boolean contains(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        return contains(material.getId());
     }
 
     public boolean contains(ItemStack item) {
@@ -122,23 +121,20 @@ public class CraftInventory implements Inventory {
         return false;
     }
 
-    public boolean contains(int materialId, int amount) {
+    public boolean contains(Material material, int amount) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         if (amount <= 0) {
             return true;
         }
         for (ItemStack item : getStorageContents()) {
-            if (item != null && item.getTypeId() == materialId) {
+            if (item != null && item.getType()== material) {
                 if ((amount -= item.getAmount()) <= 0) {
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    public boolean contains(Material material, int amount) {
-        Validate.notNull(material, "Material cannot be null");
-        return contains(material.getId(), amount);
     }
 
     public boolean contains(ItemStack item, int amount) {
@@ -171,22 +167,19 @@ public class CraftInventory implements Inventory {
         return false;
     }
 
-    public HashMap<Integer, ItemStack> all(int materialId) {
+    public HashMap<Integer, ItemStack> all(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         HashMap<Integer, ItemStack> slots = new HashMap<Integer, ItemStack>();
 
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId) {
+            if (item != null && item.getType()== material) {
                 slots.put(i, item);
             }
         }
         return slots;
-    }
-
-    public HashMap<Integer, ItemStack> all(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        return all(material.getId());
     }
 
     public HashMap<Integer, ItemStack> all(ItemStack item) {
@@ -202,20 +195,17 @@ public class CraftInventory implements Inventory {
         return slots;
     }
 
-    public int first(int materialId) {
+    public int first(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId) {
+            if (item != null && item.getType()== material) {
                 return i;
             }
         }
         return -1;
-    }
-
-    public int first(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        return first(material.getId());
     }
 
     public int first(ItemStack item) {
@@ -223,10 +213,16 @@ public class CraftInventory implements Inventory {
     }
 
     private int first(ItemStack item, boolean withAmount) {
+        // Paper start
+        return first(item, withAmount, getStorageContents());
+    }
+
+    private int first(ItemStack item, boolean withAmount, ItemStack[] inventory) {
+        // Paper end
         if (item == null) {
             return -1;
         }
-        ItemStack[] inventory = getStorageContents();
+        //ItemStack[] inventory = getStorageContents(); // Paper - let param deal
         for (int i = 0; i < inventory.length; i++) {
             if (inventory[i] == null) continue;
 
@@ -247,20 +243,17 @@ public class CraftInventory implements Inventory {
         return -1;
     }
 
-    public int firstPartial(int materialId) {
+    public int firstPartial(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getTypeId() == materialId && item.getAmount() < item.getMaxStackSize()) {
+            if (item != null && item.getType()== material && item.getAmount() < item.getMaxStackSize()) {
                 return i;
             }
         }
         return -1;
-    }
-
-    public int firstPartial(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        return firstPartial(material.getId());
     }
 
     private int firstPartial(ItemStack item) {
@@ -344,6 +337,17 @@ public class CraftInventory implements Inventory {
     }
 
     public HashMap<Integer, ItemStack> removeItem(ItemStack... items) {
+        // Paper start
+        return removeItem(false, items);
+    }
+
+    @Override
+    public HashMap<Integer, ItemStack> removeItemAnySlot(ItemStack... items) {
+        return removeItem(true, items);
+    }
+
+    private HashMap<Integer, ItemStack> removeItem(boolean searchEntire, ItemStack... items) {
+        // Paper end
         Validate.notNull(items, "Items cannot be null");
         HashMap<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
 
@@ -354,7 +358,10 @@ public class CraftInventory implements Inventory {
             int toDelete = item.getAmount();
 
             while (true) {
-                int first = first(item, false);
+                // Paper start - Allow searching entire contents
+                ItemStack[] toSearch = searchEntire ? getContents() : getStorageContents();
+                int first = first(item, false, toSearch);
+                // Paper end
 
                 // Drat! we don't have this type in the inventory
                 if (first == -1) {
@@ -390,18 +397,15 @@ public class CraftInventory implements Inventory {
         return getInventory().getMaxStackSize();
     }
 
-    public void remove(int materialId) {
+    public void remove(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        material = CraftLegacy.fromLegacy(material);
         ItemStack[] items = getStorageContents();
         for (int i = 0; i < items.length; i++) {
-            if (items[i] != null && items[i].getTypeId() == materialId) {
+            if (items[i] != null && items[i].getType()== material) {
                 clear(i);
             }
         }
-    }
-
-    public void remove(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        remove(material.getId());
     }
 
     public void remove(ItemStack item) {
@@ -439,7 +443,7 @@ public class CraftInventory implements Inventory {
     }
 
     public String getTitle() {
-        return inventory.getName();
+        return getName();
     }
 
     public InventoryType getType() {

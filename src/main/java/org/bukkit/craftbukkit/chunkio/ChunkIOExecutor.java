@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.chunkio;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkProviderServer;
 import net.minecraft.server.ChunkRegionLoader;
+import net.minecraft.server.MCUtil; // Paper
 import net.minecraft.server.World;
 import org.bukkit.craftbukkit.util.AsynchronousExecutor;
 
@@ -13,7 +14,7 @@ public class ChunkIOExecutor {
     private static final AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException> instance = new AsynchronousExecutor<QueuedChunk, Chunk, Runnable, RuntimeException>(new ChunkIOProvider(), BASE_THREADS);
 
     public static Chunk syncChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z) {
-        return instance.getSkipQueue(new QueuedChunk(x, z, loader, world, provider));
+        return MCUtil.ensureMain("Async Chunk Load", () -> instance.getSkipQueue(new QueuedChunk(x, z, loader, world, provider))); // Paper
     }
 
     public static void queueChunkLoad(World world, ChunkRegionLoader loader, ChunkProviderServer provider, int x, int z, Runnable runnable) {
@@ -33,4 +34,10 @@ public class ChunkIOExecutor {
     public static void tick() {
         instance.finishActive();
     }
+
+    // Paper start
+    public static boolean hasQueuedChunkLoad(World world, int x, int z) {
+        return instance.hasTask(new QueuedChunk(x, z, null, world, null));
+    }
+    // Paper end
 }

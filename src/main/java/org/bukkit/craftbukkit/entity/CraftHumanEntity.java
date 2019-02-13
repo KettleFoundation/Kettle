@@ -1,23 +1,50 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
-
-import net.minecraft.server.*;
-
+import net.minecraft.server.BlockAnvil;
+import net.minecraft.server.BlockBed;
+import net.minecraft.server.BlockPosition;
+import net.minecraft.server.BlockWorkbench;
+import net.minecraft.server.ChatComponentText;
+import net.minecraft.server.Container;
+import net.minecraft.server.CraftingManager;
+import net.minecraft.server.Entity;
+import net.minecraft.server.EntityHuman;
+import net.minecraft.server.EntityMinecartHopper;
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.EntityTypes;
+import net.minecraft.server.EnumMainHand;
+import net.minecraft.server.IBlockData;
+import net.minecraft.server.IInventory;
+import net.minecraft.server.IMerchant;
+import net.minecraft.server.IRecipe;
+import net.minecraft.server.ITileEntityContainer;
+import net.minecraft.server.ITileInventory;
+import net.minecraft.server.ItemCooldown;
+import net.minecraft.server.NBTTagCompound;
+import net.minecraft.server.PacketPlayInCloseWindow;
+import net.minecraft.server.PacketPlayOutOpenWindow;
+import net.minecraft.server.TileEntity;
+import net.minecraft.server.TileEntityBeacon;
+import net.minecraft.server.TileEntityBrewingStand;
+import net.minecraft.server.TileEntityDispenser;
+import net.minecraft.server.TileEntityDropper;
+import net.minecraft.server.TileEntityEnchantTable;
+import net.minecraft.server.TileEntityFurnace;
+import net.minecraft.server.TileEntityHopper;
+import net.minecraft.server.TileEntityShulkerBox;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.inventory.MainHand;
-import org.bukkit.inventory.Merchant;
 import org.bukkit.Material;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Villager;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.inventory.CraftContainer;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
@@ -25,9 +52,18 @@ import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.inventory.CraftMerchant;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.util.CraftNamespacedKey;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Villager;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.Merchant;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
@@ -46,10 +82,6 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         mode = server.getDefaultGameMode();
         this.inventory = new CraftInventoryPlayer(entity.inventory);
         enderChest = new CraftInventory(entity.getEnderChest());
-    }
-
-    public String getName() {
-        return getHandle().getName();
     }
 
     public PlayerInventory getInventory() {
@@ -94,6 +126,76 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
     public int getSleepTicks() {
         return getHandle().sleepTicks;
+    }
+
+    @Override
+    public Location getBedSpawnLocation() {
+        World world = getServer().getWorld(getHandle().spawnWorld);
+        BlockPosition bed = getHandle().getBed();
+
+        if (world != null && bed != null) {
+            bed = EntityHuman.getBed(((CraftWorld) world).getHandle(), bed, getHandle().isRespawnForced());
+            if (bed != null) {
+                return new Location(world, bed.getX(), bed.getY(), bed.getZ());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setBedSpawnLocation(Location location) {
+        setBedSpawnLocation(location, false);
+    }
+
+    @Override
+    public void setBedSpawnLocation(Location location, boolean override) {
+        if (location == null) {
+            getHandle().setRespawnPosition(null, override);
+        } else {
+            getHandle().setRespawnPosition(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()), override);
+            getHandle().spawnWorld = location.getWorld().getName();
+        }
+    }
+
+    @Override
+    public boolean sleep(Location location, boolean force) {
+        Preconditions.checkArgument(location != null, "Location == null");
+        Preconditions.checkArgument(location.getWorld().equals(getWorld()), "Cannot sleep across worlds");
+
+        BlockPosition blockposition = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+        IBlockData iblockdata = getHandle().world.getType(blockposition);
+        if (!(iblockdata.getBlock() instanceof BlockBed)) {
+            return false;
+        }
+
+        if (getHandle().a(blockposition) != EntityHuman.EnumBedResult.OK) {
+            return false;
+        }
+
+        // From BlockBed
+        iblockdata = (IBlockData) iblockdata.set(BlockBed.OCCUPIED, true);
+        getHandle().world.setTypeAndData(blockposition, iblockdata, 4);
+
+        return true;
+    }
+
+    @Override
+    public void wakeup(boolean setSpawnLocation) {
+        Preconditions.checkState(isSleeping(), "Cannot wakeup if not sleeping");
+
+        getHandle().a(true, true, setSpawnLocation);
+    }
+
+    @Override
+    public Location getBedLocation() {
+        Preconditions.checkState(isSleeping(), "Not sleeping");
+
+        return new Location(getWorld(), getHandle().bedPosition.getX(), getHandle().bedPosition.getY(), getHandle().bedPosition.getZ());
+    }
+
+    @Override
+    public String getName() {
+        return getHandle().getName();
     }
 
     public boolean isOp() {
@@ -188,6 +290,15 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
         IInventory iinventory = (inventory instanceof CraftInventory) ? ((CraftInventory) inventory).getInventory() : new org.bukkit.craftbukkit.inventory.InventoryWrapper(inventory);
 
+        if (iinventory instanceof ITileInventory) {
+            if (iinventory instanceof TileEntity) {
+                TileEntity te = (TileEntity) iinventory;
+                if (!te.hasWorld()) {
+                    te.setWorld(getHandle().world);
+                }
+            }
+        }
+
         switch (type) {
             case PLAYER:
             case CHEST:
@@ -260,6 +371,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
                 break;
             case CREATIVE:
             case CRAFTING:
+            case MERCHANT:
                 throw new IllegalArgumentException("Can't open a " + type + " inventory!");
         }
         if (getHandle().activeContainer == formerContainer) {
@@ -295,7 +407,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     public InventoryView openWorkbench(Location location, boolean force) {
         if (!force) {
             Block block = location.getBlock();
-            if (block.getType() != Material.WORKBENCH) {
+            if (block.getType() != Material.CRAFTING_TABLE) {
                 return null;
             }
         }
@@ -312,7 +424,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     public InventoryView openEnchanting(Location location, boolean force) {
         if (!force) {
             Block block = location.getBlock();
-            if (block.getType() != Material.ENCHANTMENT_TABLE) {
+            if (block.getType() != Material.ENCHANTING_TABLE) {
                 return null;
             }
         }
@@ -325,7 +437,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         TileEntity container = getHandle().world.getTileEntity(pos);
         if (container == null && force) {
             container = new TileEntityEnchantTable();
-            container.a(getHandle().world);
+            container.setWorld(getHandle().world);
             container.setPosition(pos);
         }
         getHandle().openTileEntity((ITileEntityContainer) container);
@@ -401,8 +513,13 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public void closeInventory() {
-        getHandle().closeInventory();
+        // Paper start
+        getHandle().closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason.PLUGIN);
     }
+    public void closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason reason) {
+        getHandle().closeInventory(reason);
+    }
+    // Paper end
 
     public boolean isBlocking() {
         return getHandle().isBlocking();
@@ -444,6 +561,68 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         getHandle().getCooldownTracker().a(CraftMagicNumbers.getItem(material), ticks);
     }
 
+    // Paper start
+    @Override
+    public org.bukkit.entity.Entity releaseLeftShoulderEntity() {
+        if (!getHandle().getShoulderEntityLeft().isEmpty()) {
+            Entity entity = getHandle().releaseLeftShoulderEntity();
+            if (entity != null) {
+                return entity.getBukkitEntity();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public org.bukkit.entity.Entity releaseRightShoulderEntity() {
+        if (!getHandle().getShoulderEntityRight().isEmpty()) {
+            Entity entity = getHandle().releaseRightShoulderEntity();
+            if (entity != null) {
+                return entity.getBukkitEntity();
+            }
+        }
+
+        return null;
+    }
+    // Paper end
+
+    @Override
+    public boolean discoverRecipe(NamespacedKey recipe) {
+        return discoverRecipes(Arrays.asList(recipe)) != 0;
+    }
+
+    @Override
+    public int discoverRecipes(Collection<NamespacedKey> recipes) {
+        return getHandle().discoverRecipes(bukkitKeysToMinecraftRecipes(recipes));
+    }
+
+    @Override
+    public boolean undiscoverRecipe(NamespacedKey recipe) {
+        return undiscoverRecipes(Arrays.asList(recipe)) != 0;
+    }
+
+    @Override
+    public int undiscoverRecipes(Collection<NamespacedKey> recipes) {
+        return getHandle().undiscoverRecipes(bukkitKeysToMinecraftRecipes(recipes));
+    }
+
+    private Collection<IRecipe> bukkitKeysToMinecraftRecipes(Collection<NamespacedKey> recipeKeys) {
+        Collection<IRecipe> recipes = new ArrayList<>();
+        CraftingManager manager = getHandle().world.getMinecraftServer().getCraftingManager();
+
+        for (NamespacedKey recipeKey : recipeKeys) {
+            IRecipe recipe = manager.a(CraftNamespacedKey.toMinecraft(recipeKey));
+            if (recipe == null) {
+                continue;
+            }
+
+            recipes.add(recipe);
+        }
+
+        return recipes;
+    }
+
     @Override
     public org.bukkit.entity.Entity getShoulderEntityLeft() {
         if (!getHandle().getShoulderEntityLeft().isEmpty()) {
@@ -481,4 +660,17 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
             entity.remove();
         }
     }
+
+    // Paper start - Add method to open already placed sign
+    @Override
+    public void openSign(org.bukkit.block.Sign sign) {
+        org.apache.commons.lang.Validate.isTrue(sign.getWorld().equals(this.getWorld()), "Sign must be in the same world as player is in");
+        org.bukkit.craftbukkit.block.CraftSign craftSign = (org.bukkit.craftbukkit.block.CraftSign) sign;
+        net.minecraft.server.TileEntitySign teSign = craftSign.getTileEntity();
+        // Make sign editable temporarily, will be set back to false in PlayerConnection later
+        teSign.isEditable = true;
+
+        getHandle().openSign(teSign);
+    }
+    // Paper end
 }

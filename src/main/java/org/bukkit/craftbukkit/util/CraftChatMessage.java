@@ -138,22 +138,40 @@ public final class CraftChatMessage {
         }
     }
 
+    public static IChatBaseComponent wrapOrNull(String message) {
+        return (message == null || message.isEmpty()) ? null : new ChatComponentText(message);
+    }
+
+    public static IChatBaseComponent fromStringOrNull(String message) {
+        // Paper start - fix up spigot tab API
+        return fromStringOrNull(message, false);
+    }
+
+    public static IChatBaseComponent fromStringOrNull(String message, boolean keepNewlines) {
+        return (message == null || message.isEmpty()) ? null : fromString(message, keepNewlines)[0];
+        // Paper end - fix up spigot tab API
+    }
+
     public static IChatBaseComponent[] fromString(String message) {
         return fromString(message, false);
     }
-    
+
     public static IChatBaseComponent[] fromString(String message, boolean keepNewlines) {
         return new StringMessage(message, keepNewlines).getOutput();
     }
-    
+
     public static String fromComponent(IChatBaseComponent component) {
         return fromComponent(component, EnumChatFormat.BLACK);
+    }
+
+    public static String toJSON(IChatBaseComponent component) {
+        return IChatBaseComponent.ChatSerializer.a(component);
     }
 
     public static String fromComponent(IChatBaseComponent component, EnumChatFormat defaultColor) {
         if (component == null) return "";
         StringBuilder out = new StringBuilder();
-        
+
         for (IChatBaseComponent c : (Iterable<IChatBaseComponent>) component) {
             ChatModifier modi = c.getChatModifier();
             out.append(modi.getColor() == null ? defaultColor : modi.getColor());
@@ -185,7 +203,7 @@ public final class CraftChatMessage {
     private static IChatBaseComponent fixComponent(IChatBaseComponent component, Matcher matcher) {
         if (component instanceof ChatComponentText) {
             ChatComponentText text = ((ChatComponentText) component);
-            String msg = text.g();
+            String msg = text.getText();
             if (matcher.reset(msg).find()) {
                 matcher.reset();
 
@@ -236,7 +254,7 @@ public final class CraftChatMessage {
         }
 
         if (component instanceof ChatMessage) {
-            Object[] subs = ((ChatMessage) component).j();
+            Object[] subs = ((ChatMessage) component).l();
             for (int i = 0; i < subs.length; i++) {
                 Object comp = subs[i];
                 if (comp instanceof IChatBaseComponent) {

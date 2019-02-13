@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import net.minecraft.server.MinecraftServer;
-import org.fusesource.jansi.AnsiConsole;
+import net.minecrell.terminalconsole.TerminalConsoleAppender; // Paper
 
 public class Main {
     public static boolean useJline = true;
@@ -111,6 +111,8 @@ public class Main {
                         .defaultsTo(new File("commands.yml"))
                         .describedAs("Yml file");
 
+                acceptsAll(asList("forceUpgrade"), "Whether to force a world upgrade");
+
                 acceptsAll(asList("nojline"), "Disables jline and emulates the vanilla console");
 
                 acceptsAll(asList("noconsole"), "Disables the console");
@@ -126,6 +128,22 @@ public class Main {
                         .defaultsTo(new File("spigot.yml"))
                         .describedAs("Yml file");
                 // Spigot End
+
+                // Paper Start
+                acceptsAll(asList("paper", "paper-settings"), "File for paper settings")
+                        .withRequiredArg()
+                        .ofType(File.class)
+                        .defaultsTo(new File("paper.yml"))
+                        .describedAs("Yml file");
+                // Paper end
+
+                // Paper start
+                acceptsAll(asList("server-name"), "Name of the server")
+                        .withRequiredArg()
+                        .ofType(String.class)
+                        .defaultsTo("Unknown Server")
+                        .describedAs("Name");
+                // Paper end
             }
         };
 
@@ -153,7 +171,15 @@ public class Main {
                 return;
             }
 
+            float javaVersion = Float.parseFloat(System.getProperty("java.class.version"));
+            if (javaVersion > 55.0) {
+                System.err.println("Unsupported Java detected (" + javaVersion + "). Only up to Java 11 is supported.");
+                return;
+            }
+
             try {
+                // Paper start - Handled by TerminalConsoleAppender
+                /*
                 // This trick bypasses Maven Shade's clever rewriting of our getProperty call when using String literals
                 String jline_UnsupportedTerminal = new String(new char[] {'j','l','i','n','e','.','U','n','s','u','p','p','o','r','t','e','d','T','e','r','m','i','n','a','l'});
                 String jline_terminal = new String(new char[] {'j','l','i','n','e','.','t','e','r','m','i','n','a','l'});
@@ -171,24 +197,47 @@ public class Main {
                     // This ensures the terminal literal will always match the jline implementation
                     System.setProperty(jline.TerminalFactory.JLINE_TERMINAL, jline.UnsupportedTerminal.class.getName());
                 }
+                */
 
+                if (options.has("nojline")) {
+                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false");
+                    useJline = false;
+                }
+                // Paper end
 
                 if (options.has("noconsole")) {
                     useConsole = false;
+                    useJline = false; // Paper
+                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false"); // Paper
                 }
 
-                if (false && Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
+                if (Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
                     Date buildDate = new SimpleDateFormat("yyyyMMdd-HHmm").parse(Main.class.getPackage().getImplementationVendor());
 
                     Calendar deadline = Calendar.getInstance();
-                    deadline.add(Calendar.DAY_OF_YEAR, -14);
+                    deadline.add(Calendar.DAY_OF_YEAR, -21);
                     if (buildDate.before(deadline.getTime())) {
-                        System.err.println("*** Error, this build is outdated ***");
-                        System.err.println("*** Please download a new build as per instructions from https://www.spigotmc.org/ ***");
-                        System.err.println("*** Server will start in 15 seconds ***");
-                        Thread.sleep(TimeUnit.SECONDS.toMillis(15));
+                        // Paper start - This is some stupid bullshit
+                        System.err.println("*** Warning, you've not updated in a while! ***");
+                        System.err.println("*** Please download a new build as per instructions from https://papermc.io/downloads ***"); // Paper
+                        //System.err.println("*** Server will start in 20 seconds ***");
+                        //Thread.sleep(TimeUnit.SECONDS.toMillis(20));
+                        // Paper End
                     }
                 }
+
+                // Paper start - Log Java and OS versioning to help with debugging plugin issues
+                java.lang.management.RuntimeMXBean runtimeMX = java.lang.management.ManagementFactory.getRuntimeMXBean();
+                java.lang.management.OperatingSystemMXBean osMX = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+                if (runtimeMX != null && osMX != null) {
+                    String javaInfo = "Java " + runtimeMX.getSpecVersion() + " (" + runtimeMX.getVmName() + " " + runtimeMX.getVmVersion() + ")";
+                    String osInfo = "Host:  " + osMX.getName() + " " + osMX.getVersion() + " (" + osMX.getArch() + ")";
+
+                    System.out.println("System Info: " + javaInfo + " " + osInfo);
+                } else {
+                    System.out.println("Unable to read system info");
+                }
+                // Paper end
 
                 System.out.println("Loading libraries, please wait...");
                 MinecraftServer.main(options);

@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import net.minecraft.server.EntitySnowball;
 import net.minecraft.server.EntityThrownExpBottle;
 import net.minecraft.server.EntityTippedArrow;
 import net.minecraft.server.EntitySpectralArrow;
+import net.minecraft.server.EntityThrownTrident;
 import net.minecraft.server.EntityWither;
 import net.minecraft.server.EntityWitherSkull;
 import net.minecraft.server.GenericAttributes;
@@ -34,6 +36,7 @@ import net.minecraft.server.MobEffect;
 import net.minecraft.server.MobEffectList;
 
 import org.apache.commons.lang.Validate;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -51,7 +54,7 @@ import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Fish;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LingeringPotion;
 import org.bukkit.entity.LivingEntity;
@@ -65,7 +68,9 @@ import org.bukkit.entity.SpectralArrow;
 import org.bukkit.entity.ThrownExpBottle;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.TippedArrow;
+import org.bukkit.entity.Trident;
 import org.bukkit.entity.WitherSkull;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -74,6 +79,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.BlockIterator;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
@@ -94,7 +100,10 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void setHealth(double health) {
         health = (float) health;
         if ((health < 0) || (health > getMaxHealth())) {
-            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + "(" + health + ")");
+            // Paper - Be more informative
+            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + ", but was " + health
+                    + ". (attribute base value: " + this.getHandle().getAttributeInstance(GenericAttributes.maxHealth).b()
+                    + (this instanceof CraftPlayer ? ", player: " + this.getName() + ')' : ')'));
         }
 
         getHandle().setHealth((float) health);
@@ -131,6 +140,9 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     private List<Block> getLineOfSight(Set<Material> transparent, int maxDistance, int maxLength) {
+        if (transparent == null) {
+            transparent = Sets.newHashSet(Material.AIR, Material.CAVE_AIR, Material.VOID_AIR);
+        }
         if (maxDistance > 120) {
             maxDistance = 120;
         }
@@ -143,14 +155,8 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
                 blocks.remove(0);
             }
             Material material = block.getType();
-            if (transparent == null) {
-                if (!material.equals(Material.AIR)) {
-                    break;
-                }
-            } else {
-                if (!transparent.contains(material)) {
-                    break;
-                }
+            if (!transparent.contains(material)) {
+                break;
             }
         }
         return blocks;
@@ -165,8 +171,75 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         return blocks.get(0);
     }
 
+    // Paper start
+    public Block getTargetBlock(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode) {
+        net.minecraft.server.MovingObjectPosition rayTrace = getHandle().getRayTrace(maxDistance, net.minecraft.server.MCUtil.getNMSFluidCollisionOption(fluidMode));
+        return rayTrace == null ? null : org.bukkit.craftbukkit.block.CraftBlock.at(getHandle().world, rayTrace.getBlockPosition());
+    }
+
+    public org.bukkit.block.BlockFace getTargetBlockFace(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode) {
+        net.minecraft.server.MovingObjectPosition rayTrace = getHandle().getRayTrace(maxDistance, net.minecraft.server.MCUtil.getNMSFluidCollisionOption(fluidMode));
+        return rayTrace == null ? null : net.minecraft.server.MCUtil.toBukkitBlockFace(rayTrace.direction);
+    }
+
+    public com.destroystokyo.paper.block.TargetBlockInfo getTargetBlockInfo(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode) {
+        net.minecraft.server.MovingObjectPosition rayTrace = getHandle().getRayTrace(maxDistance, net.minecraft.server.MCUtil.getNMSFluidCollisionOption(fluidMode));
+        return rayTrace == null ? null : new com.destroystokyo.paper.block.TargetBlockInfo(org.bukkit.craftbukkit.block.CraftBlock.at(getHandle().world, rayTrace.getBlockPosition()), net.minecraft.server.MCUtil.toBukkitBlockFace(rayTrace.direction));
+    }
+
+    public Entity getTargetEntity(int maxDistance, boolean ignoreBlocks) {
+        net.minecraft.server.MovingObjectPosition rayTrace = rayTraceEntity(maxDistance, ignoreBlocks);
+        return rayTrace == null ? null : rayTrace.entity.getBukkitEntity();
+    }
+
+    public com.destroystokyo.paper.entity.TargetEntityInfo getTargetEntityInfo(int maxDistance, boolean ignoreBlocks) {
+        net.minecraft.server.MovingObjectPosition rayTrace = rayTraceEntity(maxDistance, ignoreBlocks);
+        return rayTrace == null ? null : new com.destroystokyo.paper.entity.TargetEntityInfo(rayTrace.entity.getBukkitEntity(), new org.bukkit.util.Vector(rayTrace.pos.x, rayTrace.pos.y, rayTrace.pos.z));
+    }
+
+    public net.minecraft.server.MovingObjectPosition rayTraceEntity(int maxDistance, boolean ignoreBlocks) {
+        net.minecraft.server.MovingObjectPosition rayTrace = getHandle().getTargetEntity(maxDistance);
+        if (rayTrace == null) {
+            return null;
+        }
+        if (!ignoreBlocks) {
+            net.minecraft.server.MovingObjectPosition rayTraceBlocks = getHandle().getRayTrace(maxDistance, net.minecraft.server.FluidCollisionOption.NEVER);
+            if (rayTraceBlocks != null) {
+                net.minecraft.server.Vec3D eye = getHandle().getEyePosition(1.0F);
+                if (eye.distanceSquared(rayTraceBlocks.pos) <= eye.distanceSquared(rayTrace.pos)) {
+                    return null;
+                }
+            }
+        }
+        return rayTrace;
+    }
+    // Paper end
+
     public List<Block> getLastTwoTargetBlocks(Set<Material> transparent, int maxDistance) {
         return getLineOfSight(transparent, maxDistance, 2);
+    }
+
+    @Override
+    public Block getTargetBlockExact(int maxDistance) {
+        return this.getTargetBlockExact(maxDistance, FluidCollisionMode.NEVER);
+    }
+
+    @Override
+    public Block getTargetBlockExact(int maxDistance, FluidCollisionMode fluidCollisionMode) {
+        RayTraceResult hitResult = this.rayTraceBlocks(maxDistance, fluidCollisionMode);
+        return (hitResult != null ? hitResult.getHitBlock() : null);
+    }
+
+    @Override
+    public RayTraceResult rayTraceBlocks(double maxDistance) {
+        return this.rayTraceBlocks(maxDistance, FluidCollisionMode.NEVER);
+    }
+
+    @Override
+    public RayTraceResult rayTraceBlocks(double maxDistance, FluidCollisionMode fluidCollisionMode) {
+        Location eyeLocation = this.getEyeLocation();
+        Vector direction = eyeLocation.getDirection();
+        return this.getWorld().rayTraceBlocks(eyeLocation, direction, maxDistance, fluidCollisionMode, false);
     }
 
     public int getRemainingAir() {
@@ -249,6 +322,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         return getHandle().killer == null ? null : (Player) getHandle().killer.getBukkitEntity();
     }
 
+    // Paper start
+    @Override
+    public void setKiller(Player killer) {
+        net.minecraft.server.EntityPlayer entityPlayer = killer == null ? null : ((CraftPlayer) killer).getHandle();
+        getHandle().killer = entityPlayer;
+        getHandle().lastDamager = entityPlayer;
+        getHandle().lastDamageByPlayerTime = entityPlayer == null ? 0 : 100; // 100 value taken from EntityLiving#damageEntity
+    }
+    // Paper end
+
     public boolean addPotionEffect(PotionEffect effect) {
         return addPotionEffect(effect, false);
     }
@@ -260,7 +343,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
             }
             removePotionEffect(effect.getType());
         }
-        getHandle().addEffect(new MobEffect(MobEffectList.fromId(effect.getType().getId()), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles()));
+        getHandle().addEffect(new MobEffect(MobEffectList.fromId(effect.getType().getId()), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles()), EntityPotionEffectEvent.Cause.PLUGIN);
         return true;
     }
 
@@ -283,7 +366,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public void removePotionEffect(PotionEffectType type) {
-        getHandle().removeEffect(MobEffectList.fromId(type.getId()));
+        getHandle().removeEffect(MobEffectList.fromId(type.getId()), EntityPotionEffectEvent.Cause.PLUGIN);
     }
 
     public Collection<PotionEffect> getActivePotionEffects() {
@@ -318,6 +401,8 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
                 ((EntityTippedArrow) launch).setType(CraftPotionUtil.fromBukkit(new PotionData(PotionType.WATER, false, false)));
             } else if (SpectralArrow.class.isAssignableFrom(projectile)) {
                 launch = new EntitySpectralArrow(world, getHandle());
+            } else if (Trident.class.isAssignableFrom(projectile)) {
+                launch = new EntityThrownTrident(world, getHandle(), new net.minecraft.server.ItemStack(net.minecraft.server.Items.TRIDENT));
             } else {
                 launch = new EntityTippedArrow(world, getHandle());
             }
@@ -332,7 +417,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         } else if (ThrownExpBottle.class.isAssignableFrom(projectile)) {
             launch = new EntityThrownExpBottle(world, getHandle());
             ((EntityProjectile) launch).a(getHandle(), getHandle().pitch, getHandle().yaw, -20.0F, 0.7F, 1.0F); // ItemExpBottle
-        } else if (Fish.class.isAssignableFrom(projectile) && getHandle() instanceof EntityHuman) {
+        } else if (FishHook.class.isAssignableFrom(projectile) && getHandle() instanceof EntityHuman) {
             launch = new EntityFishingHook(world, (EntityHuman) getHandle());
         } else if (Fireball.class.isAssignableFrom(projectile)) {
             Location location = getEyeLocation();
@@ -466,6 +551,21 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     @Override
+    public boolean isSwimming() {
+        return getHandle().isSwimming();
+    }
+
+    @Override
+    public void setSwimming(boolean swimming) {
+        getHandle().setSwimming(swimming);
+    }
+
+    @Override
+    public boolean isRiptiding() {
+        return getHandle().isRiptiding();
+    }
+
+    @Override
     public AttributeInstance getAttribute(Attribute attribute) {
         return getHandle().craftAttributes.getAttribute(attribute);
     }
@@ -491,4 +591,46 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public boolean isCollidable() {
         return getHandle().collides;
     }
+
+    // Paper start
+    @Override
+    public int getArrowsStuck() {
+        return getHandle().getArrowCount();
+    }
+
+    @Override
+    public void setArrowsStuck(int arrows) {
+        getHandle().setArrowCount(arrows);
+    }
+
+    @Override
+    public int getShieldBlockingDelay() {
+        return getHandle().getShieldBlockingDelay();
+    }
+
+    @Override
+    public void setShieldBlockingDelay(int delay) {
+        getHandle().setShieldBlockingDelay(delay);
+    }
+
+    @Override
+    public ItemStack getActiveItem() {
+        return getHandle().activeItem.asBukkitMirror();
+    }
+
+    @Override
+    public int getItemUseRemainingTime() {
+        return getHandle().getItemUseRemainingTime();
+    }
+
+    @Override
+    public int getHandRaisedTime() {
+        return getHandle().getHandRaisedTime();
+    }
+
+    @Override
+    public boolean isHandRaised() {
+        return getHandle().isHandRaised();
+    }
+    // Paper end
 }

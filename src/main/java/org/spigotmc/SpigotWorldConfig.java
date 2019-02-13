@@ -39,31 +39,31 @@ public class SpigotWorldConfig
         config.set( "world-settings.default." + path, val );
     }
 
-    private boolean getBoolean(String path, boolean def)
+    public boolean getBoolean(String path, boolean def)
     {
         config.addDefault( "world-settings.default." + path, def );
         return config.getBoolean( "world-settings." + worldName + "." + path, config.getBoolean( "world-settings.default." + path ) );
     }
 
-    private double getDouble(String path, double def)
+    public double getDouble(String path, double def)
     {
         config.addDefault( "world-settings.default." + path, def );
         return config.getDouble( "world-settings." + worldName + "." + path, config.getDouble( "world-settings.default." + path ) );
     }
 
-    private int getInt(String path, int def)
+    public int getInt(String path, int def)
     {
         config.addDefault( "world-settings.default." + path, def );
         return config.getInt( "world-settings." + worldName + "." + path, config.getInt( "world-settings.default." + path ) );
     }
 
-    private <T> List getList(String path, T def)
+    public <T> List getList(String path, T def)
     {
         config.addDefault( "world-settings.default." + path, def );
         return (List<T>) config.getList( "world-settings." + worldName + "." + path, config.getList( "world-settings.default." + path ) );
     }
 
-    private String getString(String path, String def)
+    public String getString(String path, String def)
     {
         config.addDefault( "world-settings.default." + path, def );
         return config.getString( "world-settings." + worldName + "." + path, config.getString( "world-settings.default." + path ) );
@@ -76,6 +76,9 @@ public class SpigotWorldConfig
     public int mushroomModifier;
     public int pumpkinModifier;
     public int saplingModifier;
+    public int beetrootModifier;
+    public int carrotModifier;
+    public int potatoModifier;
     public int wheatModifier;
     public int wartModifier;
     public int vineModifier;
@@ -100,6 +103,9 @@ public class SpigotWorldConfig
         mushroomModifier = getAndValidateGrowth( "Mushroom" );
         pumpkinModifier = getAndValidateGrowth( "Pumpkin" );
         saplingModifier = getAndValidateGrowth( "Sapling" );
+        beetrootModifier = getAndValidateGrowth( "Beetroot" );
+        carrotModifier = getAndValidateGrowth( "Carrot" );
+        potatoModifier = getAndValidateGrowth( "Potato" );
         wheatModifier = getAndValidateGrowth( "Wheat" );
         wartModifier = getAndValidateGrowth( "NetherWart" );
         vineModifier = getAndValidateGrowth( "Vine" );
@@ -130,7 +136,7 @@ public class SpigotWorldConfig
     public byte mobSpawnRange;
     private void mobSpawnRange()
     {
-        mobSpawnRange = (byte) getInt( "mob-spawn-range", 4 );
+        mobSpawnRange = (byte) getInt( "mob-spawn-range", 8 ); // Paper - Vanilla
         log( "Mob Spawn Range: " + mobSpawnRange );
     }
 
@@ -144,12 +150,14 @@ public class SpigotWorldConfig
     public int animalActivationRange = 32;
     public int monsterActivationRange = 32;
     public int miscActivationRange = 16;
+    public int waterActivationRange = 16; // Paper
     public boolean tickInactiveVillagers = true;
     private void activationRange()
     {
         animalActivationRange = getInt( "entity-activation-range.animals", animalActivationRange );
         monsterActivationRange = getInt( "entity-activation-range.monsters", monsterActivationRange );
         miscActivationRange = getInt( "entity-activation-range.misc", miscActivationRange );
+        waterActivationRange = getInt( "entity-activation-range.water", waterActivationRange ); // Paper
         tickInactiveVillagers = getBoolean( "entity-activation-range.tick-inactive-villagers", tickInactiveVillagers );
         log( "Entity Activation Range: An " + animalActivationRange + " / Mo " + monsterActivationRange + " / Mi " + miscActivationRange + " / Tiv " + tickInactiveVillagers );
     }
@@ -190,18 +198,6 @@ public class SpigotWorldConfig
     {
         randomLightUpdates = getBoolean( "random-light-updates", false );
         log( "Random Lighting Updates: " + randomLightUpdates );
-    }
-
-    public boolean saveStructureInfo;
-    private void structureInfo()
-    {
-        saveStructureInfo = getBoolean( "save-structure-info", true );
-        log( "Structure Info Saving: " + saveStructureInfo );
-        if ( !saveStructureInfo )
-        {
-            log( "*** WARNING *** You have selected to NOT save structure info. This may cause structures such as fortresses to not spawn mobs!" );
-            log( "*** WARNING *** Please use this option with caution, SpigotMC is not responsible for any issues this option may cause in the future!" );
-        }
     }
 
     public int arrowDespawnRate;
@@ -245,16 +241,26 @@ public class SpigotWorldConfig
     }
 
     public int villageSeed;
-    public int largeFeatureSeed;
+    public int desertSeed;
+    public int iglooSeed;
+    public int jungleSeed;
+    public int swampSeed;
     public int monumentSeed;
+    public int oceanSeed;
+    public int shipwreckSeed;
     public int slimeSeed;
     private void initWorldGenSeeds()
     {
         villageSeed = getInt( "seed-village", 10387312 );
-        largeFeatureSeed = getInt( "seed-feature", 14357617 );
+        desertSeed = getInt( "seed-desert", 14357617 );
+        iglooSeed = getInt( "seed-igloo", 14357618 );
+        jungleSeed = getInt( "seed-jungle", 14357619 );
+        swampSeed = getInt( "seed-swamp", 14357620 );
         monumentSeed = getInt( "seed-monument", 10387313 );
+        shipwreckSeed = getInt( "seed-shipwreck", 165745295 );
+        oceanSeed = getInt( "seed-ocean", 14357621 );
         slimeSeed = getInt( "seed-slime", 987234911 );
-        log( "Custom Map Seeds:  Village: " + villageSeed + " Feature: " + largeFeatureSeed + " Monument: "  + monumentSeed + " Slime: " + slimeSeed );
+        log( "Custom Map Seeds:  Village: " + villageSeed + " Desert: " + desertSeed + " Igloo: " + iglooSeed + " Jungle: " + jungleSeed + " Swamp: " + swampSeed + " Monument: " + monumentSeed + "Ocean: " + oceanSeed + " Shipwreck: " + shipwreckSeed + " Slime: " + slimeSeed );
     }
 
     public float jumpWalkExhaustion;

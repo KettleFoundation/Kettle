@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit;
 
+import com.google.common.base.Preconditions;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
@@ -20,7 +21,7 @@ public class CraftChunk implements Chunk {
     private final int x;
     private final int z;
     private static final byte[] emptyData = new byte[2048];
-    private static final short[] emptyBlockIDs = new short[4096];
+    private static final DataPaletteBlock<IBlockData> emptyBlockIDs = new ChunkSection(0, false).getBlocks();
     private static final byte[] emptySkyLight = new byte[2048];
 
     public CraftChunk(net.minecraft.server.Chunk chunk) {
@@ -69,7 +70,9 @@ public class CraftChunk implements Chunk {
     }
 
     public Block getBlock(int x, int y, int z) {
-        return new CraftBlock(this, (getX() << 4) | (x & 0xF), y, (getZ() << 4) | (z & 0xF));
+        validateChunkCoordinates(x, y, z);
+
+        return new CraftBlock(worldServer, new BlockPosition((this.x << 4) | x, y, (this.z << 4) | z));
     }
 
     public Entity[] getEntities() {
@@ -96,7 +99,12 @@ public class CraftChunk implements Chunk {
         return entities;
     }
 
+    // Paper start
     public BlockState[] getTileEntities() {
+        return getTileEntities(true);
+    }
+    public BlockState[] getTileEntities(boolean useSnapshot) {
+        // Paper end
         int index = 0;
         net.minecraft.server.Chunk chunk = getHandle();
 
@@ -108,7 +116,7 @@ public class CraftChunk implements Chunk {
             }
 
             BlockPosition position = (BlockPosition) obj;
-            entities[index++] = worldServer.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ()).getState();
+            entities[index++] = worldServer.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ()).getState(useSnapshot); // Paper
         }
 
         return entities;
@@ -133,7 +141,7 @@ public class CraftChunk implements Chunk {
     @Override
     public boolean isSlimeChunk() {
         // 987234911L is deterimined in EntitySlime when seeing if a slime can spawn in a chunk
-        return getHandle().a(worldServer.spigotConfig.slimeSeed).nextInt(10) == 0;
+        return SeededRandom.a(getX(), getZ(), getWorld().getSeed(), worldServer.spigotConfig.slimeSeed).nextInt(10) == 0;
     }
 
     public boolean unload(boolean save) {
@@ -144,6 +152,16 @@ public class CraftChunk implements Chunk {
         return getWorld().unloadChunk(getX(), getZ(), save, safe);
     }
 
+    @Override
+    public boolean isForceLoaded() {
+        return getWorld().isChunkForceLoaded(getX(), getZ());
+    }
+
+    @Override
+    public void setForceLoaded(boolean forced) {
+        getWorld().setChunkForceLoaded(getX(), getZ(), forced);
+    }
+
     public ChunkSnapshot getChunkSnapshot() {
         return getChunkSnapshot(true, false, false);
     }
@@ -152,8 +170,7 @@ public class CraftChunk implements Chunk {
         net.minecraft.server.Chunk chunk = getHandle();
 
         ChunkSection[] cs = chunk.getSections();
-        short[][] sectionBlockIDs = new short[cs.length][];
-        byte[][] sectionBlockData = new byte[cs.length][];
+        DataPaletteBlock[] sectionBlockIDs = new DataPaletteBlock[cs.length];
         byte[][] sectionSkyLights = new byte[cs.length][];
         byte[][] sectionEmitLights = new byte[cs.length][];
         boolean[] sectionEmpty = new boolean[cs.length];
@@ -161,28 +178,20 @@ public class CraftChunk implements Chunk {
         for (int i = 0; i < cs.length; i++) {
             if (cs[i] == null) { // Section is empty?
                 sectionBlockIDs[i] = emptyBlockIDs;
-                sectionBlockData[i] = emptyData;
                 sectionSkyLights[i] = emptySkyLight;
                 sectionEmitLights[i] = emptyData;
                 sectionEmpty[i] = true;
             } else { // Not empty
-                short[] blockids = new short[4096];
+                NBTTagCompound data = new NBTTagCompound();
+                cs[i].getBlocks().b(data, "Spigot", "Magic");
 
-                byte[] rawIds = new byte[4096];
-                NibbleArray data = new NibbleArray();
-                cs[i].getBlocks().exportData(rawIds, data);
-
-                byte[] dataValues = sectionBlockData[i] = data.asBytes();
-
-                // Copy base IDs
-                for (int j = 0; j < 4096; j++) {
-                    blockids[j] = (short) (rawIds[j] & 0xFF);
-                }
+                DataPaletteBlock blockids = new DataPaletteBlock<>(ChunkSection.GLOBAL_PALETTE, net.minecraft.server.Block.REGISTRY_ID, GameProfileSerializer::d, GameProfileSerializer::a, Blocks.AIR.getBlockData()); // TODO: snapshot whole ChunkSection
+                blockids.a(data, "Spigot", "Magic");
 
                 sectionBlockIDs[i] = blockids;
 
                 if (cs[i].getSkyLightArray() == null) {
-                    sectionSkyLights[i] = emptyData;
+                    sectionSkyLights[i] = emptySkyLight;
                 } else {
                     sectionSkyLights[i] = new byte[2048];
                     System.arraycopy(cs[i].getSkyLightArray().asBytes(), 0, sectionSkyLights[i], 0, 2048);
@@ -192,57 +201,46 @@ public class CraftChunk implements Chunk {
             }
         }
 
-        int[] hmap = null;
+        HeightMap hmap = null;
 
         if (includeMaxBlockY) {
-            hmap = new int[256]; // Get copy of height map
-            System.arraycopy(chunk.heightMap, 0, hmap, 0, 256);
+            hmap = new HeightMap(null, HeightMap.Type.LIGHT_BLOCKING);
+            hmap.a(chunk.heightMap.get(HeightMap.Type.LIGHT_BLOCKING).b());
         }
 
         BiomeBase[] biome = null;
         double[] biomeTemp = null;
-        double[] biomeRain = null;
 
         if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager wcm = chunk.world.getWorldChunkManager();
+            WorldChunkManager wcm = worldServer.getChunkProvider().getChunkGenerator().getWorldChunkManager();
 
             if (includeBiome) {
                 biome = new BiomeBase[256];
                 for (int i = 0; i < 256; i++) {
-                    biome[i] = chunk.getBiome(new BlockPosition(i & 0xF, 0, i >> 4), wcm);
+                    biome[i] = chunk.getBiome(new BlockPosition(i & 0xF, 0, i >> 4));
                 }
             }
 
             if (includeBiomeTempRain) {
                 biomeTemp = new double[256];
-                biomeRain = new double[256];
                 float[] dat = getTemperatures(wcm, getX() << 4, getZ() << 4);
 
                 for (int i = 0; i < 256; i++) {
                     biomeTemp[i] = dat[i];
                 }
-
-                /* Removed 15w46a
-                dat = wcm.getWetness(null, getX() << 4, getZ() << 4, 16, 16);
-
-                for (int i = 0; i < 256; i++) {
-                    biomeRain[i] = dat[i];
-                }
-                */
             }
         }
 
         World world = getWorld();
-        return new CraftChunkSnapshot(getX(), getZ(), world.getName(), world.getFullTime(), sectionBlockIDs, sectionBlockData, sectionSkyLights, sectionEmitLights, sectionEmpty, hmap, biome, biomeTemp, biomeRain);
+        return new CraftChunkSnapshot(getX(), getZ(), world.getName(), world.getFullTime(), sectionBlockIDs, sectionSkyLights, sectionEmitLights, sectionEmpty, hmap, biome, biomeTemp);
     }
 
     public static ChunkSnapshot getEmptyChunkSnapshot(int x, int z, CraftWorld world, boolean includeBiome, boolean includeBiomeTempRain) {
         BiomeBase[] biome = null;
         double[] biomeTemp = null;
-        double[] biomeRain = null;
 
         if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager wcm = world.getHandle().getWorldChunkManager();
+            WorldChunkManager wcm = world.getHandle().getChunkProvider().getChunkGenerator().getWorldChunkManager();
 
             if (includeBiome) {
                 biome = new BiomeBase[256];
@@ -253,44 +251,33 @@ public class CraftChunk implements Chunk {
 
             if (includeBiomeTempRain) {
                 biomeTemp = new double[256];
-                biomeRain = new double[256];
                 float[] dat = getTemperatures(wcm, x << 4, z << 4);
 
                 for (int i = 0; i < 256; i++) {
                     biomeTemp[i] = dat[i];
                 }
-
-                /* Removed 15w46a
-                dat = wcm.getWetness(null, x << 4, z << 4, 16, 16);
-
-                for (int i = 0; i < 256; i++) {
-                    biomeRain[i] = dat[i];
-                }
-                */
             }
         }
 
         /* Fill with empty data */
         int hSection = world.getMaxHeight() >> 4;
-        short[][] blockIDs = new short[hSection][];
+        DataPaletteBlock[] blockIDs = new DataPaletteBlock[hSection];
         byte[][] skyLight = new byte[hSection][];
         byte[][] emitLight = new byte[hSection][];
-        byte[][] blockData = new byte[hSection][];
         boolean[] empty = new boolean[hSection];
 
         for (int i = 0; i < hSection; i++) {
             blockIDs[i] = emptyBlockIDs;
             skyLight[i] = emptySkyLight;
             emitLight[i] = emptyData;
-            blockData[i] = emptyData;
             empty[i] = true;
         }
 
-        return new CraftChunkSnapshot(x, z, world.getName(), world.getFullTime(), blockIDs, blockData, skyLight, emitLight, empty, new int[256], biome, biomeTemp, biomeRain);
+        return new CraftChunkSnapshot(x, z, world.getName(), world.getFullTime(), blockIDs, skyLight, emitLight, empty, new HeightMap(null, HeightMap.Type.LIGHT_BLOCKING), biome, biomeTemp);
     }
 
     private static float[] getTemperatures(WorldChunkManager chunkmanager, int chunkX, int chunkZ) {
-        BiomeBase[] biomes = chunkmanager.getBiomes(null, chunkX, chunkZ, 16, 16);
+        BiomeBase[] biomes = chunkmanager.getBiomes(chunkX, chunkZ, 16, 16);
         float[] temps = new float[biomes.length];
 
         for (int i = 0; i < biomes.length; i++) {
@@ -304,6 +291,12 @@ public class CraftChunk implements Chunk {
         }
 
         return temps;
+    }
+
+    static void validateChunkCoordinates(int x, int y, int z) {
+        Preconditions.checkArgument(0 <= x && x <= 15, "x out of range (expected 0-15, got %s)", x);
+        Preconditions.checkArgument(0 <= y && y <= 255, "y out of range (expected 0-255, got %s)", y);
+        Preconditions.checkArgument(0 <= z && z <= 15, "z out of range (expected 0-15, got %s)", z);
     }
 
     static {
