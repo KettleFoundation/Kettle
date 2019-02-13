@@ -363,12 +363,9 @@ public final class Bukkit {
      * <p>
      * This method may not return objects for offline players.
      *
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     *     guaranteed to be unique
      * @param name the name to look up
      * @return a player if one was found, null otherwise
      */
-    @Deprecated
     public static Player getPlayer(String name) {
         return server.getPlayer(name);
     }
@@ -376,12 +373,9 @@ public final class Bukkit {
     /**
      * Gets the player with the exact given name, case insensitive.
      *
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     *     guaranteed to be unique
      * @param name Exact name of the player to retrieve
      * @return a player object if one was found, null otherwise
      */
-    @Deprecated
     public static Player getPlayerExact(String name) {
         return server.getPlayerExact(name);
     }
@@ -393,12 +387,9 @@ public final class Bukkit {
      * This list is not sorted in any particular order. If an exact match is
      * found, the returned list will only contain a single result.
      *
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     *     guaranteed to be unique
      * @param name the (partial) name to match
      * @return list of all possible players
      */
-    @Deprecated
     public static List<Player> matchPlayer(String name) {
         return server.matchPlayer(name);
     }
@@ -532,6 +523,7 @@ public final class Bukkit {
      */
     public static void reload() {
         server.reload();
+        org.spigotmc.CustomTimingsHandler.reload(); // Spigot
     }
 
     /**
@@ -1161,5 +1153,10 @@ public final class Bukkit {
     @Deprecated
     public static UnsafeValues getUnsafe() {
         return server.getUnsafe();
+    }
+
+    public static Server.Spigot spigot()
+    {
+        return server.spigot();
     }
 }

@@ -478,4 +478,23 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
      * @return reaction
      */
     PistonMoveReaction getPistonMoveReaction();
+
+    // Spigot start
+    public class Spigot extends CommandSender.Spigot
+    {
+
+        /**
+         * Returns whether this entity is invulnerable.
+         *
+         * @return True if the entity is invulnerable.
+         */
+        public boolean isInvulnerable()
+        {
+            throw new UnsupportedOperationException( "Not supported yet." );
+        }
+    }
+
+    @Override
+    Spigot spigot();
+    // Spigot end
 }
