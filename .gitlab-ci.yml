@@ -1,6 +1,7 @@
 image: openjdk:8-jdk
 
 stages:
+- setup
 - test
 - build
 
@@ -16,21 +17,26 @@ cache:
   - .gradle/wrapper
   - .gradle/caches
 
+setup:
+  stage: test
+  script:
+  - chmod +x gradlew && ./gradlew setup
+  - mv src/main/java/org* projects/Kettle/src/main/java
+
+test:
+  stage: test
+  script:
+  - chmod +x gradlew && ./gradlew check
+
 build:
   stage: build
   script:
-  - mv src/main/java/org* projects/Kettle/src/main/java
   - chmod +x gradlew && ./gradlew build
   only:
   - master
   artifacts:
     paths:
       - build/distributions/*.jar
-  
-test:
-  stage: test
-  script:
-  - chmod +x gradlew && ./gradlew check
 
 after_script:
 - echo "End CI"
