@@ -17,8 +17,9 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ## Depolyment
 
+
 ### Installation
-1. Download the universal server & bundled libraries
+1. Download the universal server & bundled libraries from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
 2. Download the minecraft server via the link in the release
 3. Make a new folder for the server
 4. Move the server to the folder and rename it to `kettle.jar`
