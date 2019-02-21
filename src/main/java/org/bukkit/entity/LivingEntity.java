@@ -4,26 +4,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.util.RayTraceResult;
-import org.bukkit.util.Vector;
-
-import javax.annotation.Nullable;
 
 /**
  * Represents a living entity, such as a monster or player
  */
-public interface LivingEntity extends Attributable, Damageable, ProjectileSource {
+public interface LivingEntity extends Attributable, Entity, Damageable, ProjectileSource {
 
     /**
      * Gets the height of the living entity's eyes above its Location.
@@ -52,7 +45,7 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
      * Gets all blocks along the living entity's line of sight.
      * <p>
      * This list contains all blocks from the living entity's eye position to
-     * target inclusive. This method considers all blocks as 1x1x1 in size.
+     * target inclusive.
      *
      * @param transparent HashSet containing all transparent block Materials (set to
      *     null for only air)
@@ -65,10 +58,6 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
 
     /**
      * Gets the block that the living entity has targeted.
-     * <p>
-     * This method considers all blocks as 1x1x1 in size. To take exact block
-     * collision shapes into account, see {@link #getTargetBlockExact(int,
-     * FluidCollisionMode)}.
      *
      * @param transparent HashSet containing all transparent block Materials (set to
      *     null for only air)
@@ -78,126 +67,10 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
      */
     public Block getTargetBlock(Set<Material> transparent, int maxDistance);
 
-    // Paper start
-    /**
-     * Gets the block that the living entity has targeted, ignoring fluids
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @return block that the living entity has targeted,
-     *     or null if no block is within maxDistance
-     */
-    @Nullable
-    public default Block getTargetBlock(int maxDistance) {
-        return getTargetBlock(maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode.NEVER);
-    }
-
-    /**
-     * Gets the block that the living entity has targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @param fluidMode whether to check fluids or not
-     * @return block that the living entity has targeted,
-     *     or null if no block is within maxDistance
-     */
-    @Nullable
-    public Block getTargetBlock(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode);
-
-    /**
-     * Gets the blockface of that block that the living entity has targeted, ignoring fluids
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @return blockface of the block that the living entity has targeted,
-     *     or null if no block is targeted
-     */
-    @Nullable
-    public default org.bukkit.block.BlockFace getTargetBlockFace(int maxDistance) {
-        return getTargetBlockFace(maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode.NEVER);
-    }
-
-    /**
-     * Gets the blockface of that block that the living entity has targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @param fluidMode whether to check fluids or not
-     * @return blockface of the block that the living entity has targeted,
-     *     or null if no block is targeted
-     */
-    @Nullable
-    public org.bukkit.block.BlockFace getTargetBlockFace(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode);
-
-    /**
-     * Gets information about the block the living entity has targeted, ignoring fluids
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @return TargetBlockInfo about the block the living entity has targeted,
-     *     or null if no block is targeted
-     */
-    @Nullable
-    public default com.destroystokyo.paper.block.TargetBlockInfo getTargetBlockInfo(int maxDistance) {
-        return getTargetBlockInfo(maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode.NEVER);
-    }
-
-    /**
-     * Gets information about the block the living entity has targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @param fluidMode whether to check fluids or not
-     * @return TargetBlockInfo about the block the living entity has targeted,
-     *     or null if no block is targeted
-     */
-    @Nullable
-    public com.destroystokyo.paper.block.TargetBlockInfo getTargetBlockInfo(int maxDistance, com.destroystokyo.paper.block.TargetBlockInfo.FluidMode fluidMode);
-
-    /**
-     * Gets information about the entity being targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @return entity being targeted, or null if no entity is targeted
-     */
-    @Nullable
-    public default Entity getTargetEntity(int maxDistance) {
-        return getTargetEntity(maxDistance, false);
-    }
-
-    /**
-     * Gets information about the entity being targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @param ignoreBlocks true to scan through blocks
-     * @return entity being targeted, or null if no entity is targeted
-     */
-    @Nullable
-    public Entity getTargetEntity(int maxDistance, boolean ignoreBlocks);
-
-    /**
-     * Gets information about the entity being targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @return TargetEntityInfo about the entity being targeted,
-     *     or null if no entity is targeted
-     */
-    @Nullable
-    public default com.destroystokyo.paper.entity.TargetEntityInfo getTargetEntityInfo(int maxDistance) {
-        return getTargetEntityInfo(maxDistance, false);
-    }
-
-    /**
-     * Gets information about the entity being targeted
-     *
-     * @param maxDistance this is the maximum distance to scan
-     * @param ignoreBlocks true to scan through blocks
-     * @return TargetEntityInfo about the entity being targeted,
-     *     or null if no entity is targeted
-     */
-    @Nullable
-    public com.destroystokyo.paper.entity.TargetEntityInfo getTargetEntityInfo(int maxDistance, boolean ignoreBlocks);
-    // Paper end
-
     /**
      * Gets the last two blocks along the living entity's line of sight.
      * <p>
-     * The target block will be the last block in the list. This method
-     * considers all blocks as 1x1x1 in size.
+     * The target block will be the last block in the list.
      *
      * @param transparent HashSet containing all transparent block Materials (set to
      *     null for only air)
@@ -207,68 +80,6 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
      *     line of sight
      */
     public List<Block> getLastTwoTargetBlocks(Set<Material> transparent, int maxDistance);
-
-    /**
-     * Gets the block that the living entity has targeted.
-     * <p>
-     * This takes the blocks' precise collision shapes into account. Fluids are
-     * ignored.
-     * <p>
-     * This may cause loading of chunks! Some implementations may impose
-     * artificial restrictions on the maximum distance.
-     *
-     * @param maxDistance the maximum distance to scan
-     * @return block that the living entity has targeted
-     * @see #getTargetBlockExact(int, org.bukkit.FluidCollisionMode)
-     */
-    public Block getTargetBlockExact(int maxDistance);
-
-    /**
-     * Gets the block that the living entity has targeted.
-     * <p>
-     * This takes the blocks' precise collision shapes into account.
-     * <p>
-     * This may cause loading of chunks! Some implementations may impose
-     * artificial restrictions on the maximum distance.
-     *
-     * @param maxDistance the maximum distance to scan
-     * @param fluidCollisionMode the fluid collision mode
-     * @return block that the living entity has targeted
-     * @see #rayTraceBlocks(double, FluidCollisionMode)
-     */
-    public Block getTargetBlockExact(int maxDistance, FluidCollisionMode fluidCollisionMode);
-
-    /**
-     * Performs a ray trace that provides information on the targeted block.
-     * <p>
-     * This takes the blocks' precise collision shapes into account. Fluids are
-     * ignored.
-     * <p>
-     * This may cause loading of chunks! Some implementations may impose
-     * artificial restrictions on the maximum distance.
-     *
-     * @param maxDistance the maximum distance to scan
-     * @return information on the targeted block, or <code>null</code> if there
-     *     is no targeted block in range
-     * @see #rayTraceBlocks(double, FluidCollisionMode)
-     */
-    public RayTraceResult rayTraceBlocks(double maxDistance);
-
-    /**
-     * Performs a ray trace that provides information on the targeted block.
-     * <p>
-     * This takes the blocks' precise collision shapes into account.
-     * <p>
-     * This may cause loading of chunks! Some implementations may impose
-     * artificial restrictions on the maximum distance.
-     *
-     * @param maxDistance the maximum distance to scan
-     * @param fluidCollisionMode the fluid collision mode
-     * @return information on the targeted block, or <code>null</code> if there
-     *     is no targeted block in range
-     * @see World#rayTraceBlocks(Location, Vector, double, FluidCollisionMode)
-     */
-    public RayTraceResult rayTraceBlocks(double maxDistance, FluidCollisionMode fluidCollisionMode);
 
     /**
      * Returns the amount of air that the living entity has remaining, in
@@ -356,15 +167,6 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
      * @return killer player, or null if none found
      */
     public Player getKiller();
-
-    // Paper start
-    /**
-     * Sets the player identified as the killer of the living entity.
-     *
-     * @param killer player
-     */
-    public void setKiller(@Nullable Player killer);
-    // Paper end
 
     /**
      * Adds the given {@link PotionEffect} to the living entity.
@@ -523,29 +325,6 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
     public void setGliding(boolean gliding);
 
     /**
-     * Checks to see if an entity is swimming.
-     *
-     * @return True if this entity is swimming.
-     */
-    public boolean isSwimming();
-
-    /**
-     * Makes entity start or stop swimming.
-     *
-     * This may have unexpected results if the entity is not in water.
-     *
-     * @param swimming True if the entity is swimming.
-     */
-    public void setSwimming(boolean swimming);
-
-    /**
-     * Checks to see if an entity is currently using the Riptide enchantment.
-     *
-     * @return True if this entity is currently riptiding.
-     */
-    public boolean isRiptiding();
-
-    /**
      * Sets whether an entity will have AI.
      *
      * @param ai whether the mob will have AI or not.
@@ -580,59 +359,4 @@ public interface LivingEntity extends Attributable, Damageable, ProjectileSource
      * @return collision status
      */
     boolean isCollidable();
-
-    // Paper start
-    /**
-     * Get the number of arrows stuck in this entity
-     * @return Number of arrows stuck
-     */
-    int getArrowsStuck();
-
-    /**
-     * Set the number of arrows stuck in this entity
-     *
-     * @param arrows Number of arrows to stick in this entity
-     */
-    void setArrowsStuck(int arrows);
-
-    /**
-     * Get the delay (in ticks) before blocking is effective for this entity
-     *
-     * @return Delay in ticks
-     */
-    int getShieldBlockingDelay();
-
-    /**
-     * Set the delay (in ticks) before blocking is effective for this entity
-     *
-     * @param delay Delay in ticks
-     */
-    void setShieldBlockingDelay(int delay);
-
-    /**
-     * Get's the item being actively "used" or consumed.
-     * @return The item. Will be null if no active item.
-     */
-    ItemStack getActiveItem();
-
-    /**
-     * Get's remaining time a player needs to keep hands raised with an item to finish using it.
-     * @return Remaining ticks to use the item
-     */
-    int getItemUseRemainingTime();
-
-    /**
-     * Get how long the players hands have been raised (Charging Bow attack, using a potion, etc)
-     *
-     * @return Get how long the players hands have been raised (Charging Bow attack, using a potion, etc)
-     */
-    int getHandRaisedTime();
-
-    /**
-     * Whether or not this entity is using or charging an attack (Bow pulled back, drinking potion, eating food)
-     *
-     * @return Whether or not this entity is using or charging an attack (Bow pulled back, drinking potion, eating food)
-     */
-    boolean isHandRaised();
-    // Paper end
 }

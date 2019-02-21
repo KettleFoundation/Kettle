@@ -1,11 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockChest;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.ITileInventory;
-import net.minecraft.server.InventoryLargeChest;
-import net.minecraft.server.TileEntityChest;
-
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -13,9 +9,8 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest;
 import org.bukkit.inventory.Inventory;
-import com.destroystokyo.paper.loottable.PaperLootableBlockInventory; // Paper
 
-public class CraftChest extends CraftLootable<TileEntityChest> implements Chest, PaperLootableBlockInventory { // Paper
+public class CraftChest extends CraftLootable<TileEntityChest> implements Chest {
 
     public CraftChest(final Block block) {
         super(block, TileEntityChest.class);
@@ -47,13 +42,35 @@ public class CraftChest extends CraftLootable<TileEntityChest> implements Chest,
         }
 
         // The logic here is basically identical to the logic in BlockChest.interact
+        int x = this.getX();
+        int y = this.getY();
+        int z = this.getZ();
         CraftWorld world = (CraftWorld) this.getWorld();
 
-        BlockChest blockChest = (BlockChest) (this.getType() == Material.CHEST ? Blocks.CHEST : Blocks.TRAPPED_CHEST);
-        ITileInventory nms = blockChest.getInventory(data, world.getHandle(), this.getPosition(), true);
+        int id;
+        if (world.getBlockTypeIdAt(x, y, z) == Material.CHEST.getId()) {
+            id = Material.CHEST.getId();
+        } else if (world.getBlockTypeIdAt(x, y, z) == Material.TRAPPED_CHEST.getId()) {
+            id = Material.TRAPPED_CHEST.getId();
+        } else {
+            throw new IllegalStateException("CraftChest is not a chest but is instead " + world.getBlockAt(x, y, z));
+        }
 
-        if (nms instanceof InventoryLargeChest) {
-            inventory = new CraftInventoryDoubleChest((InventoryLargeChest) nms);
+        if (world.getBlockTypeIdAt(x - 1, y, z) == id) {
+            CraftInventory left = new CraftInventory((TileEntityChest) world.getHandle().getTileEntity(new BlockPos(x - 1, y, z)));
+            inventory = new CraftInventoryDoubleChest(left, inventory);
+        }
+        if (world.getBlockTypeIdAt(x + 1, y, z) == id) {
+            CraftInventory right = new CraftInventory((TileEntityChest) world.getHandle().getTileEntity(new BlockPos(x + 1, y, z)));
+            inventory = new CraftInventoryDoubleChest(inventory, right);
+        }
+        if (world.getBlockTypeIdAt(x, y, z - 1) == id) {
+            CraftInventory left = new CraftInventory((TileEntityChest) world.getHandle().getTileEntity(new BlockPos(x, y, z - 1)));
+            inventory = new CraftInventoryDoubleChest(left, inventory);
+        }
+        if (world.getBlockTypeIdAt(x, y, z + 1) == id) {
+            CraftInventory right = new CraftInventory((TileEntityChest) world.getHandle().getTileEntity(new BlockPos(x, y, z + 1)));
+            inventory = new CraftInventoryDoubleChest(inventory, right);
         }
         return inventory;
     }

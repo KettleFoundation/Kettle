@@ -3,7 +3,7 @@ package org.bukkit.potion;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Color;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -24,13 +24,12 @@ public class PotionEffect implements ConfigurationSerializable {
     private static final String TYPE = "effect";
     private static final String AMBIENT = "ambient";
     private static final String PARTICLES = "has-particles";
-    private static final String ICON = "has-icon";
     private final int amplifier;
     private final int duration;
     private final PotionEffectType type;
     private final boolean ambient;
     private final boolean particles;
-    private final boolean icon;
+    private final Color color;
 
     /**
      * Creates a potion effect.
@@ -40,16 +39,16 @@ public class PotionEffect implements ConfigurationSerializable {
      * @param amplifier the amplifier, see {@link PotionEffect#getAmplifier()}
      * @param ambient the ambient status, see {@link PotionEffect#isAmbient()}
      * @param particles the particle status, see {@link PotionEffect#hasParticles()}
-     * @param icon the icon status, see {@link PotionEffect#hasIcon()}
+     * @param color the particle color, see {@link PotionEffect#getColor()}
      */
-    public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles, boolean icon) {
+    public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles, Color color) {
         Validate.notNull(type, "effect type cannot be null");
         this.type = type;
         this.duration = duration;
         this.amplifier = amplifier;
         this.ambient = ambient;
         this.particles = particles;
-        this.icon = icon;
+        this.color = color;
     }
 
     /**
@@ -63,7 +62,7 @@ public class PotionEffect implements ConfigurationSerializable {
      * @param particles the particle status, see {@link PotionEffect#hasParticles()}
      */
     public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles) {
-        this(type, duration, amplifier, ambient, particles, particles);
+        this(type, duration, amplifier, ambient, particles, null);
     }
 
     /**
@@ -97,29 +96,8 @@ public class PotionEffect implements ConfigurationSerializable {
      * @param map the map to deserialize from
      */
     public PotionEffect(Map<String, Object> map) {
-        this(getEffectType(map), getInt(map, DURATION), getInt(map, AMPLIFIER), getBool(map, AMBIENT, false), getBool(map, PARTICLES, true), getBool(map, ICON, getBool(map, PARTICLES, true)));
+        this(getEffectType(map), getInt(map, DURATION), getInt(map, AMPLIFIER), getBool(map, AMBIENT, false), getBool(map, PARTICLES, true));
     }
-
-    // Paper start
-    public PotionEffect withType(PotionEffectType type) {
-        return new PotionEffect(type, duration, amplifier, ambient, particles, icon);
-    }
-    public PotionEffect withDuration(int duration) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, icon);
-    }
-    public PotionEffect withAmplifier(int amplifier) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, icon);
-    }
-    public PotionEffect withAmbient(boolean ambient) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, icon);
-    }
-    public PotionEffect withParticles(boolean particles) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, icon);
-    }
-    public PotionEffect withIcon(boolean icon) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, icon);
-    }
-    // Paper end
 
     private static PotionEffectType getEffectType(Map<?, ?> map) {
         int type = getInt(map, TYPE);
@@ -147,14 +125,13 @@ public class PotionEffect implements ConfigurationSerializable {
     }
 
     public Map<String, Object> serialize() {
-        return ImmutableMap.<String, Object>builder()
-            .put(TYPE, type.getId())
-            .put(DURATION, duration)
-            .put(AMPLIFIER, amplifier)
-            .put(AMBIENT, ambient)
-            .put(PARTICLES, particles)
-            .put(ICON, icon)
-            .build();
+        return ImmutableMap.<String, Object>of(
+            TYPE, type.getId(),
+            DURATION, duration,
+            AMPLIFIER, amplifier,
+            AMBIENT, ambient,
+            PARTICLES, particles
+        );
     }
 
     /**
@@ -178,7 +155,7 @@ public class PotionEffect implements ConfigurationSerializable {
             return false;
         }
         PotionEffect that = (PotionEffect) obj;
-        return this.type.equals(that.type) && this.ambient == that.ambient && this.amplifier == that.amplifier && this.duration == that.duration && this.particles == that.particles && this.icon == that.icon;
+        return this.type.equals(that.type) && this.ambient == that.ambient && this.amplifier == that.amplifier && this.duration == that.duration && this.particles == that.particles;
     }
 
     /**
@@ -229,18 +206,9 @@ public class PotionEffect implements ConfigurationSerializable {
 
     /**
      * @return color of this potion's particles. May be null if the potion has no particles or defined color.
-     * @deprecated color is not part of potion effects
      */
-     @Deprecated
     public Color getColor() {
-        return null;
-    }
-
-    /**
-     * @return whether this effect has an icon or not
-     */
-    public boolean hasIcon() {
-        return icon;
+        return color;
     }
 
     @Override
@@ -251,7 +219,6 @@ public class PotionEffect implements ConfigurationSerializable {
         hash = hash * 31 + duration;
         hash ^= 0x22222222 >> (ambient ? 1 : -1);
         hash ^= 0x22222222 >> (particles ? 1 : -1);
-        hash ^= 0x22222222 >> (icon ? 1 : -1);
         return hash;
     }
 

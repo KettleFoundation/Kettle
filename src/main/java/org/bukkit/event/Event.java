@@ -1,6 +1,5 @@
 package org.bukkit.event;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
 /**
@@ -34,22 +33,6 @@ public abstract class Event {
         this.async = isAsync;
     }
 
-    // Paper start
-    /**
-     * Calls the event and tests if cancelled.
-     *
-     * @return false if event was cancelled, if cancellable. otherwise true.
-     */
-    public boolean callEvent() {
-        Bukkit.getPluginManager().callEvent(this);
-        if (this instanceof Cancellable) {
-            return !((Cancellable) this).isCancelled();
-        } else {
-            return true;
-        }
-    }
-    // Paper end
-
     /**
      * Convenience method for providing a user-friendly identifier. By
      * default, it is the event's class's {@linkplain Class#getSimpleName()
@@ -73,7 +56,7 @@ public abstract class Event {
      * <ul>
      * <li>The event is never fired from inside code triggered by a
      *     synchronous event. Attempting to do so results in an {@link
-     *     java.lang.IllegalStateException}.
+     *     IllegalStateException}.
      * <li>However, asynchronous event handlers may fire synchronous or
      *     asynchronous events
      * <li>The event may be fired multiple times simultaneously and in any

@@ -4,8 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
+import net.minecraft.potion.Potion;
 
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -34,8 +33,6 @@ public class CraftPotionUtil {
             .put(PotionType.STRENGTH, "strength")
             .put(PotionType.WEAKNESS, "weakness")
             .put(PotionType.LUCK, "luck")
-            .put(PotionType.TURTLE_MASTER, "turtle_master")
-            .put(PotionType.SLOW_FALLING, "slow_falling")
             .build();
     private static final BiMap<PotionType, String> upgradeable = ImmutableBiMap.<PotionType, String>builder()
             .put(PotionType.JUMP, "strong_leaping")
@@ -45,8 +42,6 @@ public class CraftPotionUtil {
             .put(PotionType.POISON, "strong_poison")
             .put(PotionType.REGEN, "strong_regeneration")
             .put(PotionType.STRENGTH, "strong_strength")
-            .put(PotionType.SLOWNESS, "strong_slowness")
-            .put(PotionType.TURTLE_MASTER, "strong_turtle_master")
             .build();
     private static final BiMap<PotionType, String> extendable = ImmutableBiMap.<PotionType, String>builder()
             .put(PotionType.NIGHT_VISION, "long_night_vision")
@@ -60,8 +55,6 @@ public class CraftPotionUtil {
             .put(PotionType.REGEN, "long_regeneration")
             .put(PotionType.STRENGTH, "long_strength")
             .put(PotionType.WEAKNESS, "long_weakness")
-            .put(PotionType.TURTLE_MASTER, "long_turtle_master")
-            .put(PotionType.SLOW_FALLING, "long_slow_falling")
             .build();
 
     public static String fromBukkit(PotionData data) {
@@ -101,22 +94,22 @@ public class CraftPotionUtil {
         return new PotionData(PotionType.UNCRAFTABLE, false, false);
     }
 
-    public static MobEffect fromBukkit(PotionEffect effect) {
-        MobEffectList type = MobEffectList.fromId(effect.getType().getId());
-        return new MobEffect(type, effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
+    public static net.minecraft.potion.PotionEffect fromBukkit(PotionEffect effect) {
+        Potion type = Potion.getPotionById(effect.getType().getId());
+        return new net.minecraft.potion.PotionEffect(type, effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles());
     }
 
-    public static PotionEffect toBukkit(MobEffect effect) {
-        PotionEffectType type = PotionEffectType.getById(MobEffectList.getId(effect.getMobEffect()));
+    public static PotionEffect toBukkit(net.minecraft.potion.PotionEffect effect) {
+        PotionEffectType type = PotionEffectType.getById(Potion.getIdFromPotion(effect.getPotion()));
         int amp = effect.getAmplifier();
         int duration = effect.getDuration();
-        boolean ambient = effect.isAmbient();
-        boolean particles = effect.isShowParticles();
+        boolean ambient = effect.getIsAmbient();
+        boolean particles = effect.doesShowParticles();
         return new PotionEffect(type, duration, amp, ambient, particles);
     }
 
-    public static boolean equals(MobEffectList mobEffect, PotionEffectType type) {
-        PotionEffectType typeV = PotionEffectType.getById(MobEffectList.getId(mobEffect));
+    public static boolean equals(Potion mobEffect, PotionEffectType type) {
+        PotionEffectType typeV = PotionEffectType.getById(Potion.getIdFromPotion(mobEffect));
         return typeV.equals(type);
     }
 }

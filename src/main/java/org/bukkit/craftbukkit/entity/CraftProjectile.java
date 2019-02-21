@@ -1,14 +1,14 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityProjectile;
-
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.projectile.EntityThrowable;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Projectile;
 import org.bukkit.projectiles.ProjectileSource;
 
-public abstract class CraftProjectile extends AbstractProjectile implements Projectile {
-    public CraftProjectile(CraftServer server, net.minecraft.server.Entity entity) {
+public class CraftProjectile extends AbstractProjectile implements Projectile {
+    public CraftProjectile(CraftServer server, net.minecraft.entity.Entity entity) {
         super(server, entity);
     }
 
@@ -18,22 +18,29 @@ public abstract class CraftProjectile extends AbstractProjectile implements Proj
 
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof CraftLivingEntity) {
-            getHandle().shooter = (EntityLiving) ((CraftLivingEntity) shooter).entity;
-            getHandle().shooterId = ((CraftLivingEntity) shooter).getUniqueId();
+            getHandle().thrower = (EntityLiving) ((CraftLivingEntity) shooter).entity;
+            if (shooter instanceof CraftHumanEntity) {
+                getHandle().throwerName = ((CraftHumanEntity) shooter).getName();
+            }
         } else {
-            getHandle().shooter = null;
-            getHandle().shooterId = null;
+            getHandle().thrower = null;
+            getHandle().throwerName = null;
         }
         getHandle().projectileSource = shooter;
     }
 
     @Override
-    public EntityProjectile getHandle() {
-        return (EntityProjectile) entity;
+    public EntityThrowable getHandle() {
+        return (EntityThrowable) entity;
     }
 
     @Override
     public String toString() {
         return "CraftProjectile";
+    }
+
+    @Override
+    public EntityType getType() {
+        return EntityType.UNKNOWN;
     }
 }

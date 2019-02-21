@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.block;
 
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.EnumColor;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-import net.minecraft.server.TileEntityBanner;
+
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntityBanner;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
@@ -31,15 +31,13 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
     public void load(TileEntityBanner banner) {
         super.load(banner);
 
-        if (banner.color != null) {
-            base = DyeColor.getByWoolData((byte) banner.color.getColorIndex());
-        }
+        base = DyeColor.getByDyeData((byte) banner.baseColor.getDyeDamage());
         patterns = new ArrayList<Pattern>();
 
         if (banner.patterns != null) {
-            for (int i = 0; i < banner.patterns.size(); i++) {
+            for (int i = 0; i < banner.patterns.tagCount(); i++) {
                 NBTTagCompound p = (NBTTagCompound) banner.patterns.get(i);
-                patterns.add(new Pattern(DyeColor.getByWoolData((byte) p.getInt("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
+                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInteger("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
             }
         }
     }
@@ -51,7 +49,6 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
 
     @Override
     public void setBaseColor(DyeColor color) {
-        Preconditions.checkArgument(color != null, "color");
         this.base = color;
     }
 
@@ -94,15 +91,15 @@ public class CraftBanner extends CraftBlockEntityState<TileEntityBanner> impleme
     public void applyTo(TileEntityBanner banner) {
         super.applyTo(banner);
 
-        banner.color = EnumColor.fromColorIndex(base.getWoolData());
+        banner.baseColor = EnumDyeColor.byDyeDamage(base.getDyeData());
 
         NBTTagList newPatterns = new NBTTagList();
 
         for (Pattern p : patterns) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setInt("Color", p.getColor().getWoolData());
+            compound.setInteger("Color", p.getColor().getDyeData());
             compound.setString("Pattern", p.getPattern().getIdentifier());
-            newPatterns.add(compound);
+            newPatterns.appendTag(compound);
         }
         banner.patterns = newPatterns;
     }

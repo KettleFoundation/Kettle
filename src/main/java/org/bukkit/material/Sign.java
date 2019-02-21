@@ -8,11 +8,30 @@ import org.bukkit.Material;
  */
 public class Sign extends MaterialData implements Attachable {
     public Sign() {
-        super(Material.LEGACY_SIGN_POST);
+        super(Material.SIGN_POST);
+    }
+
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Sign(final int type) {
+        super(type);
     }
 
     public Sign(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Sign(final int type, final byte data) {
+        super(type, data);
     }
 
     /**
@@ -32,7 +51,7 @@ public class Sign extends MaterialData implements Attachable {
      *     a block
      */
     public boolean isWallSign() {
-        return getItemType() == Material.LEGACY_WALL_SIGN;
+        return getItemType() == Material.WALL_SIGN;
     }
 
     /**

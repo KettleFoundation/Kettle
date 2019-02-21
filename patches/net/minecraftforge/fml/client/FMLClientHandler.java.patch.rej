@@ -1,0 +1,20 @@
+++++ REJECTED PATCH 1
+             boolean moddedClientAllowed = true;
+             if (!Strings.isNullOrEmpty(serverDescription))
+             {
+-                moddedClientAllowed = !serverDescription.endsWith(":NOFMLÂ§r");
++                moddedClientAllowed = !serverDescription.endsWith(":NOFMLï¿½r");
+             }
+             serverDataTag.put(data, new ExtendedServerListData("VANILLA", false, ImmutableMap.of(), !moddedClientAllowed));
+         }
+++++ END PATCH
+++++ REJECTED PATCH 2
+ 
+     public String fixDescription(String description)
+     {
+-        return description.endsWith(":NOFMLÂ§r") ? description.substring(0, description.length() - 8)+"Â§r" : description;
++        return description.endsWith(":NOFMLï¿½r") ? description.substring(0, description.length() - 8)+"ï¿½r" : description;
+     }
+ 
+     public void connectToServerAtStartup(String host, int port)
+++++ END PATCH

@@ -1,11 +1,9 @@
 package org.bukkit;
 
+import java.util.List;
+
 import org.bukkit.advancement.Advancement;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.plugin.InvalidPluginException;
-import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
  * This interface provides value conversions that may be specific to a
@@ -18,23 +16,17 @@ import org.bukkit.plugin.PluginDescriptionFile;
 @Deprecated
 public interface UnsafeValues {
 
-    Material toLegacy(Material material);
+    Material getMaterialFromInternalName(String name);
 
-    Material fromLegacy(Material material);
-
-    Material fromLegacy(MaterialData material);
-
-    Material fromLegacy(MaterialData material, boolean itemPriority);
-
-    BlockData fromLegacy(Material material, byte data);
-
-    int getDataVersion();
+    List<String> tabCompleteInternalMaterialName(String token, List<String> completions);
 
     ItemStack modifyItemStack(ItemStack stack, String arguments);
 
-    void checkSupported(PluginDescriptionFile pdf) throws InvalidPluginException;
+    Statistic getStatisticFromInternalName(String name);
 
-    byte[] processClass(PluginDescriptionFile pdf, String path, byte[] clazz);
+    Achievement getAchievementFromInternalName(String name);
+
+    List<String> tabCompleteInternalStatisticOrAchievementName(String token, List<String> completions);
 
     /**
      * Load an advancement represented by the specified string into the server.
@@ -57,7 +49,7 @@ public interface UnsafeValues {
 
     /**
      * Delete an advancement which was loaded and saved by
-     * {@link #loadAdvancement(org.bukkit.NamespacedKey, java.lang.String)}.
+     * {@link #loadAdvancement(NamespacedKey, String)}.
      * <br>
      * This method will only remove advancement from persistent storage. It
      * should be accompanied by a call to {@link Server#reloadData()} in order
@@ -67,10 +59,4 @@ public interface UnsafeValues {
      * @return true if a file matching this key was found and deleted
      */
     boolean removeAdvancement(NamespacedKey key);
-
-    // Paper start - Add legacy check util
-    static boolean isLegacyPlugin(org.bukkit.plugin.Plugin plugin) {
-        return !("1.13".equals(plugin.getDescription().getAPIVersion()));
-    }
-    // Paper end
 }

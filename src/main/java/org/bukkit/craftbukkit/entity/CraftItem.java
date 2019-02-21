@@ -1,18 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.Entity;
-import net.minecraft.server.EntityItem;
-
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.CraftServer;
-
-// Paper start
-import javax.annotation.Nullable;
-import java.util.UUID;
-// Paper end
 
 public class CraftItem extends CraftEntity implements Item {
     private final EntityItem item;
@@ -27,11 +21,11 @@ public class CraftItem extends CraftEntity implements Item {
     }
 
     public ItemStack getItemStack() {
-        return CraftItemStack.asCraftMirror(item.getItemStack());
+        return CraftItemStack.asCraftMirror(item.getItem());
     }
 
     public void setItemStack(ItemStack stack) {
-        item.setItemStack(CraftItemStack.asNMSCopy(stack));
+        item.setItem(CraftItemStack.asNMSCopy(stack));
     }
 
     public int getPickupDelay() {
@@ -41,42 +35,6 @@ public class CraftItem extends CraftEntity implements Item {
     public void setPickupDelay(int delay) {
         item.pickupDelay = Math.min(delay, Short.MAX_VALUE);
     }
-
-    @Override
-    public void setTicksLived(int value) {
-        super.setTicksLived(value);
-
-        // Second field for EntityItem
-        item.age = value;
-    }
-
-    // Paper Start
-    public boolean canMobPickup() {
-        return item.canMobPickup;
-    }
-
-    public void setCanMobPickup(boolean canMobPickup) {
-        item.canMobPickup = canMobPickup;
-    }
-
-    @Nullable
-    public UUID getOwner() {
-        return item.getOwner();
-    }
-
-    public void setOwner(@Nullable UUID owner) {
-        item.setOwner(owner);
-    }
-
-    @Nullable
-    public UUID getThrower() {
-        return item.getThrower();
-    }
-
-    public void setThrower(@Nullable UUID thrower) {
-        item.setThrower(thrower);
-    }
-    // Paper End
 
     @Override
     public String toString() {

@@ -18,9 +18,7 @@ public interface Banner extends BlockState {
     DyeColor getBaseColor();
 
     /**
-     * Sets the base color for this banner.
-     * <b>Only valid for shield pseudo banners, otherwise base depends on block
-     * type</b>
+     * Sets the base color for this banner
      *
      * @param color the base color
      */

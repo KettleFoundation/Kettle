@@ -7,20 +7,18 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import net.minecraft.server.MinecraftServer;
-import net.minecrell.terminalconsole.TerminalConsoleAppender; // Paper
+//import org.fusesource.jansi.AnsiConsole;
 
 public class Main {
     public static boolean useJline = true;
     public static boolean useConsole = true;
 
-    public static void main(String[] args) {
+    public static OptionSet main(String[] args) {
         // Todo: Installation script
         OptionParser parser = new OptionParser() {
             {
@@ -111,8 +109,6 @@ public class Main {
                         .defaultsTo(new File("commands.yml"))
                         .describedAs("Yml file");
 
-                acceptsAll(asList("forceUpgrade"), "Whether to force a world upgrade");
-
                 acceptsAll(asList("nojline"), "Disables jline and emulates the vanilla console");
 
                 acceptsAll(asList("noconsole"), "Disables the console");
@@ -129,21 +125,7 @@ public class Main {
                         .describedAs("Yml file");
                 // Spigot End
 
-                // Paper Start
-                acceptsAll(asList("paper", "paper-settings"), "File for paper settings")
-                        .withRequiredArg()
-                        .ofType(File.class)
-                        .defaultsTo(new File("paper.yml"))
-                        .describedAs("Yml file");
-                // Paper end
-
-                // Paper start
-                acceptsAll(asList("server-name"), "Name of the server")
-                        .withRequiredArg()
-                        .ofType(String.class)
-                        .defaultsTo("Unknown Server")
-                        .describedAs("Name");
-                // Paper end
+                acceptsAll(asList("mixin"), "This argument is needed for proper Mixin Framework work in the test env");
             }
         };
 
@@ -161,25 +143,15 @@ public class Main {
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else if (options.has("v")) {
-            System.out.println(CraftServer.class.getPackage().getImplementationVersion());
         } else {
             // Do you love Java using + and ! as string based identifiers? I sure do!
             String path = new File(".").getAbsolutePath();
             if (path.contains("!") || path.contains("+")) {
                 System.err.println("Cannot run server in a directory with ! or + in the pathname. Please rename the affected folders and try again.");
-                return;
-            }
-
-            float javaVersion = Float.parseFloat(System.getProperty("java.class.version"));
-            if (javaVersion > 55.0) {
-                System.err.println("Unsupported Java detected (" + javaVersion + "). Only up to Java 11 is supported.");
-                return;
+                return null;
             }
 
             try {
-                // Paper start - Handled by TerminalConsoleAppender
-                /*
                 // This trick bypasses Maven Shade's clever rewriting of our getProperty call when using String literals
                 String jline_UnsupportedTerminal = new String(new char[] {'j','l','i','n','e','.','U','n','s','u','p','p','o','r','t','e','d','T','e','r','m','i','n','a','l'});
                 String jline_terminal = new String(new char[] {'j','l','i','n','e','.','t','e','r','m','i','n','a','l'});
@@ -191,6 +163,7 @@ public class Main {
                     useJline = false;
                 }
 
+                /*
                 if (useJline) {
                     AnsiConsole.systemInstall();
                 } else {
@@ -199,52 +172,31 @@ public class Main {
                 }
                 */
 
-                if (options.has("nojline")) {
-                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false");
-                    useJline = false;
-                }
-                // Paper end
-
                 if (options.has("noconsole")) {
                     useConsole = false;
-                    useJline = false; // Paper
-                    System.setProperty(TerminalConsoleAppender.JLINE_OVERRIDE_PROPERTY, "false"); // Paper
                 }
 
                 if (Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
                     Date buildDate = new SimpleDateFormat("yyyyMMdd-HHmm").parse(Main.class.getPackage().getImplementationVendor());
 
                     Calendar deadline = Calendar.getInstance();
-                    deadline.add(Calendar.DAY_OF_YEAR, -21);
+                    deadline.add(Calendar.DAY_OF_YEAR, -14);
                     if (buildDate.before(deadline.getTime())) {
-                        // Paper start - This is some stupid bullshit
-                        System.err.println("*** Warning, you've not updated in a while! ***");
-                        System.err.println("*** Please download a new build as per instructions from https://papermc.io/downloads ***"); // Paper
-                        //System.err.println("*** Server will start in 20 seconds ***");
-                        //Thread.sleep(TimeUnit.SECONDS.toMillis(20));
-                        // Paper End
+                        System.err.println("*** Error, this build is outdated ***");
+                        System.err.println("*** Please download a new build as per instructions from https://www.spigotmc.org/ ***");
+                        System.err.println("*** Server will start in 15 seconds ***");
+                        Thread.sleep(TimeUnit.SECONDS.toMillis(15));
                     }
                 }
 
-                // Paper start - Log Java and OS versioning to help with debugging plugin issues
-                java.lang.management.RuntimeMXBean runtimeMX = java.lang.management.ManagementFactory.getRuntimeMXBean();
-                java.lang.management.OperatingSystemMXBean osMX = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-                if (runtimeMX != null && osMX != null) {
-                    String javaInfo = "Java " + runtimeMX.getSpecVersion() + " (" + runtimeMX.getVmName() + " " + runtimeMX.getVmVersion() + ")";
-                    String osInfo = "Host:  " + osMX.getName() + " " + osMX.getVersion() + " (" + osMX.getArch() + ")";
-
-                    System.out.println("System Info: " + javaInfo + " " + osInfo);
-                } else {
-                    System.out.println("Unable to read system info");
-                }
-                // Paper end
-
                 System.out.println("Loading libraries, please wait...");
-                MinecraftServer.main(options);
+                // MinecraftServer.main(options);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
+            return options;
         }
+        return null;
     }
 
     private static List<String> asList(String... params) {

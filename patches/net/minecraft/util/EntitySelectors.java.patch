@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/util/EntitySelectors.java
++++ ../src-work/minecraft/net/minecraft/util/EntitySelectors.java
+@@ -161,7 +161,7 @@
+                     }
+                     else if (entitylivingbase instanceof EntityLiving)
+                     {
+-                        return ((EntityLiving)entitylivingbase).canPickUpLoot();
++                        return ((EntityLiving)entitylivingbase).thisisatestof();
+                     }
+                     else if (entitylivingbase instanceof EntityArmorStand)
+                     {

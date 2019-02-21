@@ -7,11 +7,30 @@ import org.bukkit.Material;
  */
 public class PressurePlate extends MaterialData implements PressureSensor {
     public PressurePlate() {
-        super(Material.LEGACY_WOOD_PLATE);
+        super(Material.WOOD_PLATE);
+    }
+
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public PressurePlate(int type) {
+        super(type);
     }
 
     public PressurePlate(Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public PressurePlate(int type, byte data) {
+        super(type, data);
     }
 
     /**

@@ -1,0 +1,102 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/WorldInfo.java
++++ ../src-work/minecraft/net/minecraft/world/storage/WorldInfo.java
+@@ -6,7 +6,9 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.crash.CrashReportCategory;
+ import net.minecraft.crash.ICrashReportDetail;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.network.play.server.SPacketServerDifficulty;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.datafix.DataFixer;
+ import net.minecraft.util.datafix.FixTypes;
+@@ -17,10 +19,14 @@
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.GameType;
++import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldSettings;
+ import net.minecraft.world.WorldType;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Bukkit;
++import org.bukkit.event.weather.ThunderChangeEvent;
++import org.bukkit.event.weather.WeatherChangeEvent;
+ 
+ public class WorldInfo
+ {
+@@ -65,8 +71,10 @@
+     private int borderWarningTime = 15;
+     private final Map<Integer, NBTTagCompound> dimensionData = Maps.newHashMap();
+     private GameRules gameRules = new GameRules();
+-    private java.util.Map<String, net.minecraft.nbt.NBTBase> additionalProperties;
++    private Map<String, net.minecraft.nbt.NBTBase> additionalProperties;
+ 
++    public WorldServer world;
++
+     protected WorldInfo()
+     {
+     }
+@@ -511,6 +519,14 @@
+ 
+     public void setThundering(boolean thunderingIn)
+     {
++        org.bukkit.World world = Bukkit.getWorld(getWorldName());
++        if (world != null) {
++            ThunderChangeEvent thunder = new ThunderChangeEvent(world, thunderingIn);
++            Bukkit.getServer().getPluginManager().callEvent(thunder);
++            if (thunder.isCancelled()) {
++                return;
++            }
++        }
+         this.thundering = thunderingIn;
+     }
+ 
+@@ -531,6 +547,14 @@
+ 
+     public void setRaining(boolean isRaining)
+     {
++        org.bukkit.World world = Bukkit.getWorld(getWorldName());
++        if (world != null) {
++            WeatherChangeEvent weather = new WeatherChangeEvent(world, isRaining);
++            Bukkit.getServer().getPluginManager().callEvent(weather);
++            if (weather.isCancelled()) {
++                return;
++            }
++        }
+         this.raining = isRaining;
+     }
+ 
+@@ -712,6 +736,10 @@
+     public void setDifficulty(EnumDifficulty newDifficulty)
+     {
+         net.minecraftforge.common.ForgeHooks.onDifficultyChange(newDifficulty, this.difficulty);
++        SPacketServerDifficulty packet = new SPacketServerDifficulty(this.getDifficulty(), this.isDifficultyLocked());
++        for (EntityPlayerMP player :(java.util.List<EntityPlayerMP>) (java.util.List) world.playerEntities) {
++            player.connection.sendPacket(packet);
++        }
+         this.difficulty = newDifficulty;
+     }
+ 
+@@ -815,7 +843,7 @@
+      * Used by Forge to store the dimensions available to a world
+      * @param additionalProperties
+      */
+-    public void setAdditionalProperties(java.util.Map<String,net.minecraft.nbt.NBTBase> additionalProperties)
++    public void setAdditionalProperties(Map<String,net.minecraft.nbt.NBTBase> additionalProperties)
+     {
+         // one time set for this
+         if (this.additionalProperties == null)
+@@ -869,4 +897,12 @@
+     {
+         return this.versionName;
+     }
++
++    // CraftBukkit start - Check if the name stored in NBT is the correct one
++    public void checkName(String name) {
++        if (!this.levelName.equals(name)) {
++            this.levelName = name;
++        }
++    }
++    // CraftBukkit end
+ }

@@ -1,0 +1,10 @@
+++++ REJECTED PATCH 1
+         {
+             if (time < 1000)
+             {
+-                return "Âµs";
++                return "ï¿½s";
+             }
+             else
+             {
+++++ END PATCH

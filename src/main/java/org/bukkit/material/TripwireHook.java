@@ -9,16 +9,25 @@ import org.bukkit.block.BlockFace;
 public class TripwireHook extends SimpleAttachableMaterialData implements Redstone {
 
     public TripwireHook() {
-        super(Material.LEGACY_TRIPWIRE_HOOK);
+        super(Material.TRIPWIRE_HOOK);
     }
 
     /**
-     * @param type the type
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public TripwireHook(final int type) {
+        super(type);
+    }
+
+    /**
+     * @param type the raw type id
      * @param data the raw data value
      * @deprecated Magic value
      */
     @Deprecated
-    public TripwireHook(final Material type, final byte data) {
+    public TripwireHook(final int type, final byte data) {
         super(type, data);
     }
 

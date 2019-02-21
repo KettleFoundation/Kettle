@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,7 +42,7 @@ public abstract class JavaPlugin extends PluginBase {
     private boolean naggable = true;
     private FileConfiguration newConfig = null;
     private File configFile = null;
-    Logger logger = null; // Paper - PluginLogger -> Logger, package-private
+    private PluginLogger logger = null;
 
     public JavaPlugin() {
         final ClassLoader classLoader = this.getClass().getClassLoader();
@@ -139,12 +139,14 @@ public abstract class JavaPlugin extends PluginBase {
      * @throws IllegalArgumentException if file is null
      * @see ClassLoader#getResourceAsStream(String)
      */
+    @SuppressWarnings("deprecation")
     protected final Reader getTextResource(String file) {
         final InputStream in = getResource(file);
 
         return in == null ? null : new InputStreamReader(in, Charsets.UTF_8);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void reloadConfig() {
         newConfig = YamlConfiguration.loadConfiguration(configFile);
@@ -267,11 +269,7 @@ public abstract class JavaPlugin extends PluginBase {
         this.dataFolder = dataFolder;
         this.classLoader = classLoader;
         this.configFile = new File(dataFolder, "config.yml");
-        // Paper start
-        if (this.logger == null) {
-            this.logger = com.destroystokyo.paper.utils.PaperPluginLogger.getLogger(this.description);
-        }
-        // Paper end
+        this.logger = new PluginLogger(this);
     }
 
     /**
@@ -338,7 +336,7 @@ public abstract class JavaPlugin extends PluginBase {
     }
 
     @Override
-    public Logger getLogger() {
+    public final Logger getLogger() {
         return logger;
     }
 

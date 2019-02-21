@@ -1,14 +1,13 @@
 package org.bukkit.enchantments;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 /**
  * A simple wrapper for ease of selecting {@link Enchantment}s
  */
 public class EnchantmentWrapper extends Enchantment {
-    public EnchantmentWrapper(String name) {
-        super(NamespacedKey.minecraft(name));
+    public EnchantmentWrapper(int id) {
+        super(id);
     }
 
     /**
@@ -17,7 +16,7 @@ public class EnchantmentWrapper extends Enchantment {
      * @return Enchantment
      */
     public Enchantment getEnchantment() {
-        return Enchantment.getByKey(getKey());
+        return Enchantment.getById(getId());
     }
 
     @Override

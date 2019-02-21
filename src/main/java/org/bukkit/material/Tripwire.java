@@ -8,16 +8,25 @@ import org.bukkit.Material;
 public class Tripwire extends MaterialData {
 
     public Tripwire() {
-        super(Material.LEGACY_TRIPWIRE);
+        super(Material.TRIPWIRE);
     }
 
     /**
-     * @param type the type
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Tripwire(final int type) {
+        super(type);
+    }
+
+    /**
+     * @param type the raw type id
      * @param data the raw data value
      * @deprecated Magic value
      */
     @Deprecated
-    public Tripwire(final Material type, final byte data) {
+    public Tripwire(final int type, final byte data) {
         super(type, data);
     }
 

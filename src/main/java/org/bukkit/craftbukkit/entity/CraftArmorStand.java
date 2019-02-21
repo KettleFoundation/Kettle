@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityArmorStand;
-import net.minecraft.server.Vector3f;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.util.math.Rotations;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -30,13 +30,11 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
     }
 
     @Override
-    @Deprecated // Paper
     public ItemStack getItemInHand() {
         return getEquipment().getItemInHand();
     }
 
     @Override
-    @Deprecated // Paper
     public void setItemInHand(ItemStack item) {
         getEquipment().setItemInHand(item);
     }
@@ -83,79 +81,79 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
 
     @Override
     public EulerAngle getBodyPose() {
-        return fromNMS(getHandle().bodyPose);
+        return fromNMS(getHandle().bodyRotation);
     }
 
     @Override
     public void setBodyPose(EulerAngle pose) {
-        getHandle().setBodyPose(toNMS(pose));
+        getHandle().setBodyRotation(toNMS(pose));
     }
 
     @Override
     public EulerAngle getLeftArmPose() {
-        return fromNMS(getHandle().leftArmPose);
+        return fromNMS(getHandle().leftArmRotation);
     }
 
     @Override
     public void setLeftArmPose(EulerAngle pose) {
-        getHandle().setLeftArmPose(toNMS(pose));
+        getHandle().setLeftArmRotation(toNMS(pose));
     }
 
     @Override
     public EulerAngle getRightArmPose() {
-        return fromNMS(getHandle().rightArmPose);
+        return fromNMS(getHandle().rightArmRotation);
     }
 
     @Override
     public void setRightArmPose(EulerAngle pose) {
-        getHandle().setRightArmPose(toNMS(pose));
+        getHandle().setRightArmRotation(toNMS(pose));
     }
 
     @Override
     public EulerAngle getLeftLegPose() {
-        return fromNMS(getHandle().leftLegPose);
+        return fromNMS(getHandle().leftLegRotation);
     }
 
     @Override
     public void setLeftLegPose(EulerAngle pose) {
-        getHandle().setLeftLegPose(toNMS(pose));
+        getHandle().setLeftLegRotation(toNMS(pose));
     }
 
     @Override
     public EulerAngle getRightLegPose() {
-        return fromNMS(getHandle().rightLegPose);
+        return fromNMS(getHandle().rightLegRotation);
     }
 
     @Override
     public void setRightLegPose(EulerAngle pose) {
-        getHandle().setRightLegPose(toNMS(pose));
+        getHandle().setRightLegRotation(toNMS(pose));
     }
 
     @Override
     public EulerAngle getHeadPose() {
-        return fromNMS(getHandle().headPose);
+        return fromNMS(getHandle().headRotation);
     }
 
     @Override
     public void setHeadPose(EulerAngle pose) {
-        getHandle().setHeadPose(toNMS(pose));
+        getHandle().setHeadRotation(toNMS(pose));
     }
 
     @Override
     public boolean hasBasePlate() {
-        return !getHandle().hasBasePlate();
+        return !getHandle().hasNoBasePlate();
     }
 
     @Override
     public void setBasePlate(boolean basePlate) {
-        getHandle().setBasePlate(!basePlate);
+        getHandle().setNoBasePlate(!basePlate);
     }
 
     @Override
     public void setGravity(boolean gravity) {
         super.setGravity(gravity);
         // Armor stands are special
-        getHandle().noclip = !gravity;
+        getHandle().noClip = !gravity;
     }
 
     @Override
@@ -170,12 +168,12 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
 
     @Override
     public boolean hasArms() {
-        return getHandle().hasArms();
+        return getHandle().getShowArms();
     }
 
     @Override
     public void setArms(boolean arms) {
-        getHandle().setArms(arms);
+        getHandle().setShowArms(arms);
     }
 
     @Override
@@ -188,7 +186,7 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
         getHandle().setSmall(small);
     }
 
-    private static EulerAngle fromNMS(Vector3f old) {
+    private static EulerAngle fromNMS(Rotations old) {
         return new EulerAngle(
             Math.toRadians(old.getX()),
             Math.toRadians(old.getY()),
@@ -196,8 +194,8 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
         );
     }
 
-    private static Vector3f toNMS(EulerAngle old) {
-        return new Vector3f(
+    private static Rotations toNMS(EulerAngle old) {
+        return new Rotations(
             (float) Math.toDegrees(old.getX()),
             (float) Math.toDegrees(old.getY()),
             (float) Math.toDegrees(old.getZ())
@@ -206,106 +204,11 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
 
     @Override
     public boolean isMarker() {
-        return getHandle().isMarker();
+        return getHandle().hasMarker();
     }
 
     @Override
     public void setMarker(boolean marker) {
         getHandle().setMarker(marker);
     }
-
-    // Paper start
-    @Override
-    public boolean canMove() {
-        return getHandle().canMove;
-    }
-
-    @Override
-    public void setCanMove(boolean move) {
-        getHandle().canMove = move;
-    }
-
-    @Override
-    public ItemStack getItem(org.bukkit.inventory.EquipmentSlot slot) {
-        com.google.common.base.Preconditions.checkNotNull(slot, "slot");
-        return getHandle().getEquipment(org.bukkit.craftbukkit.CraftEquipmentSlot.getNMS(slot)).asBukkitMirror();
-    }
-
-    @Override
-    public void setItem(org.bukkit.inventory.EquipmentSlot slot, ItemStack item) {
-        com.google.common.base.Preconditions.checkNotNull(slot, "slot");
-        switch (slot) {
-            case HAND:
-                getEquipment().setItemInMainHand(item);
-                return;
-            case OFF_HAND:
-                getEquipment().setItemInOffHand(item);
-                return;
-            case FEET:
-                setBoots(item);
-                return;
-            case LEGS:
-                setLeggings(item);
-                break;
-            case CHEST:
-                setChestplate(item);
-                return;
-            case HEAD:
-                setHelmet(item);
-                return;
-        }
-        throw new UnsupportedOperationException(slot.name());
-    }
-
-    @Override
-    public java.util.Set<org.bukkit.inventory.EquipmentSlot> getDisabledSlots() {
-        java.util.Set<org.bukkit.inventory.EquipmentSlot> disabled = new java.util.HashSet<>();
-        for (org.bukkit.inventory.EquipmentSlot slot : org.bukkit.inventory.EquipmentSlot.values()) {
-            if (this.isSlotDisabled(slot)) {
-                disabled.add(slot);
-            }
-        }
-        return disabled;
-    }
-
-    @Override
-    public void setDisabledSlots(org.bukkit.inventory.EquipmentSlot... slots) {
-        int disabled = 0;
-        for (org.bukkit.inventory.EquipmentSlot slot : slots) {
-            if (slot == org.bukkit.inventory.EquipmentSlot.OFF_HAND) continue;
-            net.minecraft.server.EnumItemSlot nmsSlot = org.bukkit.craftbukkit.CraftEquipmentSlot.getNMS(slot);
-            disabled += (1 << nmsSlot.c()) + (1 << (nmsSlot.c() + 8)) + (1 << (nmsSlot.c() + 16));
-        }
-        getHandle().setDisabledSlots(disabled);
-    }
-
-    @Override
-    public void addDisabledSlots(org.bukkit.inventory.EquipmentSlot... slots) {
-        java.util.Set<org.bukkit.inventory.EquipmentSlot> disabled = getDisabledSlots();
-        java.util.Collections.addAll(disabled, slots);
-        setDisabledSlots(disabled.toArray(new org.bukkit.inventory.EquipmentSlot[0]));
-    }
-
-    @Override
-    public void removeDisabledSlots(org.bukkit.inventory.EquipmentSlot... slots) {
-        java.util.Set<org.bukkit.inventory.EquipmentSlot> disabled = getDisabledSlots();
-        for (final org.bukkit.inventory.EquipmentSlot slot : slots) disabled.remove(slot);
-        setDisabledSlots(disabled.toArray(new org.bukkit.inventory.EquipmentSlot[0]));
-    }
-
-    @Override
-    public boolean isSlotDisabled(org.bukkit.inventory.EquipmentSlot slot) {
-        return getHandle().isSlotDisabled(org.bukkit.craftbukkit.CraftEquipmentSlot.getNMS(slot));
-    }
-
-    @Override
-    public boolean canTick() {
-        return this.getHandle().canTick;
-    }
-
-    @Override
-    public void setCanTick(final boolean tick) {
-        this.getHandle().canTick = tick;
-    }
-    // Paper end
 }

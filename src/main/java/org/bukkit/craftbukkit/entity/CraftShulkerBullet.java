@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityShulkerBullet;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -36,11 +36,6 @@ public class CraftShulkerBullet extends AbstractProjectile implements ShulkerBul
     @Override
     public void setTarget(org.bukkit.entity.Entity target) {
         getHandle().setTarget(target == null ? null : ((CraftEntity) target).getHandle());
-    }
-
-    @Override
-    public String toString() {
-        return "CraftShulkerBullet";
     }
 
     @Override

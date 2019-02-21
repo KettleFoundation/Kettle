@@ -5,10 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-
-import org.apache.commons.lang.Validate;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
@@ -81,7 +80,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagCompound fireworks = tag.getCompound(FIREWORKS.NBT);
+        NBTTagCompound fireworks = tag.getCompoundTag(FIREWORKS.NBT);
 
         power = 0xff & fireworks.getByte(FLIGHT.NBT);
 
@@ -89,10 +88,10 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagList fireworkEffects = fireworks.getList(EXPLOSIONS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
-        List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.size());
+        NBTTagList fireworkEffects = fireworks.getTagList(EXPLOSIONS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
+        List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.tagCount());
 
-        for (int i = 0; i < fireworkEffects.size(); i++) {
+        for (int i = 0; i < fireworkEffects.tagCount(); i++) {
             effects.add(getEffect((NBTTagCompound) fireworkEffects.get(i)));
         }
     }
@@ -217,17 +216,17 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagCompound fireworks = itemTag.getCompound(FIREWORKS.NBT);
-        itemTag.set(FIREWORKS.NBT, fireworks);
+        NBTTagCompound fireworks = itemTag.getCompoundTag(FIREWORKS.NBT);
+        itemTag.setTag(FIREWORKS.NBT, fireworks);
 
         if (hasEffects()) {
             NBTTagList effects = new NBTTagList();
             for (FireworkEffect effect : this.effects) {
-                effects.add(getExplosion(effect));
+                effects.appendTag(getExplosion(effect));
             }
 
-            if (effects.size() > 0) {
-                fireworks.set(EXPLOSIONS.NBT, effects);
+            if (effects.tagCount() > 0) {
+                fireworks.setTag(EXPLOSIONS.NBT, effects);
             }
         }
 
@@ -253,7 +252,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
     @Override
     boolean applicableTo(Material type) {
         switch(type) {
-            case FIREWORK_ROCKET:
+            case FIREWORK:
                 return true;
             default:
                 return false;

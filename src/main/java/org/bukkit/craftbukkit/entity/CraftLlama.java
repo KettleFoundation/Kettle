@@ -1,8 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.destroystokyo.paper.entity.CraftRangedEntity;
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityLlama;
+import net.minecraft.entity.passive.EntityLlama;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryLlama;
 import org.bukkit.entity.EntityType;
@@ -10,7 +9,7 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.Llama;
 import org.bukkit.inventory.LlamaInventory;
 
-public class CraftLlama extends CraftChestedHorse implements Llama, CraftRangedEntity<EntityLlama> { // Paper
+public class CraftLlama extends CraftChestedHorse implements Llama {
 
     public CraftLlama(CraftServer server, EntityLlama entity) {
         super(server, entity);
@@ -35,7 +34,7 @@ public class CraftLlama extends CraftChestedHorse implements Llama, CraftRangedE
 
     @Override
     public LlamaInventory getInventory() {
-        return new CraftInventoryLlama(getHandle().inventoryChest);
+        return new CraftInventoryLlama(getHandle().horseChest);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class CraftLlama extends CraftChestedHorse implements Llama, CraftRangedE
         Preconditions.checkArgument(1 <= strength && strength <= 5, "strength must be [1,5]");
         if (strength == getStrength()) return;
         getHandle().setStrength(strength);
-        getHandle().loadChest();
+        getHandle().initHorseChest();
     }
 
     @Override

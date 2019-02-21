@@ -2,7 +2,6 @@ package org.bukkit.event.entity;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -14,13 +13,24 @@ public class EntityChangeBlockEvent extends EntityEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private final Block block;
     private boolean cancel;
-    private final BlockData to;
+    private final Material to;
+    private final byte data;
 
-    public EntityChangeBlockEvent(final Entity what, final Block block, final BlockData to) {
+    /**
+     *
+     * @param what the Entity causing the change
+     * @param block the block (before the change)
+     * @param to the future material being changed to
+     * @param data the future block data
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public EntityChangeBlockEvent(final Entity what, final Block block, final Material to, final byte data) {
         super(what);
         this.block = block;
         this.cancel = false;
         this.to = to;
+        this.data = data;
     }
 
     /**
@@ -46,16 +56,18 @@ public class EntityChangeBlockEvent extends EntityEvent implements Cancellable {
      * @return the material that the block is changing into
      */
     public Material getTo() {
-        return to.getMaterial();
+        return to;
     }
 
     /**
      * Gets the data for the block that would be changed into
      *
      * @return the data for the block that would be changed into
+     * @deprecated Magic value
      */
-    public BlockData getBlockData() {
-        return to;
+    @Deprecated
+    public byte getData() {
+        return data;
     }
 
     @Override

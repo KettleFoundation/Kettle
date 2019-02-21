@@ -2,10 +2,9 @@ package org.bukkit.craftbukkit.scoreboard;
 
 import java.util.Map;
 
-import net.minecraft.server.IScoreboardCriteria;
-import net.minecraft.server.ScoreboardObjective;
-
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.ScoreObjective;
 
 final class CraftCriteria {
     static final Map<String, CraftCriteria> DEFAULTS;
@@ -14,9 +13,9 @@ final class CraftCriteria {
     static {
         ImmutableMap.Builder<String, CraftCriteria> defaults = ImmutableMap.builder();
 
-        for (Map.Entry<?, ?> entry : ((Map<?,?> ) IScoreboardCriteria.criteria).entrySet()) {
+        for (Map.Entry<?, ?> entry : ((Map<?,?> ) IScoreCriteria.INSTANCES).entrySet()) {
             String name = entry.getKey().toString();
-            IScoreboardCriteria criteria = (IScoreboardCriteria) entry.getValue();
+            IScoreCriteria criteria = (IScoreCriteria) entry.getValue();
 
             defaults.put(name, new CraftCriteria(criteria));
         }
@@ -25,7 +24,7 @@ final class CraftCriteria {
         DUMMY = DEFAULTS.get("dummy");
     }
 
-    final IScoreboardCriteria criteria;
+    final IScoreCriteria criteria;
     final String bukkitName;
 
     private CraftCriteria(String bukkitName) {
@@ -33,12 +32,12 @@ final class CraftCriteria {
         this.criteria = DUMMY.criteria;
     }
 
-    private CraftCriteria(IScoreboardCriteria criteria) {
+    private CraftCriteria(IScoreCriteria criteria) {
         this.criteria = criteria;
         this.bukkitName = criteria.getName();
     }
 
-    static CraftCriteria getFromNMS(ScoreboardObjective objective) {
+    static CraftCriteria getFromNMS(ScoreObjective objective) {
         return DEFAULTS.get(objective.getCriteria().getName());
     }
 

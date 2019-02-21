@@ -38,7 +38,7 @@ public abstract class HelpTopic {
      * <p>
      * HelpTopic implementations should take this into account when
      * determining topic visibility on the {@link
-     * HelpTopic#canSee(org.bukkit.command.CommandSender)} function.
+     * HelpTopic#canSee(CommandSender)} function.
      *
      * @param amendedPermission The permission node the server administrator
      *     wishes to apply to this topic.

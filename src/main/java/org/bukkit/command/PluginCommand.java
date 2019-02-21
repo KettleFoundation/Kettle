@@ -2,7 +2,7 @@ package org.bukkit.command;
 
 import java.util.List;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -121,7 +121,7 @@ public final class PluginCommand extends Command implements PluginIdentifiableCo
      * @throws IllegalArgumentException if sender, alias, or args is null
      */
     @Override
-    public java.util.List<String> tabComplete(CommandSender sender, String alias, String[] args) throws CommandException, IllegalArgumentException {
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws CommandException, IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
@@ -145,7 +145,6 @@ public final class PluginCommand extends Command implements PluginIdentifiableCo
         }
 
         if (completions == null) {
-            if (!sender.getServer().suggestPlayerNamesWhenNullTabCompletions()) return com.google.common.collect.ImmutableList.of(); // Paper - allow preventing player name suggestions by default
             return super.tabComplete(sender, alias, args);
         }
         return completions;

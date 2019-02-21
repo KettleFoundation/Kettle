@@ -10,16 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.bukkit.Warning.WarningState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.boss.KeyedBossBar;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -34,7 +31,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.loot.LootTable;
 import org.bukkit.map.MapView;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.PluginManager;
@@ -52,9 +48,6 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import javax.annotation.Nullable; // Paper
-import javax.annotation.Nonnull; // Paper
-
 /**
  * Represents a server implementation.
  */
@@ -64,7 +57,7 @@ public interface Server extends PluginMessageRecipient {
      * Used for all administrative messages, such as an operator using a
      * command.
      * <p>
-     * For use in {@link #broadcast(java.lang.String, java.lang.String)}.
+     * For use in {@link #broadcast(String, String)}.
      */
     public static final String BROADCAST_CHANNEL_ADMINISTRATIVE = "bukkit.broadcast.admin";
 
@@ -72,7 +65,7 @@ public interface Server extends PluginMessageRecipient {
      * Used for all announcement messages, such as informing users that a
      * player has joined.
      * <p>
-     * For use in {@link #broadcast(java.lang.String, java.lang.String)}.
+     * For use in {@link #broadcast(String, String)}.
      */
     public static final String BROADCAST_CHANNEL_USERS = "bukkit.broadcast.user";
 
@@ -160,9 +153,7 @@ public interface Server extends PluginMessageRecipient {
      * Get the name of this server.
      *
      * @return the name of this server
-     * @deprecated not a standard server property
      */
-    @Deprecated
     public String getServerName();
 
     /**
@@ -170,9 +161,7 @@ public interface Server extends PluginMessageRecipient {
      * that can be used for uniquely identifying this server.
      *
      * @return the ID of this server
-     * @deprecated not a standard server property
      */
-    @Deprecated
     public String getServerId();
 
     /**
@@ -232,33 +221,13 @@ public interface Server extends PluginMessageRecipient {
     /**
      * Broadcast a message to all players.
      * <p>
-     * This is the same as calling {@link #broadcast(java.lang.String,
-     * java.lang.String)} to {@link #BROADCAST_CHANNEL_USERS}
+     * This is the same as calling {@link #broadcast(String,
+     * String)} to {@link #BROADCAST_CHANNEL_USERS}
      *
      * @param message the message
      * @return the number of players
      */
     public int broadcastMessage(String message);
-
-    // Paper start
-    /**
-     * Sends the component to all online players.
-     *
-     * @param component the component to send
-     */
-    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent component) {
-        spigot().broadcast(component);
-    }
-
-    /**
-     * Sends an array of components as a single message to all online players.
-     *
-     * @param components the components to send
-     */
-    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent... components) {
-        spigot().broadcast(components);
-    }
-    // Paper end
 
     /**
      * Gets the name of the update folder. The update folder is used to safely
@@ -365,18 +334,6 @@ public interface Server extends PluginMessageRecipient {
      */
     public Player getPlayer(UUID id);
 
-    // Paper start
-    /**
-     * Gets the unique ID of the player currently known as the specified player name
-     * In Offline Mode, will return an Offline UUID
-     *
-     * @param playerName the player name to look up the unique ID for
-     * @return A UUID, or null if that player name is not registered with Minecraft and the server is in online mode
-     */
-    @Nullable
-    public UUID getPlayerUniqueId(String playerName);
-    // Paper end
-
     /**
      * Gets the plugin manager for interfacing with plugins.
      *
@@ -459,7 +416,7 @@ public interface Server extends PluginMessageRecipient {
      * @deprecated Magic value
      */
     @Deprecated
-    public MapView getMap(int id);
+    public MapView getMap(short id);
 
     /**
      * Create a new map with an automatically assigned ID.
@@ -468,43 +425,6 @@ public interface Server extends PluginMessageRecipient {
      * @return a newly created map view
      */
     public MapView createMap(World world);
-
-    /**
-     * Create a new explorer map targeting the closest nearby structure of a
-     * given {@link StructureType}.
-     * <br>
-     * This method uses implementation default values for radius and
-     * findUnexplored (usually 100, true).
-     *
-     * @param world the world the map will belong to
-     * @param location the origin location to find the nearest structure
-     * @param structureType the type of structure to find
-     * @return a newly created item stack
-     *
-     * @see World#locateNearestStructure(org.bukkit.Location,
-     *      org.bukkit.StructureType, int, boolean)
-     */
-    public ItemStack createExplorerMap(World world, Location location, StructureType structureType);
-
-    /**
-     * Create a new explorer map targeting the closest nearby structure of a
-     * given {@link StructureType}.
-     * <br>
-     * This method uses implementation default values for radius and
-     * findUnexplored (usually 100, true).
-     *
-     * @param world the world the map will belong to
-     * @param location the origin location to find the nearest structure
-     * @param structureType the type of structure to find
-     * @param radius radius to search, see World#locateNearestStructure for more
-     *               information
-     * @param findUnexplored whether to find unexplored structures
-     * @return the newly created item stack
-     *
-     * @see World#locateNearestStructure(org.bukkit.Location,
-     *      org.bukkit.StructureType, int, boolean)
-     */
-    public ItemStack createExplorerMap(World world, Location location, StructureType structureType, int radius, boolean findUnexplored);
 
     /**
      * Reloads the server, refreshing settings and plugin information.
@@ -656,7 +576,7 @@ public interface Server extends PluginMessageRecipient {
      *             unique past a single session.
      * @param name the name the player to retrieve
      * @return an offline player
-     * @see #getOfflinePlayer(java.util.UUID)
+     * @see #getOfflinePlayer(UUID)
      */
     @Deprecated
     public OfflinePlayer getOfflinePlayer(String name);
@@ -770,27 +690,13 @@ public interface Server extends PluginMessageRecipient {
     public HelpMap getHelpMap();
 
     /**
-     * Creates an empty inventory with the specified type and title. If the type
-     * is {@link InventoryType#CHEST}, the new inventory has a size of 27;
-     * otherwise the new inventory has the normal size for its type.<br>
-     * It should be noted that some inventory types do not support titles and
-     * may not render with said titles on the Minecraft client.
-     * <br>
-     * {@link InventoryType#WORKBENCH} will not process crafting recipes if
-     * created with this method. Use
-     * {@link Player#openWorkbench(Location, boolean)} instead.
-     * <br>
-     * {@link InventoryType#ENCHANTING} will not process {@link ItemStack}s
-     * for possible enchanting results. Use
-     * {@link Player#openEnchanting(Location, boolean)} instead.
+     * Creates an empty inventory of the specified type. If the type is {@link
+     * InventoryType#CHEST}, the new inventory has a size of 27; otherwise the
+     * new inventory has the normal size for its type.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
      * @param type the type of inventory to create
      * @return a new inventory
-     * @throws IllegalArgumentException if the {@link InventoryType} cannot be
-     * viewed.
-     *
-     * @see InventoryType#isCreatable()
      */
     Inventory createInventory(InventoryHolder owner, InventoryType type);
 
@@ -800,23 +706,11 @@ public interface Server extends PluginMessageRecipient {
      * otherwise the new inventory has the normal size for its type.<br>
      * It should be noted that some inventory types do not support titles and
      * may not render with said titles on the Minecraft client.
-     * <br>
-     * {@link InventoryType#WORKBENCH} will not process crafting recipes if
-     * created with this method. Use
-     * {@link Player#openWorkbench(Location, boolean)} instead.
-     * <br>
-     * {@link InventoryType#ENCHANTING} will not process {@link ItemStack}s
-     * for possible enchanting results. Use
-     * {@link Player#openEnchanting(Location, boolean)} instead.
      *
      * @param owner The holder of the inventory; can be null if there's no holder.
      * @param type The type of inventory to create.
      * @param title The title of the inventory, to be displayed when it is viewed.
      * @return The new inventory.
-     * @throws IllegalArgumentException if the {@link InventoryType} cannot be
-     * viewed.
-     *
-     * @see InventoryType#isCreatable()
      */
     Inventory createInventory(InventoryHolder owner, InventoryType type, String title);
 
@@ -997,7 +891,7 @@ public interface Server extends PluginMessageRecipient {
     /**
      * Create a ChunkData for use in a generator.
      * 
-     * See {@link ChunkGenerator#generateChunkData(org.bukkit.World, java.util.Random, int, int, org.bukkit.generator.ChunkGenerator.BiomeGrid)}
+     * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
      * 
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world
@@ -1018,95 +912,12 @@ public interface Server extends PluginMessageRecipient {
     BossBar createBossBar(String title, BarColor color, BarStyle style, BarFlag... flags);
 
     /**
-     * Creates a boss bar instance to display to players. The progress defaults
-     * to 1.0.
-     * <br>
-     * This instance is added to the persistent storage of the server and will
-     * be editable by commands and restored after restart.
-     *
-     * @param key the key of the boss bar that is used to access the boss bar
-     * @param title the title of the boss bar
-     * @param color the color of the boss bar
-     * @param style the style of the boss bar
-     * @param flags an optional list of flags to set on the boss bar
-     * @return the created boss bar
-     */
-    KeyedBossBar createBossBar(NamespacedKey key, String title, BarColor color, BarStyle style, BarFlag... flags);
-
-    /**
-     * Gets an unmodifiable iterator through all persistent bossbars.
-     * <ul>
-     *   <li><b>not</b> bound to a {@link org.bukkit.entity.Boss}</li>
-     *   <li>
-     *     <b>not</b> created using
-     *     {@link #createBossBar(String, BarColor, BarStyle, BarFlag...)}
-     *   </li>
-     * </ul>
-     *
-     * e.g. bossbars created using the bossbar command
-     *
-     * @return a bossbar iterator
-     */
-    Iterator<KeyedBossBar> getBossBars();
-
-    /**
-     * Gets the {@link KeyedBossBar} specified by this key.
-     * <ul>
-     *   <li><b>not</b> bound to a {@link org.bukkit.entity.Boss}</li>
-     *   <li>
-     *     <b>not</b> created using
-     *     {@link #createBossBar(String, BarColor, BarStyle, BarFlag...)}
-     *   </li>
-     * </ul>
-     *
-     * e.g. bossbars created using the bossbar command
-     *
-     * @param key unique bossbar key
-     * @return bossbar or null if not exists
-     */
-    KeyedBossBar getBossBar(NamespacedKey key);
-
-    /**
-     * Removes a {@link KeyedBossBar} specified by this key.
-     * <ul>
-     *   <li><b>not</b> bound to a {@link org.bukkit.entity.Boss}</li>
-     *   <li>
-     *     <b>not</b> created using
-     *     {@link #createBossBar(String, BarColor, BarStyle, BarFlag...)}
-     *   </li>
-     * </ul>
-     *
-     * e.g. bossbars created using the bossbar command
-     *
-     * @param key unique bossbar key
-     * @return true if removal succeeded or false
-     */
-    boolean removeBossBar(NamespacedKey key);
-
-    /**
      * Gets an entity on the server by its UUID
      *
      * @param uuid the UUID of the entity
      * @return the entity with the given UUID, or null if it isn't found
      */
     Entity getEntity(UUID uuid);
-
-    // Paper start
-    /**
-     * Gets the current server TPS
-     *
-     * @return current server TPS (1m, 5m, 15m in Paper-Server)
-     */
-    public double[] getTPS();
-    // Paper end
-
-    // Paper start
-    /**
-     * Gets the active {@link org.bukkit.command.CommandMap}
-     *
-     * @return the active command map
-     */
-    org.bukkit.command.CommandMap getCommandMap();
 
     /**
      * Get the advancement specified by this key.
@@ -1125,102 +936,6 @@ public interface Server extends PluginMessageRecipient {
     Iterator<Advancement> advancementIterator();
 
     /**
-     * Creates a new {@link BlockData} instance for the specified Material, with
-     * all properties initialized to unspecified defaults.
-     *
-     * @param material the material
-     * @return new data instance
-     */
-    BlockData createBlockData(Material material);
-
-    /**
-     * Creates a new {@link BlockData} instance for the specified Material, with
-     * all properties initialized to unspecified defaults.
-     *
-     * @param material the material
-     * @param consumer consumer to run on new instance before returning
-     * @return new data instance
-     */
-    public BlockData createBlockData(Material material, Consumer<BlockData> consumer);
-
-    /**
-     * Creates a new {@link BlockData} instance with material and properties
-     * parsed from provided data.
-     *
-     * @param data data string
-     * @return new data instance
-     * @throws IllegalArgumentException if the specified data is not valid
-     */
-    BlockData createBlockData(String data) throws IllegalArgumentException;
-
-    /**
-     * Creates a new {@link BlockData} instance for the specified Material, with
-     * all properties initialized to unspecified defaults, except for those
-     * provided in data.
-     * <br>
-     * If <code>material</code> is specified, then the data string must not also
-     * contain the material.
-     *
-     * @param material the material
-     * @param data data string
-     * @return new data instance
-     * @throws IllegalArgumentException if the specified data is not valid
-     */
-    BlockData createBlockData(Material material, String data) throws IllegalArgumentException;
-
-    /**
-     * Gets a tag which has already been defined within the server. Plugins are
-     * suggested to use the concrete tags in {@link Tag} rather than this method
-     * which makes no guarantees about which tags are available, and may also be
-     * less performant due to lack of caching.
-     * <br>
-     * Tags will be searched for in an implementation specific manner, but a
-     * path consisting of namespace/tags/registry/key is expected.
-     * <br>
-     * Server implementations are allowed to handle only the registries
-     * indicated in {@link Tag}.
-     *
-     * @param <T> type of the tag
-     * @param registry the tag registry to look at
-     * @param tag the name of the tag
-     * @param clazz the class of the tag entries
-     * @return the tag or null
-     */
-    <T extends Keyed> Tag<T> getTag(String registry, NamespacedKey tag, Class<T> clazz);
-
-    /**
-     * Gets the specified {@link LootTable}.
-     *
-     * @param key the name of the LootTable
-     * @return the LootTable, or null if no LootTable is found with that name
-     */
-    LootTable getLootTable(NamespacedKey key);
-
-    /**
-     * Selects entities using the given Vanilla selector.
-     * <br>
-     * No guarantees are made about the selector format, other than they match
-     * the Vanilla format for the active Minecraft version.
-     * <br>
-     * Usually a selector will start with '@', unless selecting a Player in
-     * which case it may simply be the Player's name or UUID.
-     * <br>
-     * Note that in Vanilla, elevated permissions are usually required to use
-     * '@' selectors, but this method should not check such permissions from the
-     * sender.
-     *
-     * @param sender the sender to execute as, must be provided
-     * @param selector the selection string
-     * @return a list of the selected entities. The list will not be null, but
-     * no further guarantees are made.
-     * @throws IllegalArgumentException if the selector is malformed in any way
-     * or a parameter is null
-     * @deprecated draft API
-     */
-    @Deprecated
-    List<Entity> selectEntities(CommandSender sender, String selector) throws IllegalArgumentException;
-
-    /**
      * @see UnsafeValues
      * @return the unsafe values instance
      */
@@ -1230,25 +945,10 @@ public interface Server extends PluginMessageRecipient {
     // Spigot start
     public class Spigot
     {
-        @Deprecated
+
         public org.bukkit.configuration.file.YamlConfiguration getConfig()
         {
             throw new UnsupportedOperationException( "Not supported yet." );
-        }
-
-        public org.bukkit.configuration.file.YamlConfiguration getBukkitConfig()
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
-        }
-
-        public org.bukkit.configuration.file.YamlConfiguration getSpigotConfig()
-        {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public org.bukkit.configuration.file.YamlConfiguration getPaperConfig()
-        {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         /**
@@ -1279,49 +979,4 @@ public interface Server extends PluginMessageRecipient {
 
     Spigot spigot();
     // Spigot end
-
-    void reloadPermissions(); // Paper
-
-    boolean reloadCommandAliases(); // Paper
-
-    // Paper start - allow preventing player name suggestions by default
-    /**
-     * Checks if player names should be suggested when a command returns {@code null} as
-     * their tab completion result.
-     *
-     * @return true if player names should be suggested
-     */
-    boolean suggestPlayerNamesWhenNullTabCompletions();
-
-    /**
-     *
-     * @return the default no permission message used on the server
-     */
-    String getPermissionMessage();
-
-    /**
-     * Creates a PlayerProfile for the specified uuid, with name as null
-     * @param uuid UUID to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid);
-
-    /**
-     * Creates a PlayerProfile for the specified name, with UUID as null
-     * @param name Name to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name);
-
-    /**
-     * Creates a PlayerProfile for the specified name/uuid
-     *
-     * Both UUID and Name can not be null at same time. One must be supplied.
-     *
-     * @param uuid UUID to create profile for
-     * @param name Name to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name);
-    // Paper end
 }

@@ -1,6 +1,5 @@
 package org.bukkit.entity;
 
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 
@@ -11,12 +10,7 @@ public interface ArmorStand extends LivingEntity {
      * currently holding
      *
      * @return the held item
-     // Paper start - Deprecate in favor of setItemInMainHand
-     * @deprecated use {@link ArmorStand#getItem(EquipmentSlot)} instead
-     * @see ArmorStand#getItem(EquipmentSlot)
-     // Paper end
      */
-    @Deprecated // Paper
     ItemStack getItemInHand();
 
     /**
@@ -24,12 +18,7 @@ public interface ArmorStand extends LivingEntity {
      * holding
      *
      * @param item the item to hold
-     // Paper start - Deprecate in favor of setItemInMainHand
-     * @deprecated use {@link ArmorStand#setItem(EquipmentSlot, ItemStack)} instead
-     * @see ArmorStand#setItem(EquipmentSlot, ItemStack)
-     // Paper end
      */
-    @Deprecated // Paper
     void setItemInHand(ItemStack item);
 
     /**
@@ -98,7 +87,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's body's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -106,7 +95,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's body's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -114,7 +103,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's left arm's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -122,7 +111,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's left arm's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -130,7 +119,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's right arm's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -138,7 +127,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's right arm's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -146,7 +135,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's left leg's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -154,7 +143,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's left leg's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -162,7 +151,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's right leg's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -170,7 +159,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's right leg's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -178,7 +167,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Returns the armor stand's head's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @return the current pose
      */
@@ -186,7 +175,7 @@ public interface ArmorStand extends LivingEntity {
 
     /**
      * Sets the armor stand's head's
-     * current pose as a {@link org.bukkit.util.EulerAngle}
+     * current pose as a {@link EulerAngle}
      *
      * @param pose the current pose
      */
@@ -269,102 +258,4 @@ public interface ArmorStand extends LivingEntity {
      * @param marker whether this is a marker
      */
     void setMarker(boolean marker);
-
-    // Paper start
-    /**
-     * Tests if this armor stand can move.
-     *
-     * <p>The default value is {@code true}.</p>
-     *
-     * @return {@code true} if this armour stand can move, {@code false} otherwise
-     */
-    boolean canMove();
-
-    /**
-     * Sets if this armor stand can move.
-     *
-     * @param move {@code true} if this armour stand can move, {@code false} otherwise
-     */
-    void setCanMove(boolean move);
-
-    /**
-     * Tests if this armor stand can tick.
-     *
-     * <p>The default value is defined in {@code paper.yml}.</p>
-     *
-     * @return {@code true} if this armour stand can tick, {@code false} otherwise
-     */
-    boolean canTick();
-
-    /**
-     * Sets if this armor stand can tick.
-     *
-     * @param tick {@code true} if this armour stand can tick, {@code false} otherwise
-     */
-    void setCanTick(final boolean tick);
-
-    /**
-     * Returns the item the armor stand has
-     * equip in the given equipment slot
-     *
-     * @param slot the equipment slot to get
-     * @return the ItemStack in the equipment slot
-     */
-    ItemStack getItem(final org.bukkit.inventory.EquipmentSlot slot);
-
-    /**
-     * Sets the item the armor stand has
-     * equip in the given equipment slot
-     *
-     * @param slot the equipment slot to set
-     * @param item the item to hold
-     */
-    void setItem(final org.bukkit.inventory.EquipmentSlot slot, final ItemStack item);
-
-    /**
-     * Get the list of disabled slots
-     *
-     * @return list of disabled slots
-     */
-    java.util.Set<org.bukkit.inventory.EquipmentSlot> getDisabledSlots();
-
-    /**
-     * Set the disabled slots
-     *
-     * This makes it so a player is unable to interact with the Armor Stand to place, remove, or replace an item in the given slot(s)
-     * Note: Once a slot is disabled, the only way to get an item back it to break the armor stand.
-     *
-     * @param slots var-arg array of slots to lock
-     */
-    void setDisabledSlots(org.bukkit.inventory.EquipmentSlot... slots);
-
-    /**
-     * Disable specific slots, adding them
-     * to the currently disabled slots
-     *
-     * This makes it so a player is unable to interact with the Armor Stand to place, remove, or replace an item in the given slot(s)
-     * Note: Once a slot is disabled, the only way to get an item back it to break the armor stand.
-     *
-     * @param slots var-arg array of slots to lock
-     */
-    void addDisabledSlots(final org.bukkit.inventory.EquipmentSlot... slots);
-
-    /**
-     * Remove the given slots from the disabled
-     * slots list, enabling them.
-     *
-     * This makes it so a player is able to interact with the Armor Stand to place, remove, or replace an item in the given slot(s)
-     *
-     * @param slots var-arg array of slots to unlock
-     */
-    void removeDisabledSlots(final org.bukkit.inventory.EquipmentSlot... slots);
-
-    /**
-     * Check if a specific slot is disabled
-     *
-     * @param slot The slot to check
-     * @return {@code true} if the slot is disabled, else {@code false}.
-     */
-    boolean isSlotDisabled(org.bukkit.inventory.EquipmentSlot slot);
-    // Paper end
 }

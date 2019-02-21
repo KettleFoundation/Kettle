@@ -1,23 +1,37 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySlime;
-
+import net.minecraft.entity.monster.EntitySlime;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Slime;
 
-public class CraftSlime extends CraftMob implements Slime {
+public class CraftSlime extends CraftLivingEntity implements Slime {
 
     public CraftSlime(CraftServer server, EntitySlime entity) {
         super(server, entity);
     }
 
     public int getSize() {
-        return getHandle().getSize();
+        return getHandle().getSlimeSize();
     }
 
     public void setSize(int size) {
-        getHandle().setSize(size, true);
+        getHandle().setSlimeSize(size, true);
+    }
+
+    @Override
+    public void setTarget(LivingEntity target) {
+        if (target == null) {
+            getHandle().setAttackTarget(null, null, false);
+        } else if (target instanceof CraftLivingEntity) {
+            getHandle().setAttackTarget(((CraftLivingEntity) target).getHandle(), null, false);
+        }
+    }
+
+    @Override
+    public LivingEntity getTarget() {
+        return getHandle().getAttackTarget() == null ? null : (LivingEntity)getHandle().getAttackTarget().getBukkitEntity();
     }
 
     @Override
@@ -33,14 +47,4 @@ public class CraftSlime extends CraftMob implements Slime {
     public EntityType getType() {
         return EntityType.SLIME;
     }
-
-    // Paper start
-    public boolean canWander() {
-        return getHandle().canWander();
-    }
-
-    public void setWander(boolean canWander) {
-        getHandle().setWander(canWander);
-    }
-    // Paper end
 }

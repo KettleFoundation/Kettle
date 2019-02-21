@@ -1,12 +1,11 @@
 package org.bukkit.entity;
 
-import com.destroystokyo.paper.entity.RangedEntity;
 import org.bukkit.inventory.LlamaInventory;
 
 /**
  * Represents a Llama.
  */
-public interface Llama extends ChestedHorse, RangedEntity { // Paper
+public interface Llama extends ChestedHorse {
 
     /**
      * Represents the base color that the llama has.

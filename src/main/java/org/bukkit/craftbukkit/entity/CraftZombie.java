@@ -1,9 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityZombie;
-import net.minecraft.server.EntityZombieVillager;
-
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
@@ -30,11 +28,11 @@ public class CraftZombie extends CraftMonster implements Zombie {
     }
 
     public boolean isBaby() {
-        return getHandle().isBaby();
+        return getHandle().isChild();
     }
 
     public void setBaby(boolean flag) {
-        getHandle().setBaby(flag);
+        getHandle().setChild(flag);
     }
 
     public boolean isVillager() {
@@ -55,56 +53,4 @@ public class CraftZombie extends CraftMonster implements Zombie {
     public Villager.Profession getVillagerProfession() {
         return null;
     }
-
-    @Override
-    public boolean isConverting() {
-        return getHandle().isDrownConverting();
-    }
-
-    @Override
-    public int getConversionTime() {
-        Preconditions.checkState(isConverting(), "Entity not converting");
-
-        return getHandle().drownedConversionTime;
-    }
-
-    @Override
-    public void setConversionTime(int time) {
-        if (time < 0) {
-            getHandle().drownedConversionTime = -1;
-            getHandle().getDataWatcher().set(EntityZombie.DROWN_CONVERTING, false);
-        } else {
-            getHandle().startDrownedConversion(time);
-        }
-    }
-
-    // Paper start
-    public boolean isDrowning() {
-        return getHandle().isDrowning();
-    }
-
-    public void startDrowning(int drownedConversionTime) {
-        getHandle().startDrownedConversion(drownedConversionTime);
-    }
-
-    public void stopDrowning() {
-        getHandle().stopDrowning();
-    }
-
-    public void setArmsRaised(boolean raised) {
-        getHandle().setArmsRaised(raised);
-    }
-
-    public boolean isArmsRaised() {
-        return getHandle().isArmsRaised();
-    }
-
-    public boolean shouldBurnInDay() {
-        return getHandle().shouldBurnInDay();
-    }
-
-    public void setShouldBurnInDay(boolean shouldBurnInDay) {
-        getHandle().setShouldBurnInDay(shouldBurnInDay);
-    }
-    // Paper end
 }

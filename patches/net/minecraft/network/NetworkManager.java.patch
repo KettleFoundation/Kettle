@@ -1,0 +1,70 @@
+--- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
++++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
+@@ -74,10 +74,14 @@
+         }
+     };
+     private final EnumPacketDirection direction;
+-    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
++    private final Queue<InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
+     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+     private Channel channel;
+-    private SocketAddress socketAddress;
++    // Spigot Start // PAIL
++    public SocketAddress socketAddress;
++    public java.util.UUID spoofedUUID;
++    public com.mojang.authlib.properties.Property[] spoofedProfile;
++    // Spigot End
+     private INetHandler packetListener;
+     private ITextComponent terminationReason;
+     private boolean isEncrypted;
+@@ -173,7 +177,7 @@
+ 
+             try
+             {
+-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, new GenericFutureListener[0]));
++                this.outboundPacketsQueue.add(new InboundHandlerTuplePacketListener(packetIn, new GenericFutureListener[0]));
+             }
+             finally
+             {
+@@ -195,7 +199,7 @@
+ 
+             try
+             {
+-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, (GenericFutureListener[])ArrayUtils.add(listeners, 0, listener)));
++                this.outboundPacketsQueue.add(new InboundHandlerTuplePacketListener(packetIn, (GenericFutureListener[])ArrayUtils.add(listeners, 0, listener)));
+             }
+             finally
+             {
+@@ -265,7 +269,7 @@
+             {
+                 while (!this.outboundPacketsQueue.isEmpty())
+                 {
+-                    NetworkManager.InboundHandlerTuplePacketListener networkmanager$inboundhandlertuplepacketlistener = this.outboundPacketsQueue.poll();
++                    InboundHandlerTuplePacketListener networkmanager$inboundhandlertuplepacketlistener = this.outboundPacketsQueue.poll();
+                     this.dispatchPacket(networkmanager$inboundhandlertuplepacketlistener.packet, networkmanager$inboundhandlertuplepacketlistener.futureListeners);
+                 }
+             }
+@@ -300,7 +304,9 @@
+     {
+         if (this.channel.isOpen())
+         {
+-            this.channel.close().awaitUninterruptibly();
++            // We can't wait as this may be called from an event loop.
++            // this.channel.close().awaitUninterruptibly();
++            this.channel.close();
+             this.terminationReason = message;
+         }
+     }
+@@ -476,4 +482,12 @@
+                 this.futureListeners = inFutureListeners;
+             }
+         }
++
++    // Spigot Start
++    public SocketAddress getRawAddress()
++    {
++        return this.channel.remoteAddress();
++    }
++    // Spigot End
++
+ }

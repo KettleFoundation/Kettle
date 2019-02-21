@@ -1,6 +1,6 @@
 package org.bukkit.event.inventory;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -30,8 +30,6 @@ public class InventoryMoveItemEvent extends Event implements Cancellable {
     private final Inventory destinationInventory;
     private ItemStack itemStack;
     private final boolean didSourceInitiate;
-    public boolean calledGetItem; // Paper
-    public boolean calledSetItem; // Paper
 
     public InventoryMoveItemEvent(final Inventory sourceInventory, final ItemStack itemStack, final Inventory destinationInventory, final boolean didSourceInitiate) {
         Validate.notNull(itemStack, "ItemStack cannot be null");
@@ -57,8 +55,7 @@ public class InventoryMoveItemEvent extends Event implements Cancellable {
      * @return ItemStack
      */
     public ItemStack getItem() {
-        calledGetItem = true; // Paper - record this method was used for auto detection of mode
-        return itemStack; // Paper - Removed clone, handled better in Server
+        return itemStack.clone();
     }
 
     /**
@@ -70,7 +67,6 @@ public class InventoryMoveItemEvent extends Event implements Cancellable {
      */
     public void setItem(ItemStack itemStack) {
         Validate.notNull(itemStack, "ItemStack cannot be null.  Cancel the event if you want nothing to be transferred.");
-        calledSetItem = true; // Paper - record this method was used for auto detection of mode
         this.itemStack = itemStack.clone();
     }
 

@@ -1,16 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
 import java.util.Collection;
-import net.minecraft.server.EntityPotion;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.PotionUtil;
 
-import org.apache.commons.lang.Validate;
-import org.bukkit.Material;
+import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.potion.PotionUtils;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.potion.CraftPotionUtil;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -24,14 +20,14 @@ public abstract class CraftThrownPotion extends CraftProjectile implements Throw
 
     public Collection<PotionEffect> getEffects() {
         ImmutableList.Builder<PotionEffect> builder = ImmutableList.builder();
-        for (MobEffect effect : PotionUtil.getEffects(getHandle().getItem())) {
+        for (net.minecraft.potion.PotionEffect effect : PotionUtils.getEffectsFromStack(getHandle().getPotion())) {
             builder.add(CraftPotionUtil.toBukkit(effect));
         }
         return builder.build();
     }
 
     public ItemStack getItem() {
-        return CraftItemStack.asBukkitCopy(getHandle().getItem());
+        return CraftItemStack.asBukkitCopy(getHandle().getPotion());
     }
 
     @Override

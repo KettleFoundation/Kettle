@@ -8,11 +8,30 @@ import org.bukkit.Material;
  */
 public class Button extends SimpleAttachableMaterialData implements Redstone {
     public Button() {
-        super(Material.LEGACY_STONE_BUTTON);
+        super(Material.STONE_BUTTON);
+    }
+
+    /**
+     * @param type the type
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Button(final int type) {
+        super(type);
     }
 
     public Button(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Button(final int type, final byte data) {
+        super(type, data);
     }
 
     /**

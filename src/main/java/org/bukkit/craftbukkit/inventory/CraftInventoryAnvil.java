@@ -1,8 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.server.ContainerAnvil;
-import net.minecraft.server.IInventory;
+import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.inventory.IInventory;
 import org.bukkit.Location;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
@@ -11,9 +10,9 @@ public class CraftInventoryAnvil extends CraftInventory implements AnvilInventor
 
     private final Location location;
     private final IInventory resultInventory;
-    private final ContainerAnvil container;
+    private final ContainerRepair container;
 
-    public CraftInventoryAnvil(Location location, IInventory inventory, IInventory resultInventory, ContainerAnvil container) {
+    public CraftInventoryAnvil(Location location, IInventory inventory, IInventory resultInventory, ContainerRepair container) {
         super(inventory);
         this.location = location;
         this.resultInventory = resultInventory;
@@ -30,27 +29,27 @@ public class CraftInventoryAnvil extends CraftInventory implements AnvilInventor
 
     @Override
     public ItemStack getItem(int slot) {
-        if (slot < getIngredientsInventory().getSize()) {
-            net.minecraft.server.ItemStack item = getIngredientsInventory().getItem(slot);
+        if (slot < getIngredientsInventory().getSizeInventory()) {
+            net.minecraft.item.ItemStack item = getIngredientsInventory().getStackInSlot(slot);
             return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
         } else {
-            net.minecraft.server.ItemStack item = getResultInventory().getItem(slot - getIngredientsInventory().getSize());
+            net.minecraft.item.ItemStack item = getResultInventory().getStackInSlot(slot - getIngredientsInventory().getSizeInventory());
             return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
         }
     }
 
     @Override
     public void setItem(int index, ItemStack item) {
-        if (index < getIngredientsInventory().getSize()) {
-            getIngredientsInventory().setItem(index, CraftItemStack.asNMSCopy(item));
+        if (index < getIngredientsInventory().getSizeInventory()) {
+            getIngredientsInventory().setInventorySlotContents(index, CraftItemStack.asNMSCopy(item));
         } else {
-            getResultInventory().setItem((index - getIngredientsInventory().getSize()), CraftItemStack.asNMSCopy(item));
+            getResultInventory().setInventorySlotContents((index - getIngredientsInventory().getSizeInventory()), CraftItemStack.asNMSCopy(item));
         }
     }
 
     @Override
     public int getSize() {
-        return getResultInventory().getSize() + getIngredientsInventory().getSize();
+        return getResultInventory().getSizeInventory() + getIngredientsInventory().getSizeInventory();
     }
 
     @Override
@@ -60,27 +59,16 @@ public class CraftInventoryAnvil extends CraftInventory implements AnvilInventor
 
     @Override
     public String getRenameText() {
-        return container.renameText;
+        return container.repairedItemName;
     }
 
     @Override
     public int getRepairCost() {
-        return container.levelCost;
+        return container.maximumCost;
     }
 
     @Override
     public void setRepairCost(int i) {
-        container.levelCost = i;
-    }
-
-    @Override
-    public int getMaximumRepairCost() {
-        return container.maximumRepairCost;
-    }
-
-    @Override
-    public void setMaximumRepairCost(int levels) {
-        Preconditions.checkArgument(levels >= 0, "Maximum repair cost must be positive (or 0)");
-        container.maximumRepairCost = levels;
+        container.maximumCost = i;
     }
 }

@@ -1,19 +1,19 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityIllagerWizard;
+import net.minecraft.entity.monster.EntitySpellcasterIllager;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Spellcaster;
 
 public class CraftSpellcaster extends CraftIllager implements Spellcaster {
 
-    public CraftSpellcaster(CraftServer server, EntityIllagerWizard entity) {
+    public CraftSpellcaster(CraftServer server, EntitySpellcasterIllager entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityIllagerWizard getHandle() {
-        return (EntityIllagerWizard) super.getHandle();
+    public EntitySpellcasterIllager getHandle() {
+        return (EntitySpellcasterIllager) super.getHandle();
     }
 
     @Override
@@ -23,13 +23,13 @@ public class CraftSpellcaster extends CraftIllager implements Spellcaster {
 
     @Override
     public Spell getSpell() {
-        return Spell.valueOf(getHandle().getSpell().name());
+        return Spell.valueOf(getHandle().getSpellType().name());
     }
 
     @Override
     public void setSpell(Spell spell) {
         Preconditions.checkArgument(spell != null, "Use Spell.NONE");
 
-        getHandle().setSpell(EntityIllagerWizard.Spell.a(spell.ordinal()));
+        getHandle().setSpellType(EntitySpellcasterIllager.SpellType.getFromId(spell.ordinal()));
     }
 }

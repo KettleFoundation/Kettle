@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-import net.minecraft.server.NBTTagString;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -36,10 +36,10 @@ public class CraftMetaKnowledgeBook extends CraftMetaItem implements KnowledgeBo
         super(tag);
 
         if (tag.hasKey(BOOK_RECIPES.NBT)) {
-            NBTTagList pages = tag.getList(BOOK_RECIPES.NBT, 8);
+            NBTTagList pages = tag.getTagList(BOOK_RECIPES.NBT, 8);
 
-            for (int i = 0; i < pages.size(); i++) {
-                String recipe = pages.getString(i);
+            for (int i = 0; i < pages.tagCount(); i++) {
+                String recipe = pages.getStringTagAt(i);
 
                 addRecipe(CraftNamespacedKey.fromString(recipe));
             }
@@ -65,9 +65,9 @@ public class CraftMetaKnowledgeBook extends CraftMetaItem implements KnowledgeBo
         if (hasRecipes()) {
             NBTTagList list = new NBTTagList();
             for (NamespacedKey recipe : this.recipes) {
-                list.add(new NBTTagString(recipe.toString()));
+                list.appendTag(new NBTTagString(recipe.toString()));
             }
-            itemData.set(BOOK_RECIPES.NBT, list);
+            itemData.setTag(BOOK_RECIPES.NBT, list);
         }
     }
 
@@ -116,7 +116,7 @@ public class CraftMetaKnowledgeBook extends CraftMetaItem implements KnowledgeBo
     @Override
     public void setRecipes(List<NamespacedKey> recipes) {
         this.recipes.clear();
-        for (NamespacedKey recipe : recipes) {
+        for (NamespacedKey recipe : this.recipes) {
             addRecipe(recipe);
         }
     }

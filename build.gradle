@@ -10,25 +10,26 @@ buildscript {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            url  "https://jcenter.bintray.com"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
+        classpath 'net.nemerosa:versioning:2.7.1'
     }
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: "idea"
 apply plugin: 'net.minecraftforge.gradle.patcher'
 apply plugin: 'net.minecraftforge.gradle.launch4j'
+apply plugin: 'net.nemerosa.versioning'
 
 
 group 'kettlefoundation'
-version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
-tasks.generateXmlConfig.dependsOn installer
-tasks.compileJava.enabled = false
-compileJava.options.encoding = 'UTF-8'
-tasks.reobfuscate.setProperty("extraSrg",["PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_12_R1"])
+version 'git-' +  versioning.info.full
 
 repositories {
     clear()
@@ -59,7 +60,7 @@ repositories {
 }
 
 configurations{
-    compile.extendsFrom libraries
+    compile.extendsFrom exported
     libraries
 }
 
@@ -82,7 +83,7 @@ minecraft {
     mappings = "snapshot_nodoc_20171003"
     workspaceDir = "projects"
     versionJson = "jsons/1.12.2-dev.json"
-    buildUserdev = false
+    buildUserdev = true
     buildInstaller = false
     installerVersion = "1.5"
 
@@ -110,13 +111,19 @@ minecraft {
             patchDir "patches/"
             patchAfter "forge"
             genPatchesFrom "forge"
-            genMcpPatches = false
-            applyMcpPatches = false
+            genMcpPatches = true
+            applyMcpPatches = true
             s2sKeepImports = true
             with common
         }
     }
 }
+
+sourceCompatibility = 1.8
+tasks.generateXmlConfig.dependsOn installer
+tasks.compileJava.enabled = false
+tasks.build.dependsOn 'launch4j'
+tasks.reobfuscate.setProperty("extraSrg",["PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_12_R1"])
 
 installer {
     classifier = 'installer'
@@ -125,7 +132,17 @@ installer {
 }
 
 launch4j {
+    jar = installer.archivePath.canonicalPath
+    outfile = file("build/distributions/${project.name}-${project.version}-installer-win.exe").canonicalPath
+    icon = file('icon.ico').canonicalPath
+    manifest = file('l4jManifest.xml').canonicalPath
     jreMinVersion = '1.8.0'
+    initialHeapPercent = 5
+    maxHeapPercent = 100
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 task signUniversal(type: SignJar, dependsOn: 'outputJar') {
@@ -200,4 +217,9 @@ String getServerClasspath(File file) {
     }
     out += "minecraft_server.1.12.2.jar"
     return out.toString()
+}
+
+task dumpLibs(type: Copy) {
+    into "$buildDir/libraries"
+    from configurations.libraries
 }

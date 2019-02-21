@@ -4,20 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
-import net.minecraft.server.IHopper;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.InventoryCrafting;
-import net.minecraft.server.InventoryEnderChest;
-import net.minecraft.server.InventoryMerchant;
-import net.minecraft.server.PlayerInventory;
-import net.minecraft.server.TileEntityBeacon;
-import net.minecraft.server.TileEntityBrewingStand;
-import net.minecraft.server.TileEntityDispenser;
-import net.minecraft.server.TileEntityDropper;
-import net.minecraft.server.TileEntityFurnace;
-import net.minecraft.server.TileEntityShulkerBox;
+import net.minecraft.inventory.IInventory;
 
-import org.apache.commons.lang.Validate;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.inventory.InventoryMerchant;
+import net.minecraft.tileentity.IHopper;
+import net.minecraft.tileentity.TileEntityBeacon;
+import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityShulkerBox;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
@@ -25,8 +24,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.util.CraftChatMessage;
-import org.bukkit.craftbukkit.util.CraftLegacy;
+import org.bukkit.inventory.PlayerInventory;
 
 public class CraftInventory implements Inventory {
     protected final IInventory inventory;
@@ -40,24 +38,24 @@ public class CraftInventory implements Inventory {
     }
 
     public int getSize() {
-        return getInventory().getSize();
+        return getInventory().getSizeInventory();
     }
 
     public String getName() {
-        return CraftChatMessage.fromComponent(getInventory().getDisplayName());
+        return getInventory().getName();
     }
 
     public ItemStack getItem(int index) {
-        net.minecraft.server.ItemStack item = getInventory().getItem(index);
+        net.minecraft.item.ItemStack item = getInventory().getStackInSlot(index);
         return item.isEmpty() ? null : CraftItemStack.asCraftMirror(item);
     }
 
-    protected ItemStack[] asCraftMirror(List<net.minecraft.server.ItemStack> mcItems) {
+    protected ItemStack[] asCraftMirror(List<net.minecraft.item.ItemStack> mcItems) {
         int size = mcItems.size();
         ItemStack[] items = new ItemStack[size];
 
         for (int i = 0; i < size; i++) {
-            net.minecraft.server.ItemStack mcItem = mcItems.get(i);
+            net.minecraft.item.ItemStack mcItem = mcItems.get(i);
             items[i] = (mcItem.isEmpty()) ? null : CraftItemStack.asCraftMirror(mcItem);
         }
 
@@ -75,7 +73,7 @@ public class CraftInventory implements Inventory {
     }
 
     public ItemStack[] getContents() {
-        List<net.minecraft.server.ItemStack> mcItems = getInventory().getContents();
+        List<net.minecraft.item.ItemStack> mcItems = getInventory().getContents();
 
         return asCraftMirror(mcItems);
     }
@@ -95,18 +93,21 @@ public class CraftInventory implements Inventory {
     }
 
     public void setItem(int index, ItemStack item) {
-        getInventory().setItem(index, CraftItemStack.asNMSCopy(item));
+        getInventory().setInventorySlotContents(index, CraftItemStack.asNMSCopy(item));
     }
 
-    public boolean contains(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
+    public boolean contains(int materialId) {
         for (ItemStack item : getStorageContents()) {
-            if (item != null && item.getType() == material) {
+            if (item != null && item.getTypeId() == materialId) {
                 return true;
             }
         }
         return false;
+    }
+
+    public boolean contains(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        return contains(material.getId());
     }
 
     public boolean contains(ItemStack item) {
@@ -121,20 +122,23 @@ public class CraftInventory implements Inventory {
         return false;
     }
 
-    public boolean contains(Material material, int amount) {
-        Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
+    public boolean contains(int materialId, int amount) {
         if (amount <= 0) {
             return true;
         }
         for (ItemStack item : getStorageContents()) {
-            if (item != null && item.getType()== material) {
+            if (item != null && item.getTypeId() == materialId) {
                 if ((amount -= item.getAmount()) <= 0) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public boolean contains(Material material, int amount) {
+        Validate.notNull(material, "Material cannot be null");
+        return contains(material.getId(), amount);
     }
 
     public boolean contains(ItemStack item, int amount) {
@@ -167,19 +171,22 @@ public class CraftInventory implements Inventory {
         return false;
     }
 
-    public HashMap<Integer, ItemStack> all(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
+    public HashMap<Integer, ItemStack> all(int materialId) {
         HashMap<Integer, ItemStack> slots = new HashMap<Integer, ItemStack>();
 
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getType()== material) {
+            if (item != null && item.getTypeId() == materialId) {
                 slots.put(i, item);
             }
         }
         return slots;
+    }
+
+    public HashMap<Integer, ItemStack> all(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        return all(material.getId());
     }
 
     public HashMap<Integer, ItemStack> all(ItemStack item) {
@@ -195,17 +202,20 @@ public class CraftInventory implements Inventory {
         return slots;
     }
 
-    public int first(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
+    public int first(int materialId) {
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getType()== material) {
+            if (item != null && item.getTypeId() == materialId) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public int first(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        return first(material.getId());
     }
 
     public int first(ItemStack item) {
@@ -213,16 +223,10 @@ public class CraftInventory implements Inventory {
     }
 
     private int first(ItemStack item, boolean withAmount) {
-        // Paper start
-        return first(item, withAmount, getStorageContents());
-    }
-
-    private int first(ItemStack item, boolean withAmount, ItemStack[] inventory) {
-        // Paper end
         if (item == null) {
             return -1;
         }
-        //ItemStack[] inventory = getStorageContents(); // Paper - let param deal
+        ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             if (inventory[i] == null) continue;
 
@@ -243,17 +247,20 @@ public class CraftInventory implements Inventory {
         return -1;
     }
 
-    public int firstPartial(Material material) {
-        Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
+    public int firstPartial(int materialId) {
         ItemStack[] inventory = getStorageContents();
         for (int i = 0; i < inventory.length; i++) {
             ItemStack item = inventory[i];
-            if (item != null && item.getType()== material && item.getAmount() < item.getMaxStackSize()) {
+            if (item != null && item.getTypeId() == materialId && item.getAmount() < item.getMaxStackSize()) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public int firstPartial(Material material) {
+        Validate.notNull(material, "Material cannot be null");
+        return firstPartial(material.getId());
     }
 
     private int firstPartial(ItemStack item) {
@@ -337,17 +344,6 @@ public class CraftInventory implements Inventory {
     }
 
     public HashMap<Integer, ItemStack> removeItem(ItemStack... items) {
-        // Paper start
-        return removeItem(false, items);
-    }
-
-    @Override
-    public HashMap<Integer, ItemStack> removeItemAnySlot(ItemStack... items) {
-        return removeItem(true, items);
-    }
-
-    private HashMap<Integer, ItemStack> removeItem(boolean searchEntire, ItemStack... items) {
-        // Paper end
         Validate.notNull(items, "Items cannot be null");
         HashMap<Integer, ItemStack> leftover = new HashMap<Integer, ItemStack>();
 
@@ -358,10 +354,7 @@ public class CraftInventory implements Inventory {
             int toDelete = item.getAmount();
 
             while (true) {
-                // Paper start - Allow searching entire contents
-                ItemStack[] toSearch = searchEntire ? getContents() : getStorageContents();
-                int first = first(item, false, toSearch);
-                // Paper end
+                int first = first(item, false);
 
                 // Drat! we don't have this type in the inventory
                 if (first == -1) {
@@ -394,18 +387,21 @@ public class CraftInventory implements Inventory {
     }
 
     private int getMaxItemStack() {
-        return getInventory().getMaxStackSize();
+        return getInventory().getInventoryStackLimit();
+    }
+
+    public void remove(int materialId) {
+        ItemStack[] items = getStorageContents();
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i].getTypeId() == materialId) {
+                clear(i);
+            }
+        }
     }
 
     public void remove(Material material) {
         Validate.notNull(material, "Material cannot be null");
-        material = CraftLegacy.fromLegacy(material);
-        ItemStack[] items = getStorageContents();
-        for (int i = 0; i < items.length; i++) {
-            if (items[i] != null && items[i].getType()== material) {
-                clear(i);
-            }
-        }
+        remove(material.getId());
     }
 
     public void remove(ItemStack item) {
@@ -443,13 +439,13 @@ public class CraftInventory implements Inventory {
     }
 
     public String getTitle() {
-        return getName();
+        return inventory.getName();
     }
 
     public InventoryType getType() {
         // Thanks to Droppers extending Dispensers, order is important.
         if (inventory instanceof InventoryCrafting) {
-            return inventory.getSize() >= 9 ? InventoryType.WORKBENCH : InventoryType.CRAFTING;
+            return inventory.getSizeInventory() >= 9 ? InventoryType.WORKBENCH : InventoryType.CRAFTING;
         } else if (inventory instanceof PlayerInventory) {
             return InventoryType.PLAYER;
         } else if (inventory instanceof TileEntityDropper) {
@@ -486,7 +482,7 @@ public class CraftInventory implements Inventory {
     }
 
     public int getMaxStackSize() {
-        return inventory.getMaxStackSize();
+        return inventory.getInventoryStackLimit();
     }
 
     public void setMaxStackSize(int size) {

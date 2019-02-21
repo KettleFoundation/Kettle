@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.World;
-import net.minecraft.server.EntityRabbit;
-import net.minecraft.server.PathfinderGoalSelector;
+import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.world.World;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Rabbit;
@@ -41,8 +41,8 @@ public class CraftRabbit extends CraftAnimals implements Rabbit {
         if (getRabbitType() == Type.THE_KILLER_BUNNY) {
             // Reset goals and target finders.
             World world = ((CraftWorld) this.getWorld()).getHandle();
-            entity.goalSelector = new PathfinderGoalSelector(world != null && world.methodProfiler != null ? world.methodProfiler : null);
-            entity.targetSelector = new PathfinderGoalSelector(world != null && world.methodProfiler != null ? world.methodProfiler : null);
+            entity.tasks = new EntityAITasks(world != null && world.profiler != null ? world.profiler : null);
+            entity.targetTasks = new EntityAITasks(world != null && world.profiler != null ? world.profiler : null);
             entity.initializePathFinderGoals();
         }
 

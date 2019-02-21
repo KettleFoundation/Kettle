@@ -2,15 +2,15 @@ package org.bukkit.craftbukkit.block;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.MobEffectList;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.TileEntityBeacon;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityBeacon;
 import org.bukkit.Material;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.inventory.CraftInventoryBeacon;
-import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.potion.PotionEffect;
@@ -46,10 +46,10 @@ public class CraftBeacon extends CraftContainer<TileEntityBeacon> implements Bea
         if (tileEntity instanceof TileEntityBeacon) {
             TileEntityBeacon beacon = (TileEntityBeacon) tileEntity;
 
-            Collection<EntityHuman> nms = beacon.getHumansInRange();
+            Collection<EntityPlayer> nms = beacon.getHumansInRange();
             Collection<LivingEntity> bukkit = new ArrayList<LivingEntity>(nms.size());
 
-            for (EntityHuman human : nms) {
+            for (EntityPlayer human : nms) {
                 bukkit.add(human.getBukkitEntity());
             }
 
@@ -72,7 +72,7 @@ public class CraftBeacon extends CraftContainer<TileEntityBeacon> implements Bea
 
     @Override
     public void setPrimaryEffect(PotionEffectType effect) {
-        this.getSnapshot().primaryEffect = (effect != null) ? MobEffectList.fromId(effect.getId()) : null;
+        this.getSnapshot().primaryEffect = (effect != null) ? Potion.getPotionById(effect.getId()) : null;
     }
 
     @Override
@@ -82,17 +82,17 @@ public class CraftBeacon extends CraftContainer<TileEntityBeacon> implements Bea
 
     @Override
     public void setSecondaryEffect(PotionEffectType effect) {
-        this.getSnapshot().secondaryEffect = (effect != null) ? MobEffectList.fromId(effect.getId()) : null;
+        this.getSnapshot().secondaryEffect = (effect != null) ? Potion.getPotionById(effect.getId()) : null;
     }
 
     @Override
     public String getCustomName() {
         TileEntityBeacon beacon = this.getSnapshot();
-        return beacon.hasCustomName() ? CraftChatMessage.fromComponent(beacon.getCustomName()) : null;
+        return beacon.hasCustomName() ? beacon.getName() : null;
     }
 
     @Override
     public void setCustomName(String name) {
-        this.getSnapshot().setCustomName(CraftChatMessage.fromStringOrNull(name));
+        this.getSnapshot().setName(name);
     }
 }

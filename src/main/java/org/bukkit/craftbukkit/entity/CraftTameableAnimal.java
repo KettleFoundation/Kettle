@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityTameableAnimal;
+import net.minecraft.entity.passive.EntityTameable;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Creature;
@@ -9,28 +9,25 @@ import org.bukkit.entity.Tameable;
 import java.util.UUID;
 
 public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creature {
-    public CraftTameableAnimal(CraftServer server, EntityTameableAnimal entity) {
+    public CraftTameableAnimal(CraftServer server, EntityTameable entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityTameableAnimal getHandle() {
-        return (EntityTameableAnimal)super.getHandle();
+    public EntityTameable getHandle() {
+        return (EntityTameable)super.getHandle();
     }
 
-    public UUID getOwnerUniqueId() {
-        return getOwnerUUID();
-    }
     public UUID getOwnerUUID() {
         try {
-            return getHandle().getOwnerUUID();
+            return getHandle().getOwnerId();
         } catch (IllegalArgumentException ex) {
             return null;
         }
     }
 
     public void setOwnerUUID(UUID uuid) {
-        getHandle().setOwnerUUID(uuid);
+        getHandle().setOwnerId(uuid);
     }
 
     public AnimalTamer getOwner() {
@@ -53,7 +50,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
     public void setOwner(AnimalTamer tamer) {
         if (tamer != null) {
             setTamed(true);
-            getHandle().setGoalTarget(null, null, false);
+            getHandle().setAttackTarget(null, null, false);
             setOwnerUUID(tamer.getUniqueId());
         } else {
             setTamed(false);
@@ -74,7 +71,7 @@ public class CraftTameableAnimal extends CraftAnimals implements Tameable, Creat
 
     public void setSitting(boolean sitting) {
         getHandle().setSitting(sitting);
-        getHandle().getGoalSit().setSitting(sitting);
+        getHandle().getAISit().setSitting(sitting);
     }
 
     @Override

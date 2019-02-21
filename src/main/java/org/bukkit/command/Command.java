@@ -5,10 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -33,8 +32,7 @@ public abstract class Command {
     protected String usageMessage;
     private String permission;
     private String permissionMessage;
-    public co.aikar.timings.Timing timings; // Spigot
-    public String getTimingName() {return getName();} // Spigot
+    public org.spigotmc.CustomTimingsHandler timings; // Spigot
 
     protected Command(String name) {
         this(name, "", "/" + name, new ArrayList<String>());
@@ -48,6 +46,7 @@ public abstract class Command {
         this.usageMessage = usageMessage;
         this.aliases = aliases;
         this.activeAliases = new ArrayList<String>(aliases);
+        this.timings = new org.spigotmc.CustomTimingsHandler("** Command: " + name); // Spigot
     }
 
     /**
@@ -180,7 +179,7 @@ public abstract class Command {
         }
 
         if (permissionMessage == null) {
-            target.sendMessage(Bukkit.getPermissionMessage()); // Paper
+            target.sendMessage(ChatColor.RED + "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.");
         } else if (permissionMessage.length() != 0) {
             for (String line : permissionMessage.replace("<permission>", permission).split("\n")) {
                 target.sendMessage(line);
@@ -236,6 +235,7 @@ public abstract class Command {
     public boolean setLabel(String name) {
         this.nextLabel = name;
         if (!isRegistered()) {
+            this.timings = new org.spigotmc.CustomTimingsHandler("** Command: " + name); // Spigot
             this.label = name;
             return true;
         }
@@ -392,14 +392,14 @@ public abstract class Command {
         if (source instanceof BlockCommandSender) {
             BlockCommandSender blockCommandSender = (BlockCommandSender) source;
 
-            if (!blockCommandSender.getBlock().getWorld().getGameRuleValue(GameRule.COMMAND_BLOCK_OUTPUT)) {
+            if (blockCommandSender.getBlock().getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
                 Bukkit.getConsoleSender().sendMessage(result);
                 return;
             }
         } else if (source instanceof CommandMinecart) {
             CommandMinecart commandMinecart = (CommandMinecart) source;
 
-            if (!commandMinecart.getWorld().getGameRuleValue(GameRule.COMMAND_BLOCK_OUTPUT)) {
+            if (commandMinecart.getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
                 Bukkit.getConsoleSender().sendMessage(result);
                 return;
             }

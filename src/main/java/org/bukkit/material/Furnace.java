@@ -9,7 +9,7 @@ import org.bukkit.block.BlockFace;
 public class Furnace extends FurnaceAndDispenser {
 
     public Furnace() {
-        super(Material.LEGACY_FURNACE);
+        super(Material.FURNACE);
     }
 
     /**
@@ -22,8 +22,27 @@ public class Furnace extends FurnaceAndDispenser {
         setFacingDirection(direction);
     }
 
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Furnace(final int type) {
+        super(type);
+    }
+
     public Furnace(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Furnace(final int type, final byte data) {
+        super(type, data);
     }
 
     /**

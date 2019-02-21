@@ -12,16 +12,16 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 public class SpawnEgg extends MaterialData {
 
     public SpawnEgg() {
-        super(Material.LEGACY_MONSTER_EGG);
+        super(Material.MONSTER_EGG);
     }
 
     /**
-     * @param type the type
+     * @param type the raw type id
      * @param data the raw data value
      * @deprecated Magic value
      */
     @Deprecated
-    public SpawnEgg(final Material type, final byte data) {
+    public SpawnEgg(int type, byte data) {
         super(type, data);
     }
 
@@ -31,7 +31,7 @@ public class SpawnEgg extends MaterialData {
      */
     @Deprecated
     public SpawnEgg(byte data) {
-        super(Material.LEGACY_MONSTER_EGG, data);
+        super(Material.MONSTER_EGG, data);
     }
 
     public SpawnEgg(EntityType type) {

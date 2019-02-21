@@ -4,6 +4,7 @@ import org.bukkit.Color;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionType;
 
 import java.util.List;
 
@@ -77,7 +78,7 @@ public interface PotionMeta extends ItemMeta {
      *
      * @param type the potion effect type to move
      * @return true if the potion meta changed as a result of this call
-     * @deprecated use {@link org.bukkit.potion.PotionType#PotionType}
+     * @deprecated use {@link PotionType#PotionType}
      */
     @Deprecated
     boolean setMainEffect(PotionEffectType type);

@@ -1,8 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.TileEntityNote;
-
+import net.minecraft.tileentity.TileEntityNote;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Instrument;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -48,7 +47,7 @@ public class CraftNoteBlock extends CraftBlockEntityState<TileEntityNote> implem
         if (block.getType() == Material.NOTE_BLOCK) {
             TileEntityNote note = (TileEntityNote) this.getTileEntityFromWorld();
             CraftWorld world = (CraftWorld) this.getWorld();
-            note.play(world.getHandle(), new BlockPosition(getX(), getY(), getZ()));
+            note.triggerNote(world.getHandle(), new BlockPos(getX(), getY(), getZ()));
             return true;
         } else {
             return false;
@@ -61,7 +60,7 @@ public class CraftNoteBlock extends CraftBlockEntityState<TileEntityNote> implem
 
         if (block.getType() == Material.NOTE_BLOCK) {
             CraftWorld world = (CraftWorld) this.getWorld();
-            world.getHandle().playBlockAction(new BlockPosition(getX(), getY(), getZ()), CraftMagicNumbers.getBlock(block), instrument, note);
+            world.getHandle().addBlockEvent(new BlockPos(getX(), getY(), getZ()), CraftMagicNumbers.getBlock(block), instrument, note);
             return true;
         } else {
             return false;
@@ -74,7 +73,7 @@ public class CraftNoteBlock extends CraftBlockEntityState<TileEntityNote> implem
 
         if (block.getType() == Material.NOTE_BLOCK) {
             CraftWorld world = (CraftWorld) this.getWorld();
-            world.getHandle().playBlockAction(new BlockPosition(getX(), getY(), getZ()), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
+            world.getHandle().addBlockEvent(new BlockPos(getX(), getY(), getZ()), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
             return true;
         } else {
             return false;

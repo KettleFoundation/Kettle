@@ -44,13 +44,32 @@ public class Hopper extends MaterialData implements Directional, Redstone {
      * @see BlockFace
      */
     public Hopper(BlockFace facingDirection, boolean isActive) {
-        super(Material.LEGACY_HOPPER);
+        super(Material.HOPPER);
         setFacingDirection(facingDirection);
         setActive(isActive);
     }
 
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Hopper(int type) {
+        super(type);
+    }
+
     public Hopper(Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Hopper(int type, byte data) {
+        super(type, data);
     }
 
     /**

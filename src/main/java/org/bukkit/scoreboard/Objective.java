@@ -31,7 +31,7 @@ public interface Objective {
      * @param displayName Display name to set
      * @throws IllegalStateException if this objective has been unregistered
      * @throws IllegalArgumentException if displayName is null
-     * @throws IllegalArgumentException if displayName is longer than 128
+     * @throws IllegalArgumentException if displayName is longer than 32
      *     characters.
      */
     void setDisplayName(String displayName) throws IllegalStateException, IllegalArgumentException;
@@ -86,22 +86,6 @@ public interface Objective {
     DisplaySlot getDisplaySlot() throws IllegalStateException;
 
     /**
-     * Sets manner in which this objective will be rendered.
-     *
-     * @param renderType new render type
-     * @throws IllegalStateException if this objective has been unregistered
-     */
-    void setRenderType(RenderType renderType) throws IllegalStateException;
-
-    /**
-     * Sets manner in which this objective will be rendered.
-     *
-     * @return the render type
-     * @throws IllegalStateException if this objective has been unregistered
-     */
-    RenderType getRenderType() throws IllegalStateException;
-
-    /**
      * Gets a player's Score for an Objective on this Scoreboard
      *
      * @param player Player for the Score
@@ -121,7 +105,6 @@ public interface Objective {
      * @return Score tracking the Objective and entry specified
      * @throws IllegalArgumentException if entry is null
      * @throws IllegalStateException if this objective has been unregistered
-     * @throws IllegalArgumentException if entry is longer than 40 characters.
      */
     Score getScore(String entry) throws IllegalArgumentException, IllegalStateException;
 }

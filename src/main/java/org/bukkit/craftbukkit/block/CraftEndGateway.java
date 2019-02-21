@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
 import java.util.Objects;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.TileEntityEndGateway;
+import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,7 +20,7 @@ public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway>
 
     @Override
     public Location getExitLocation() {
-        BlockPosition pos = this.getSnapshot().exitPortal;
+        BlockPos pos = this.getSnapshot().exitPortal;
         return pos == null ? null : new Location(this.isPlaced() ? this.getWorld() : null, pos.getX(), pos.getY(), pos.getZ());
     }
 
@@ -31,7 +31,7 @@ public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway>
         } else if (!Objects.equals(location.getWorld(), this.isPlaced() ? this.getWorld() : null)) {
             throw new IllegalArgumentException("Cannot set exit location to different world");
         } else {
-            this.getSnapshot().exitPortal = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            this.getSnapshot().exitPortal = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         }
     }
 
@@ -43,16 +43,6 @@ public class CraftEndGateway extends CraftBlockEntityState<TileEntityEndGateway>
     @Override
     public void setExactTeleport(boolean exact) {
         this.getSnapshot().exactTeleport = exact;
-    }
-
-    @Override
-    public long getAge() {
-        return this.getSnapshot().age;
-    }
-
-    @Override
-    public void setAge(long age) {
-        this.getSnapshot().age = age;
     }
 
     @Override

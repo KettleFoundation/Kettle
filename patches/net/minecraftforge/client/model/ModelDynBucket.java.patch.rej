@@ -1,0 +1,10 @@
+++++ REJECTED PATCH 1
+ 
+         ImmutableMap<TransformType, TRSRTransformation> transformMap = PerspectiveMapWrapper.getTransforms(state);
+ 
+-        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180Â° to turn it upside down
++        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180ï¿½ to turn it upside down
+         if (flipGas && fluid != null && fluid.isLighterThanAir())
+         {
+             state = new ModelStateComposition(state, TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, new Quat4f(0, 0, 1, 0), null, null)));
+++++ END PATCH

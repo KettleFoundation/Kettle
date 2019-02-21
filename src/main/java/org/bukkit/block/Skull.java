@@ -1,11 +1,7 @@
 package org.bukkit.block;
 
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
-import org.bukkit.block.data.BlockData;
-import com.destroystokyo.paper.profile.PlayerProfile;
-import javax.annotation.Nullable;
 
 /**
  * Represents a captured state of a skull block.
@@ -36,7 +32,7 @@ public interface Skull extends BlockState {
      *
      * @param name the new owner of the skull
      * @return true if the owner was successfully set
-     * @deprecated see {@link #setOwningPlayer(org.bukkit.OfflinePlayer)}.
+     * @deprecated see {@link #setOwningPlayer(OfflinePlayer)}.
      */
     @Deprecated
     public boolean setOwner(String name);
@@ -57,55 +53,31 @@ public interface Skull extends BlockState {
      */
     public void setOwningPlayer(OfflinePlayer player);
 
-    // Paper start
     /**
-     * Sets this skull to use the supplied Player Profile, which can include textures already prefilled.
-     * @param profile The profile to set this Skull to use, may not be null
-     */
-    void setPlayerProfile(PlayerProfile profile);
-
-    /**
-     * If the skull has an owner, per {@link #hasOwner()}, return the owners {@link PlayerProfile}
-     * @return The profile of the owner, if set
-     */
-    @Nullable PlayerProfile getPlayerProfile();
-    // Paper end
-
-    /**
-     * Gets the rotation of the skull in the world (or facing direction if this
-     * is a wall mounted skull).
+     * Gets the rotation of the skull in the world
      *
      * @return the rotation of the skull
-     * @deprecated use {@link BlockData}
      */
-    @Deprecated
     public BlockFace getRotation();
 
     /**
-     * Sets the rotation of the skull in the world (or facing direction if this
-     * is a wall mounted skull).
+     * Sets the rotation of the skull in the world
      *
      * @param rotation the rotation of the skull
-     * @deprecated use {@link BlockData}
      */
-    @Deprecated
     public void setRotation(BlockFace rotation);
 
     /**
      * Gets the type of skull
      *
      * @return the type of skull
-     * @deprecated check {@link Material} instead
      */
-    @Deprecated
     public SkullType getSkullType();
 
     /**
      * Sets the type of skull
      *
      * @param skullType the type of skull
-     * @deprecated check {@link Material} instead
      */
-    @Deprecated
     public void setSkullType(SkullType skullType);
 }

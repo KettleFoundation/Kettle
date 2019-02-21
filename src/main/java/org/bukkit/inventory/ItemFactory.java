@@ -121,39 +121,4 @@ public interface ItemFactory {
      * @return the default color for leather armor
      */
     Color getDefaultLeatherColor();
-
-    /**
-     * Apply a material change for an item meta. Do not use under any
-     * circumstances.
-     *
-     * @param meta meta
-     * @param material material
-     * @return updated material
-     * @throws IllegalArgumentException exception
-     * @deprecated for internal use only
-     */
-    @Deprecated
-    Material updateMaterial(final ItemMeta meta, final Material material) throws IllegalArgumentException;
-    // Paper start
-    /**
-     * Minecart updates are converting simple item stacks into more complex NBT oriented Item Stacks.
-     *
-     * Use this method to to ensure any desired data conversions are processed.
-     * The input itemstack will not be the same as the returned itemstack.
-     *
-     * @param item The item to process conversions on
-     * @return A potentially Data Converted ItemStack
-     */
-    ItemStack ensureServerConversions(ItemStack item);
-
-    /**
-     * Gets the Display name as seen in the Client.
-     * Currently the server only supports the English language. To override this,
-     * You must replace the language file embedded in the server jar.
-     *
-     * @param item Item to return Display name of
-     * @return Display name of Item
-     */
-    String getI18NDisplayName(ItemStack item);
-    // Paper end
 }

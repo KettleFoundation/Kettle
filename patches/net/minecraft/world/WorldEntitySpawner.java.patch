@@ -1,0 +1,70 @@
+--- ../src-base/minecraft/net/minecraft/world/WorldEntitySpawner.java
++++ ../src-work/minecraft/net/minecraft/world/WorldEntitySpawner.java
+@@ -21,6 +21,7 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.biome.Biome;
+ import net.minecraft.world.chunk.Chunk;
++import org.bukkit.event.entity.CreatureSpawnEvent;
+ 
+ public final class WorldEntitySpawner
+ {
+@@ -77,10 +78,32 @@
+ 
+             for (EnumCreatureType enumcreaturetype : EnumCreatureType.values())
+             {
++                // CraftBukkit start - Use per-world spawn limits
++                int limit = enumcreaturetype.getMaxNumberOfCreature();
++                switch (enumcreaturetype) {
++                    case MONSTER:
++                        limit = worldServerIn.getWorld().getMonsterSpawnLimit();
++                        break;
++                    case CREATURE:
++                        limit = worldServerIn.getWorld().getAnimalSpawnLimit();
++                        break;
++                    case WATER_CREATURE:
++                        limit = worldServerIn.getWorld().getWaterAnimalSpawnLimit();
++                        break;
++                    case AMBIENT:
++                        limit = worldServerIn.getWorld().getAmbientSpawnLimit();
++                        break;
++                }
++
++                if (limit == 0) {
++                    continue;
++                }
++                // CraftBukkit end
+                 if ((!enumcreaturetype.getPeacefulCreature() || spawnPeacefulMobs) && (enumcreaturetype.getPeacefulCreature() || spawnHostileMobs) && (!enumcreaturetype.getAnimal() || spawnOnSetTickRate))
+                 {
+-                    int k4 = worldServerIn.countEntities(enumcreaturetype, true);
+-                    int l4 = enumcreaturetype.getMaxNumberOfCreature() * i / MOB_COUNT_DIV;
++                    int k4 = worldServerIn.countEntities(enumcreaturetype.getCreatureClass());
++                    // int l4 = enumcreaturetype.getMaxNumberOfCreature() * i / MOB_COUNT_DIV;
++                    int l4 = limit * i / MOB_COUNT_DIV; // CraftBukkit - use per-world limits
+ 
+                     if (k4 <= l4)
+                     {
+@@ -156,8 +179,9 @@
+ 
+                                                     if (entityliving.isNotColliding())
+                                                     {
+-                                                        ++j2;
+-                                                        worldServerIn.spawnEntity(entityliving);
++                                                        if (worldServerIn.spawnEntity(entityliving, CreatureSpawnEvent.SpawnReason.NATURAL)) {
++                                                            ++j2;
++                                                        }
+                                                     }
+                                                     else
+                                                     {
+@@ -295,8 +319,11 @@
+ 
+                             if (net.minecraftforge.event.ForgeEventFactory.canEntitySpawn(entityliving, worldIn, j + 0.5f, (float) blockpos.getY(), k +0.5f, false) == net.minecraftforge.fml.common.eventhandler.Event.Result.DENY) continue;
+                             entityliving.setLocationAndAngles((double)((float)j + 0.5F), (double)blockpos.getY(), (double)((float)k + 0.5F), randomIn.nextFloat() * 360.0F, 0.0F);
+-                            worldIn.spawnEntity(entityliving);
++                            // CraftBukkit start - Added a reason for spawning this creature, moved entityliving.onInitialSpawn(ientitylivingdata) up
++                            // worldIn.spawnEntity(entityliving);
+                             ientitylivingdata = entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
++                            worldIn.spawnEntity(entityliving, CreatureSpawnEvent.SpawnReason.CHUNK_GEN);
++                            // CraftBukkit end
+                             flag = true;
+                         }
+ 

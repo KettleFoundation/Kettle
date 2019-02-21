@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.InventoryMerchant;
+import net.minecraft.inventory.InventoryMerchant;
 import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.MerchantRecipe;
 
@@ -12,12 +12,12 @@ public class CraftInventoryMerchant extends CraftInventory implements MerchantIn
 
     @Override
     public int getSelectedRecipeIndex() {
-        return getInventory().selectedIndex;
+        return getInventory().currentRecipeIndex;
     }
 
     @Override
     public MerchantRecipe getSelectedRecipe() {
-        return getInventory().getRecipe().asBukkit();
+        return getInventory().getCurrentRecipe().asBukkit();
     }
 
     @Override

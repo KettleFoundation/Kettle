@@ -1,0 +1,52 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityShulkerBox.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityShulkerBox.java
+@@ -29,6 +29,8 @@
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
+ 
+ public class TileEntityShulkerBox extends TileEntityLockableLoot implements ITickable, ISidedInventory
+ {
+@@ -199,7 +201,7 @@
+ 
+     public int getInventoryStackLimit()
+     {
+-        return 64;
++        return maxStack;
+     }
+ 
+     public boolean receiveClientEvent(int id, int type)
+@@ -365,6 +367,31 @@
+         super.clear();
+     }
+ 
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++
++    @Override
++    public List<ItemStack> getContents() {
++        return items;
++    }
++
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++
++    @Override
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++
+     public boolean isCleared()
+     {
+         return this.hasBeenCleared;

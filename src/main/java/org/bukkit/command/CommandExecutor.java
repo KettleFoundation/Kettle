@@ -6,10 +6,7 @@ package org.bukkit.command;
 public interface CommandExecutor {
 
     /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
+     * Executes the given command, returning its success
      *
      * @param sender Source of the command
      * @param command Command which was executed

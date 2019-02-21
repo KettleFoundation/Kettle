@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraft.server.EntityVillager;
-import org.apache.commons.lang.Validate;
+
+import net.minecraft.entity.passive.EntityVillager;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.craftbukkit.inventory.CraftMerchant;
@@ -69,15 +70,14 @@ public class CraftVillager extends CraftAgeable implements Villager, InventoryHo
         }
 
         if (resetTrades) {
-            getHandle().trades = null;
-            getHandle().careerLevel = 0; // SPIGOT-4310
-            getHandle().populateTrades();
+            getHandle().buyingList = null;
+            getHandle().populateBuyingList();
         }
     }
 
     @Override
     public Inventory getInventory() {
-        return new CraftInventory(getHandle().inventory);
+        return new CraftInventory(getHandle().villagerInventory);
     }
 
     private CraftMerchant getMerchant() {
@@ -121,12 +121,12 @@ public class CraftVillager extends CraftAgeable implements Villager, InventoryHo
 
     @Override
     public int getRiches() {
-        return getHandle().riches;
+        return getHandle().wealth;
     }
 
     @Override
     public void setRiches(int riches) {
-        getHandle().riches = riches;
+        getHandle().wealth = riches;
     }
 
     @Nullable

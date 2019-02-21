@@ -17,11 +17,30 @@ public class FlowerPot extends MaterialData {
      * Default constructor for a flower pot.
      */
     public FlowerPot() {
-        super(Material.LEGACY_FLOWER_POT);
+        super(Material.FLOWER_POT);
+    }
+
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public FlowerPot(final int type) {
+        super(type);
     }
 
     public FlowerPot(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public FlowerPot(final int type, final byte data) {
+        super(type, data);
     }
 
     /**
@@ -43,9 +62,9 @@ public class FlowerPot extends MaterialData {
     public MaterialData getContents() {
         switch (getData()) {
             case 1:
-                return new MaterialData(Material.LEGACY_RED_ROSE);
+                return new MaterialData(Material.RED_ROSE);
             case 2:
-                return new MaterialData(Material.LEGACY_YELLOW_FLOWER);
+                return new MaterialData(Material.YELLOW_FLOWER);
             case 3:
                 return new Tree(TreeSpecies.GENERIC);
             case 4:
@@ -55,13 +74,13 @@ public class FlowerPot extends MaterialData {
             case 6:
                 return new Tree(TreeSpecies.JUNGLE);
             case 7:
-                return new MaterialData(Material.LEGACY_RED_MUSHROOM);
+                return new MaterialData(Material.RED_MUSHROOM);
             case 8:
-                return new MaterialData(Material.LEGACY_BROWN_MUSHROOM);
+                return new MaterialData(Material.BROWN_MUSHROOM);
             case 9:
-                return new MaterialData(Material.LEGACY_CACTUS);
+                return new MaterialData(Material.CACTUS);
             case 10:
-                return new MaterialData(Material.LEGACY_DEAD_BUSH);
+                return new MaterialData(Material.DEAD_BUSH);
             case 11:
                 return new LongGrass(GrassSpecies.FERN_LIKE);
             default:
@@ -77,19 +96,19 @@ public class FlowerPot extends MaterialData {
     public void setContents(MaterialData materialData) {
         Material mat = materialData.getItemType();
 
-        if (mat == Material.LEGACY_RED_ROSE) {
+        if (mat == Material.RED_ROSE) {
             setData((byte) 1);
-        } else if (mat == Material.LEGACY_YELLOW_FLOWER) {
+        } else if (mat == Material.YELLOW_FLOWER) {
             setData((byte) 2);
-        } else if (mat == Material.LEGACY_RED_MUSHROOM) {
+        } else if (mat == Material.RED_MUSHROOM) {
             setData((byte) 7);
-        } else if (mat == Material.LEGACY_BROWN_MUSHROOM) {
+        } else if (mat == Material.BROWN_MUSHROOM) {
             setData((byte) 8);
-        } else if (mat == Material.LEGACY_CACTUS) {
+        } else if (mat == Material.CACTUS) {
             setData((byte) 9);
-        } else if (mat == Material.LEGACY_DEAD_BUSH) {
+        } else if (mat == Material.DEAD_BUSH) {
             setData((byte) 10);
-        } else if (mat == Material.LEGACY_SAPLING) {
+        } else if (mat == Material.SAPLING) {
             TreeSpecies species = ((Tree) materialData).getSpecies();
 
             if (species == TreeSpecies.GENERIC) {
@@ -101,7 +120,7 @@ public class FlowerPot extends MaterialData {
             } else {
                 setData((byte) 6);
             }
-        } else if (mat == Material.LEGACY_LONG_GRASS) {
+        } else if (mat == Material.LONG_GRASS) {
             GrassSpecies species = ((LongGrass) materialData).getSpecies();
 
             if (species == GrassSpecies.FERN_LIKE) {

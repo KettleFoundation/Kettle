@@ -1,11 +1,8 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFallingBlock;
-
+import net.minecraft.entity.item.EntityFallingBlock;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
@@ -31,19 +28,23 @@ public class CraftFallingBlock extends CraftEntity implements FallingBlock {
     }
 
     public Material getMaterial() {
-        return CraftMagicNumbers.getMaterial(getHandle().getBlock()).getItemType();
+        return Material.getMaterial(getBlockId());
     }
 
-    public BlockData getBlockData() {
-        return CraftBlockData.fromData(getHandle().getBlock());
+    public int getBlockId() {
+        return CraftMagicNumbers.getId(getHandle().getBlock().getBlock());
+    }
+
+    public byte getBlockData() {
+        return (byte) getHandle().getBlock().getBlock().getMetaFromState(getHandle().getBlock());
     }
 
     public boolean getDropItem() {
-        return getHandle().dropItem;
+        return getHandle().shouldDropItem;
     }
 
     public void setDropItem(boolean drop) {
-        getHandle().dropItem = drop;
+        getHandle().shouldDropItem = drop;
     }
 
     @Override
@@ -61,6 +62,6 @@ public class CraftFallingBlock extends CraftEntity implements FallingBlock {
         super.setTicksLived(value);
 
         // Second field for EntityFallingBlock
-        getHandle().ticksLived = value;
+        getHandle().ticksExisted = value;
     }
 }

@@ -1,9 +1,9 @@
 package org.bukkit.event.player;
 
+import org.bukkit.entity.Fish;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.FishHook;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -15,9 +15,9 @@ public class PlayerFishEvent extends PlayerEvent implements Cancellable {
     private boolean cancel = false;
     private int exp;
     private final State state;
-    private final FishHook hookEntity;
+    private final Fish hookEntity;
 
-    public PlayerFishEvent(final Player player, final Entity entity, final FishHook hookEntity, final State state) {
+    public PlayerFishEvent(final Player player, final Entity entity, final Fish hookEntity, final State state) {
         super(player);
         this.entity = entity;
         this.hookEntity = hookEntity;
@@ -40,9 +40,9 @@ public class PlayerFishEvent extends PlayerEvent implements Cancellable {
     /**
      * Gets the fishing hook.
      *
-     * @return the entity representing the fishing hook/bobber.
+     * @return Fish the entity representing the fishing hook/bobber.
      */
-    public FishHook getHook() {
+    public Fish getHook() {
         return hookEntity;
     }
 

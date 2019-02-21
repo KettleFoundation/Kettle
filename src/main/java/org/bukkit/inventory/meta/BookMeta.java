@@ -6,7 +6,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 
 /**
- * Represents a book ({@link Material#WRITABLE_BOOK} or {@link
+ * Represents a book ({@link Material#BOOK_AND_QUILL} or {@link
  * Material#WRITTEN_BOOK}) that can have a title, an author, and pages.
  */
 public interface BookMeta extends ItemMeta {

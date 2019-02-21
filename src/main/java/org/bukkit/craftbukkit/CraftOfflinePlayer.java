@@ -7,11 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import net.minecraft.server.DimensionManager;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WhiteListEntry;
-import net.minecraft.server.WorldNBTStorage;
-
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.storage.SaveHandler;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,12 +24,12 @@ import org.bukkit.plugin.Plugin;
 public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializable {
     private final GameProfile profile;
     private final CraftServer server;
-    private WorldNBTStorage storage; // Paper - lazy init
+    private final SaveHandler storage;
 
     protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        //this.storage = (WorldNBTStorage) (server.console.getWorldServer(DimensionManager.OVERWORLD).getDataManager()); // Paper - lazy init
+        this.storage = (SaveHandler) (server.console.worldServerList.get(0).getSaveHandler());
 
     }
 
@@ -75,7 +72,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isOp() {
-        return server.getHandle().isOp(profile);
+        return server.getHandle().canSendCommands(profile);
     }
 
     public void setOp(boolean value) {
@@ -111,14 +108,14 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isWhitelisted() {
-        return server.getHandle().getWhitelist().isWhitelisted(profile);
+        return server.getHandle().getWhitelistedPlayers().isWhitelisted(profile);
     }
 
     public void setWhitelisted(boolean value) {
         if (value) {
-            server.getHandle().getWhitelist().add(new WhiteListEntry(profile));
+            server.getHandle().addWhitelistedPlayer(profile);
         } else {
-            server.getHandle().getWhitelist().remove(profile);
+            server.getHandle().removePlayerFromWhitelist(profile);
         }
     }
 
@@ -169,23 +166,8 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
         return hash;
     }
 
-    // Paper - lazy
-    private WorldNBTStorage getStorageLazy() {
-        if (this.storage == null) {
-            net.minecraft.server.WorldServer worldServer = server.console.getWorldServer(DimensionManager.OVERWORLD);
-            if (worldServer == null) {
-                throw new IllegalStateException("Cannot get world storage when there are no worlds loaded!");
-            } else {
-                this.storage = (WorldNBTStorage) worldServer.getDataManager();
-            }
-        }
-
-        return this.storage;
-    }
-    // Paper end
-
     private NBTTagCompound getData() {
-        return getStorageLazy().getPlayerData(getUniqueId().toString());
+        return storage.getPlayerData(getUniqueId().toString());
     }
 
     private NBTTagCompound getBukkitData() {
@@ -193,16 +175,16 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
         if (result != null) {
             if (!result.hasKey("bukkit")) {
-                result.set("bukkit", new NBTTagCompound());
+                result.setTag("bukkit", new NBTTagCompound());
             }
-            result = result.getCompound("bukkit");
+            result = result.getCompoundTag("bukkit");
         }
 
         return result;
     }
 
     private File getDataFile() {
-        return new File(getStorageLazy().getPlayerDir(), getUniqueId() + ".dat");
+        return new File(storage.getPlayerDir(), getUniqueId() + ".dat");
     }
 
     public long getFirstPlayed() {
@@ -245,61 +227,6 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
         return getData() != null;
     }
 
-    // Paper start
-    @Override
-    public long getLastLogin() {
-        Player player = getPlayer();
-        if (player != null) return player.getLastLogin();
-
-        NBTTagCompound data = getPaperData();
-
-        if (data != null) {
-            if (data.hasKey("LastLogin")) {
-                return data.getLong("LastLogin");
-            } else {
-                // if the player file cannot provide accurate data, this is probably the closest we can approximate
-                File file = getDataFile();
-                return file.lastModified();
-            }
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public long getLastSeen() {
-        Player player = getPlayer();
-        if (player != null) return player.getLastSeen();
-
-        NBTTagCompound data = getPaperData();
-
-        if (data != null) {
-            if (data.hasKey("LastSeen")) {
-                return data.getLong("LastSeen");
-            } else {
-                // if the player file cannot provide accurate data, this is probably the closest we can approximate
-                File file = getDataFile();
-                return file.lastModified();
-            }
-        } else {
-            return 0;
-        }
-    }
-
-    private NBTTagCompound getPaperData() {
-        NBTTagCompound result = getData();
-
-        if (result != null) {
-            if (!result.hasKey("Paper")) {
-                result.set("Paper", new NBTTagCompound());
-            }
-            result = result.getCompound("Paper");
-        }
-
-        return result;
-    }
-    // Paper end
-
     public Location getBedSpawnLocation() {
         NBTTagCompound data = getData();
         if (data == null) return null;
@@ -309,7 +236,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
             if (spawnWorld.equals("")) {
                 spawnWorld = server.getWorlds().get(0).getName();
             }
-            return new Location(server.getWorld(spawnWorld), data.getInt("SpawnX"), data.getInt("SpawnY"), data.getInt("SpawnZ"));
+            return new Location(server.getWorld(spawnWorld), data.getInteger("SpawnX"), data.getInteger("SpawnY"), data.getInteger("SpawnZ"));
         }
         return null;
     }

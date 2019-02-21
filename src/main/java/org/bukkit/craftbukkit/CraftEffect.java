@@ -1,12 +1,9 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.Item;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.potion.Potion;
 
 public class CraftEffect {
@@ -21,7 +18,7 @@ public class CraftEffect {
             break;
         case RECORD_PLAY:
             Validate.isTrue(((Material) data).isRecord(), "Invalid record type!");
-            datavalue = Item.getId(CraftMagicNumbers.getItem((Material) data));
+            datavalue = ((Material) data).getId();
             break;
         case SMOKE:
             switch((BlockFace) data) { // TODO: Verify (Where did these values come from...?)
@@ -59,7 +56,10 @@ public class CraftEffect {
             break;
         case STEP_SOUND:
             Validate.isTrue(((Material) data).isBlock(), "Material is not a block!");
-            datavalue = Block.getCombinedId(CraftMagicNumbers.getBlock((Material) data).getBlockData());
+            datavalue = ((Material) data).getId();
+            break;
+        case ITEM_BREAK:
+            datavalue = ((Material) data).getId();
             break;
         default:
             datavalue = 0;

@@ -1,10 +1,9 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockDropper;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.TileEntityDropper;
-
+import net.minecraft.block.BlockDropper;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dropper;
@@ -44,7 +43,7 @@ public class CraftDropper extends CraftLootable<TileEntityDropper> implements Dr
             CraftWorld world = (CraftWorld) this.getWorld();
             BlockDropper drop = (BlockDropper) Blocks.DROPPER;
 
-            drop.dispense(world.getHandle(), this.getPosition());
+            drop.dispense(world.getHandle(), new BlockPos(getX(), getY(), getZ()));
         }
     }
 }

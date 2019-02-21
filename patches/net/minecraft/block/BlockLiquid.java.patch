@@ -1,0 +1,23 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockLiquid.java
++++ ../src-work/minecraft/net/minecraft/block/BlockLiquid.java
+@@ -285,14 +285,18 @@
+                 if (integer.intValue() == 0)
+                 {
+                     worldIn.setBlockState(pos, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos, pos, Blocks.OBSIDIAN.getDefaultState()));
+-                    this.triggerMixEffects(worldIn, pos);
++                    if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(worldIn, pos, Blocks.OBSIDIAN.getDefaultState(), null)) {
++                        this.triggerMixEffects(worldIn, pos);
++                    }
+                     return true;
+                 }
+ 
+                 if (integer.intValue() <= 4)
+                 {
+                     worldIn.setBlockState(pos, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos, pos, Blocks.COBBLESTONE.getDefaultState()));
+-                    this.triggerMixEffects(worldIn, pos);
++                    if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(worldIn, pos, Blocks.COBBLESTONE.getDefaultState(), null)) {
++                        this.triggerMixEffects(worldIn, pos);
++                    }
+                     return true;
+                 }
+             }

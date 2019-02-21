@@ -1,19 +1,16 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityHanging;
-import net.minecraft.server.EntityItemFrame;
-import net.minecraft.server.EnumDirection;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.WorldServer;
-
-import org.apache.commons.lang.Validate;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
+import org.apache.commons.lang3.Validate;
 
 import org.bukkit.Rotation;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
@@ -23,15 +20,8 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
         super(server, entity);
     }
 
-    @Override
     public boolean setFacingDirection(BlockFace face, boolean force) {
-        EntityHanging hanging = getHandle();
-        EnumDirection oldDir = hanging.direction;
-        EnumDirection newDir = CraftBlock.blockFaceToNotch(face);
-
-        getHandle().setDirection(newDir);
-        if (!force && !hanging.survives()) {
-            hanging.setDirection(oldDir);
+        if (!super.setFacingDirection(face, force)) {
             return false;
         }
 
@@ -44,28 +34,24 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
         EntityItemFrame old = this.getHandle();
 
         WorldServer world = ((CraftWorld) getWorld()).getHandle();
-        BlockPosition position = old.getBlockPosition();
-        EnumDirection direction = old.getDirection();
-        ItemStack item = old.getItem() != null ? old.getItem().cloneItemStack() : null;
+        BlockPos position = old.getPosition();
+        EnumFacing direction = old.getHorizontalFacing();
+        ItemStack item = old.getDisplayedItem() != null ? old.getDisplayedItem().copy() : null;
 
-        old.die();
+        old.setDead();
 
         EntityItemFrame frame = new EntityItemFrame(world,position,direction);
-        frame.setItem(item);
-        world.addEntity(frame);
+        frame.setDisplayedItem(item);
+        world.spawnEntity(frame);
         this.entity = frame;
     }
 
     public void setItem(org.bukkit.inventory.ItemStack item) {
-        setItem(item, true);
-    }
-
-    public void setItem(org.bukkit.inventory.ItemStack item, boolean playSound) {
-        getHandle().setItem(CraftItemStack.asNMSCopy(item), true, playSound);
+        getHandle().setDisplayedItem(CraftItemStack.asNMSCopy(item));
     }
 
     public org.bukkit.inventory.ItemStack getItem() {
-        return CraftItemStack.asBukkitCopy(getHandle().getItem());
+        return CraftItemStack.asBukkitCopy(getHandle().getDisplayedItem());
     }
 
     public Rotation getRotation() {
@@ -98,7 +84,7 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
 
     public void setRotation(Rotation rotation) {
         Validate.notNull(rotation, "Rotation cannot be null");
-        getHandle().setRotation(toInteger(rotation));
+        getHandle().setItemRotation(toInteger(rotation));
     }
 
     static int toInteger(Rotation rotation) {

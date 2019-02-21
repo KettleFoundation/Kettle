@@ -5,33 +5,23 @@ import com.google.common.collect.ImmutableSet.Builder;
 
 import java.util.Set;
 
-import net.minecraft.server.DragonControllerPhase;
-import net.minecraft.server.EntityComplexPart;
-import net.minecraft.server.EntityEnderDragon;
-
-import org.bukkit.boss.BossBar;
+import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.dragon.phase.PhaseList;
 import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.boss.CraftBossBar;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 
 public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderDragon {
-
-    private BossBar bossBar;
-
-    public CraftEnderDragon(CraftServer server, EntityEnderDragon entity) {
+    public CraftEnderDragon(CraftServer server, EntityDragon entity) {
         super(server, entity);
-
-        if (entity.getEnderDragonBattle() != null) {
-            this.bossBar = new CraftBossBar(entity.getEnderDragonBattle().bossBattle);
-        }
     }
 
     public Set<ComplexEntityPart> getParts() {
         Builder<ComplexEntityPart> builder = ImmutableSet.builder();
 
-        for (EntityComplexPart part : getHandle().children) {
+        for (MultiPartEntityPart part : getHandle().dragonPartArray) {
             builder.add((ComplexEntityPart) part.getBukkitEntity());
         }
 
@@ -39,8 +29,8 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
     }
 
     @Override
-    public EntityEnderDragon getHandle() {
-        return (EntityEnderDragon) entity;
+    public EntityDragon getHandle() {
+        return (EntityDragon) entity;
     }
 
     @Override
@@ -54,24 +44,19 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
 
     @Override
     public Phase getPhase() {
-        return Phase.values()[getHandle().getDataWatcher().get(EntityEnderDragon.PHASE)];
+        return Phase.values()[getHandle().getDataManager().get(EntityDragon.PHASE)];
     }
 
     @Override
     public void setPhase(Phase phase) {
-        getHandle().getDragonControllerManager().setControllerPhase(getMinecraftPhase(phase));
+        getHandle().getPhaseManager().setPhase(getMinecraftPhase(phase));
     }
     
-    public static Phase getBukkitPhase(DragonControllerPhase phase) {
-        return Phase.values()[phase.b()];
+    public static Phase getBukkitPhase(PhaseList phase) {
+        return Phase.values()[phase.getId()];
     }
     
-    public static DragonControllerPhase getMinecraftPhase(Phase phase) {
-        return DragonControllerPhase.getById(phase.ordinal());
-    }
-
-    @Override
-    public BossBar getBossBar() {
-        return bossBar;
+    public static PhaseList getMinecraftPhase(Phase phase) {
+        return PhaseList.getById(phase.ordinal());
     }
 }

@@ -19,10 +19,14 @@ cache:
 build:
   stage: build
   script:
+  - mv src/main/java/org* projects/Kettle/src/main/java
   - chmod +x gradlew && ./gradlew build
   only:
   - master
-
+  artifacts:
+    paths:
+      - build/distributions/*.jar
+  
 test:
   stage: test
   script:

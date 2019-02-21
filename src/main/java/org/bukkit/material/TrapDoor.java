@@ -8,11 +8,30 @@ import org.bukkit.block.BlockFace;
  */
 public class TrapDoor extends SimpleAttachableMaterialData implements Openable {
     public TrapDoor() {
-        super(Material.LEGACY_TRAP_DOOR);
+        super(Material.TRAP_DOOR);
+    }
+
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public TrapDoor(final int type) {
+        super(type);
     }
 
     public TrapDoor(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public TrapDoor(final int type, final byte data) {
+        super(type, data);
     }
 
     /**

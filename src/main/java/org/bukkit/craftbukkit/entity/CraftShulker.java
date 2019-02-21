@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.server.EntityShulker;
+import net.minecraft.entity.monster.EntityShulker;
 import org.bukkit.DyeColor;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
@@ -11,11 +11,6 @@ public class CraftShulker extends CraftGolem implements Shulker {
 
     public CraftShulker(CraftServer server, EntityShulker entity) {
         super(server, entity);
-    }
-
-    @Override
-    public String toString() {
-        return "CraftShulker";
     }
 
     @Override
@@ -30,11 +25,13 @@ public class CraftShulker extends CraftGolem implements Shulker {
 
     @Override
     public DyeColor getColor() {
-        return DyeColor.getByWoolData(getHandle().getDataWatcher().get(EntityShulker.COLOR));
+        return DyeColor.getByWoolData(getHandle().getDataManager().get(EntityShulker.COLOR));
     }
 
     @Override
     public void setColor(DyeColor color) {
-        getHandle().getDataWatcher().set(EntityShulker.COLOR, (color == null) ? 16 : color.getWoolData());
+        Preconditions.checkArgument(color != null, "color");
+
+        getHandle().getDataManager().set(EntityShulker.COLOR, color.getWoolData());
     }
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Executes tasks using a multi-stage process executor. Synchronous executions are via {@link AsynchronousExecutor#finishActive()} or the {@link AsynchronousExecutor#get(Object)} methods.
@@ -28,7 +28,7 @@ import org.apache.commons.lang.Validate;
  */
 public final class AsynchronousExecutor<P, T, C, E extends Throwable> {
 
-    public static interface CallBackProvider<P, T, C, E extends Throwable> extends ThreadFactory {
+    public interface CallBackProvider<P, T, C, E extends Throwable> extends ThreadFactory {
 
         /**
          * Normally an asynchronous call, but can be synchronous
@@ -351,10 +351,4 @@ public final class AsynchronousExecutor<P, T, C, E extends Throwable> {
     public void setActiveThreads(final int coreSize) {
         pool.setCorePoolSize(coreSize);
     }
-
-    // Paper start
-    public boolean hasTask(P parameter) throws IllegalStateException {
-        return tasks.get(parameter) != null;
-    }
-    // Paper end
 }

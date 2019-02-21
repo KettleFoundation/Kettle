@@ -1,0 +1,52 @@
+--- ../src-base/minecraft/net/minecraftforge/registries/GameData.java
++++ ../src-work/minecraft/net/minecraftforge/registries/GameData.java
+@@ -83,6 +83,7 @@
+ 
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.Level;
++import org.bukkit.inventory.Recipe;
+ 
+ /**
+  * INTERNAL ONLY
+@@ -572,10 +573,10 @@
+         if (missingRegs.size() > 0)
+         {
+             String text = "Forge Mod Loader detected missing/unknown registrie(s).\n\n" +
+-                    "There are " + missingRegs.size() + " missing registries in this save.\n" +
+-                    "If you continue the missing registries will get removed.\n" +
+-                    "This may cause issues, it is advised that you create a world backup before continuing.\n\n" +
+-                    "Missing Registries:\n";
++                "There are " + missingRegs.size() + " missing registries in this save.\n" +
++                "If you continue the missing registries will get removed.\n" +
++                "This may cause issues, it is advised that you create a world backup before continuing.\n\n" +
++                "Missing Registries:\n";
+ 
+             for (ResourceLocation s : missingRegs)
+                 text += s.toString() + "\n";
+@@ -659,9 +660,9 @@
+             {
+                 StringBuilder buf = new StringBuilder();
+                 buf.append("Forge Mod Loader detected missing registry entries.\n\n")
+-                   .append("There are ").append(defaulted.size()).append(" missing entries in this save.\n")
+-                   .append("If you continue the missing entries will get removed.\n")
+-                   .append("A world backup will be automatically created in your saves directory.\n\n");
++                    .append("There are ").append(defaulted.size()).append(" missing entries in this save.\n")
++                    .append("If you continue the missing entries will get removed.\n")
++                    .append("A world backup will be automatically created in your saves directory.\n\n");
+ 
+                 defaulted.asMap().forEach((name, entries) ->
+                 {
+@@ -836,11 +837,11 @@
+     /**
+      * Check a name for a domain prefix, and if not present infer it from the
+      * current active mod container.
+-     * 
++     *
+      * @param name          The name or resource location
+      * @param warnOverrides If true, logs a warning if domain differs from that of
+      *                      the currently currently active mod container
+-     * 
++     *
+      * @return The {@link ResourceLocation} with given or inferred domain
+      */
+     public static ResourceLocation checkPrefix(String name, boolean warnOverrides)

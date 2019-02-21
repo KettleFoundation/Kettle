@@ -1,18 +1,16 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.destroystokyo.paper.loottable.PaperLootableEntityInventory; // Paper
-import net.minecraft.server.EntityMinecartHopper;
-
+import net.minecraft.entity.item.EntityMinecartHopper;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.inventory.Inventory;
 
-public final class CraftMinecartHopper extends CraftMinecartContainer implements HopperMinecart, PaperLootableEntityInventory { // Paper
+final class CraftMinecartHopper extends CraftMinecart implements HopperMinecart {
     private final CraftInventory inventory;
 
-    public CraftMinecartHopper(CraftServer server, EntityMinecartHopper entity) {
+    CraftMinecartHopper(CraftServer server, EntityMinecartHopper entity) {
         super(server, entity);
         inventory = new CraftInventory(entity);
     }
@@ -32,11 +30,11 @@ public final class CraftMinecartHopper extends CraftMinecartContainer implements
 
     @Override
     public boolean isEnabled() {
-        return ((EntityMinecartHopper) getHandle()).isEnabled();
+        return ((EntityMinecartHopper) getHandle()).getBlocked();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        ((EntityMinecartHopper) getHandle()).setEnabled(enabled);
+        ((EntityMinecartHopper) getHandle()).setBlocked(enabled);
     }
 }

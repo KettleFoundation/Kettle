@@ -1,21 +1,19 @@
 package org.bukkit.craftbukkit.entity;
 
-import com.destroystokyo.paper.entity.CraftRangedEntity;
-import net.minecraft.server.EntitySkeletonAbstract;
-
+import net.minecraft.entity.monster.AbstractSkeleton;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Skeleton;
 
-public class CraftSkeleton extends CraftMonster implements Skeleton, CraftRangedEntity<EntitySkeletonAbstract> { // Paper
+public class CraftSkeleton extends CraftMonster implements Skeleton {
 
-    public CraftSkeleton(CraftServer server, EntitySkeletonAbstract entity) {
+    public CraftSkeleton(CraftServer server, AbstractSkeleton entity) {
         super(server, entity);
     }
 
     @Override
-    public EntitySkeletonAbstract getHandle() {
-        return (EntitySkeletonAbstract) entity;
+    public AbstractSkeleton getHandle() {
+        return (AbstractSkeleton) entity;
     }
 
     @Override

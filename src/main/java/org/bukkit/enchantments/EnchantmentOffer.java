@@ -1,6 +1,6 @@
 package org.bukkit.enchantments;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 /**
  * A class for the available enchantment offers in the enchantment table.

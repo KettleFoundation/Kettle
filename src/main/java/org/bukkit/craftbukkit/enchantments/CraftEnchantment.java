@@ -1,20 +1,16 @@
 package org.bukkit.craftbukkit.enchantments;
 
-import net.minecraft.server.EnchantmentBinding;
-import net.minecraft.server.EnchantmentVanishing;
-import net.minecraft.server.IRegistry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftEnchantment extends Enchantment {
-    private final net.minecraft.server.Enchantment target;
+    private final net.minecraft.enchantment.Enchantment target;
 
-    public CraftEnchantment(net.minecraft.server.Enchantment target) {
-        super(CraftNamespacedKey.fromMinecraft(IRegistry.ENCHANTMENT.getKey(target)));
+    public CraftEnchantment(net.minecraft.enchantment.Enchantment target) {
+        super(net.minecraft.enchantment.Enchantment.getEnchantmentID(target));
         this.target = target;
     }
 
@@ -25,12 +21,12 @@ public class CraftEnchantment extends Enchantment {
 
     @Override
     public int getStartLevel() {
-        return target.getStartLevel();
+        return target.getMinLevel();
     }
 
     @Override
     public EnchantmentTarget getItemTarget() {
-        switch (target.itemTarget) {
+        switch (target.type) {
         case ALL:
             return EnchantmentTarget.ALL;
         case ARMOR:
@@ -55,8 +51,6 @@ public class CraftEnchantment extends Enchantment {
             return EnchantmentTarget.BREAKABLE;
         case WEARABLE:
             return EnchantmentTarget.WEARABLE;
-        case TRIDENT:
-            return EnchantmentTarget.TRIDENT;
         default:
             return null;
         }
@@ -64,23 +58,22 @@ public class CraftEnchantment extends Enchantment {
 
     @Override
     public boolean isTreasure() {
-        return target.isTreasure();
+        return target.isTreasureEnchantment();
     }
 
     @Override
     public boolean isCursed() {
-        return target instanceof EnchantmentBinding || target instanceof EnchantmentVanishing;
+        return target.isCurse();
     }
 
     @Override
     public boolean canEnchantItem(ItemStack item) {
-        return target.canEnchant(CraftItemStack.asNMSCopy(item));
+        return target.canApply(CraftItemStack.asNMSCopy(item));
     }
 
     @Override
     public String getName() {
-        // PAIL: migration paths
-        switch (IRegistry.ENCHANTMENT.a(target)) {
+        switch (getId()) {
         case 0:
             return "PROTECTION_ENVIRONMENTAL";
         case 1:
@@ -103,58 +96,50 @@ public class CraftEnchantment extends Enchantment {
             return "FROST_WALKER";
         case 10:
             return "BINDING_CURSE";
-        case 11:
-            return "DAMAGE_ALL";
-        case 12:
-            return "DAMAGE_UNDEAD";
-        case 13:
-            return "DAMAGE_ARTHROPODS";
-        case 14:
-            return "KNOCKBACK";
-        case 15:
-            return "FIRE_ASPECT";
         case 16:
-            return "LOOT_BONUS_MOBS";
+            return "DAMAGE_ALL";
         case 17:
-            return "SWEEPING_EDGE";
+            return "DAMAGE_UNDEAD";
         case 18:
-            return "DIG_SPEED";
+            return "DAMAGE_ARTHROPODS";
         case 19:
-            return "SILK_TOUCH";
+            return "KNOCKBACK";
         case 20:
-            return "DURABILITY";
+            return "FIRE_ASPECT";
         case 21:
-            return "LOOT_BONUS_BLOCKS";
+            return "LOOT_BONUS_MOBS";
         case 22:
-            return "ARROW_DAMAGE";
-        case 23:
-            return "ARROW_KNOCKBACK";
-        case 24:
-            return "ARROW_FIRE";
-        case 25:
-            return "ARROW_INFINITE";
-        case 26:
-            return "LUCK";
-        case 27:
-            return "LURE";
-        case 28:
-            return "LOYALTY";
-        case 29:
-            return "IMPALING";
-        case 30:
-            return "RIPTIDE";
-        case 31:
-            return "CHANNELING";
+            return "SWEEPING_EDGE";
         case 32:
-            return "MENDING";
+            return "DIG_SPEED";
         case 33:
+            return "SILK_TOUCH";
+        case 34:
+            return "DURABILITY";
+        case 35:
+            return "LOOT_BONUS_BLOCKS";
+        case 48:
+            return "ARROW_DAMAGE";
+        case 49:
+            return "ARROW_KNOCKBACK";
+        case 50:
+            return "ARROW_FIRE";
+        case 51:
+            return "ARROW_INFINITE";
+        case 61:
+            return "LUCK";
+        case 62:
+            return "LURE";
+        case 70:
+            return "MENDING";
+        case 71:
             return "VANISHING_CURSE";
         default:
-            return "UNKNOWN_ENCHANT_" + getName();
+            return "UNKNOWN_ENCHANT_" + getId();
         }
     }
 
-    public static net.minecraft.server.Enchantment getRaw(Enchantment enchantment) {
+    public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
         if (enchantment instanceof EnchantmentWrapper) {
             enchantment = ((EnchantmentWrapper) enchantment).getEnchantment();
         }
@@ -175,10 +160,10 @@ public class CraftEnchantment extends Enchantment {
             return false;
         }
         CraftEnchantment ench = (CraftEnchantment) other;
-        return !target.b(ench.target);
+        return !target.isCompatibleWith(ench.target);
     }
 
-    public net.minecraft.server.Enchantment getHandle() {
+    public net.minecraft.enchantment.Enchantment getHandle() {
         return target;
     }
 }

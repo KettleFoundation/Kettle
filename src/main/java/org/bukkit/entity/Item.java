@@ -2,11 +2,6 @@ package org.bukkit.entity;
 
 import org.bukkit.inventory.ItemStack;
 
-// Paper start
-import javax.annotation.Nullable;
-import java.util.UUID;
-// Paper end
-
 /**
  * Represents an Item.
  */
@@ -39,50 +34,4 @@ public interface Item extends Entity {
      * @param delay New delay
      */
     public void setPickupDelay(int delay);
-
-    // Paper Start
-    /**
-     * Gets if non-player entities can pick this Item up
-     *
-     * @return True if non-player entities can pickup
-     */
-     public boolean canMobPickup();
-
-    /**
-     * Sets if non-player entities can pick this Item up
-     *
-     * @param canMobPickup True to allow non-player entity pickup
-     */
-    public void setCanMobPickup(boolean canMobPickup);
-
-    /**
-     * The owner of this item. Only the owner can pick up the item until it is within 10 seconds of despawning
-     *
-     * @return The owner's UUID
-     */
-    @Nullable
-    public UUID getOwner();
-
-    /**
-     * Set the owner of this item. Only the owner can pick up the item until it is within 10 seconds of despawning
-     *
-     * @param owner The owner's UUID
-     */
-    public void setOwner(@Nullable UUID owner);
-
-    /**
-     * Get the thrower of this item.
-     *
-     * @return The thrower's UUID
-     */
-    @Nullable
-    public UUID getThrower();
-
-    /**
-     * Set the thrower of this item.
-     *
-     * @param thrower The thrower's UUID
-     */
-    public void setThrower(@Nullable UUID thrower);
-    // Paper end
 }

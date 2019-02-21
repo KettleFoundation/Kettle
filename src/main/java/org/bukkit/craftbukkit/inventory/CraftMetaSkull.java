@@ -2,27 +2,20 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Map;
 
-import com.destroystokyo.paper.profile.CraftPlayerProfile;
-import com.destroystokyo.paper.profile.PlayerProfile;
-import net.minecraft.server.GameProfileSerializer;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.TileEntitySkull;
-import net.minecraft.server.*;
-
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntitySkull;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.authlib.GameProfile;
-
-import javax.annotation.Nullable;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
@@ -47,9 +40,9 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     CraftMetaSkull(NBTTagCompound tag) {
         super(tag);
 
-        if (tag.hasKeyOfType(SKULL_OWNER.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
-            profile = GameProfileSerializer.deserialize(tag.getCompound(SKULL_OWNER.NBT));
-        } else if (tag.hasKeyOfType(SKULL_OWNER.NBT, CraftMagicNumbers.NBT.TAG_STRING) && !tag.getString(SKULL_OWNER.NBT).isEmpty()) {
+        if (tag.hasKey(SKULL_OWNER.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
+            profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(SKULL_OWNER.NBT));
+        } else if (tag.hasKey(SKULL_OWNER.NBT, CraftMagicNumbers.NBT.TAG_STRING) && !tag.getString(SKULL_OWNER.NBT).isEmpty()) {
             profile = new GameProfile(null, tag.getString(SKULL_OWNER.NBT));
         }
     }
@@ -62,11 +55,9 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     }
 
     @Override
-    void deserializeInternal(NBTTagCompound tag, Object context) {
-        super.deserializeInternal(tag, context);
-
-        if (tag.hasKeyOfType(SKULL_PROFILE.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
-            profile = GameProfileSerializer.deserialize(tag.getCompound(SKULL_PROFILE.NBT));
+    void deserializeInternal(NBTTagCompound tag) {
+        if (tag.hasKey(SKULL_PROFILE.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND)) {
+            profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(SKULL_PROFILE.NBT));
         }
     }
 
@@ -74,7 +65,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     void serializeInternal(final Map<String, NBTBase> internalTags) {
         if (profile != null) {
             NBTTagCompound nbtData = new NBTTagCompound();
-            GameProfileSerializer.serialize(nbtData, profile);
+            NBTUtil.writeGameProfile(nbtData, profile);
             internalTags.put(SKULL_PROFILE.NBT, nbtData);
         }
     }
@@ -85,12 +76,11 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
         if (profile != null) {
             // Fill in textures
-            // Must be done sync due to way client handles textures
-            profile = com.google.common.util.concurrent.Futures.getUnchecked(TileEntitySkull.b(profile, com.google.common.base.Predicates.alwaysTrue(), true)); // Spigot
+            profile = TileEntitySkull.updateGameprofile(profile);
 
             NBTTagCompound owner = new NBTTagCompound();
-            GameProfileSerializer.serialize(owner, profile);
-            tag.set(SKULL_OWNER.NBT, owner);
+            NBTUtil.writeGameProfile(owner, profile);
+            tag.setTag(SKULL_OWNER.NBT, owner);
         }
     }
 
@@ -105,19 +95,8 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
     @Override
     boolean applicableTo(Material type) {
-        switch (type) {
-            case CREEPER_HEAD:
-            case CREEPER_WALL_HEAD:
-            case DRAGON_HEAD:
-            case DRAGON_WALL_HEAD:
-            case PLAYER_HEAD:
-            case PLAYER_WALL_HEAD:
-            case SKELETON_SKULL:
-            case SKELETON_WALL_SKULL:
-            case WITHER_SKELETON_SKULL:
-            case WITHER_SKELETON_WALL_SKULL:
-            case ZOMBIE_HEAD:
-            case ZOMBIE_WALL_HEAD:
+        switch(type) {
+            case SKULL_ITEM:
                 return true;
             default:
                 return false;
@@ -136,19 +115,6 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     public String getOwner() {
         return hasOwner() ? profile.getName() : null;
     }
-
-    // Paper start
-    @Override
-    public void setPlayerProfile(@Nullable PlayerProfile profile) {
-        this.profile = (profile == null) ? null : CraftPlayerProfile.asAuthlibCopy(profile);
-    }
-
-    @Nullable
-    @Override
-    public PlayerProfile getPlayerProfile() {
-        return profile != null ? CraftPlayerProfile.asBukkitCopy(profile) : null;
-    }
-    // Paper end
 
     @Override
     public OfflinePlayer getOwningPlayer() {
@@ -173,13 +139,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         if (name == null) {
             profile = null;
         } else {
-            // Paper start - Use Online Players Skull
-            GameProfile newProfile = null;
-            EntityPlayer player = MinecraftServer.getServer().getPlayerList().getPlayer(name);
-            if (player != null) newProfile = player.getProfile();
-            if (newProfile == null) newProfile = new GameProfile(null, name);
-            profile = newProfile;
-            // Paper end
+            profile = new GameProfile(null, name);
         }
 
         return true;
@@ -187,13 +147,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
     @Override
     public boolean setOwningPlayer(OfflinePlayer owner) {
-        if (owner == null) {
-            profile = null;
-        } else if (owner instanceof CraftPlayer) {
-            profile = ((CraftPlayer) owner).getProfile();
-        } else {
-            profile = new GameProfile(owner.getUniqueId(), owner.getName());
-        }
+        profile = (owner == null) ? null : new GameProfile(owner.getUniqueId(), owner.getName());
 
         return true;
     }

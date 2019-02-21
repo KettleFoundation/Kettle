@@ -1,7 +1,5 @@
 package org.bukkit;
 
-import com.google.common.base.Preconditions;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -34,35 +32,27 @@ public enum Particle {
     ENCHANTMENT_TABLE,
     FLAME,
     LAVA,
+    FOOTSTEP,
     CLOUD,
-    REDSTONE(DustOptions.class),
+    REDSTONE,
     SNOWBALL,
     SNOW_SHOVEL,
     SLIME,
     HEART,
     BARRIER,
     ITEM_CRACK(ItemStack.class),
-    BLOCK_CRACK(BlockData.class),
-    BLOCK_DUST(BlockData.class),
+    BLOCK_CRACK(MaterialData.class),
+    BLOCK_DUST(MaterialData.class),
     WATER_DROP,
+    ITEM_TAKE,
     MOB_APPEARANCE,
     DRAGON_BREATH,
     END_ROD,
     DAMAGE_INDICATOR,
     SWEEP_ATTACK,
-    FALLING_DUST(BlockData.class),
+    FALLING_DUST(MaterialData.class),
     TOTEM,
-    SPIT,
-    SQUID_INK,
-    BUBBLE_POP,
-    CURRENT_DOWN,
-    BUBBLE_COLUMN_UP,
-    NAUTILUS,
-    DOLPHIN,
-    // ----- Legacy Separator -----
-    LEGACY_BLOCK_CRACK(MaterialData.class),
-    LEGACY_BLOCK_DUST(MaterialData.class),
-    LEGACY_FALLING_DUST(MaterialData.class);
+    SPIT;
 
     private final Class<?> dataType;
 
@@ -80,49 +70,5 @@ public enum Particle {
      */
     public Class<?> getDataType() {
         return dataType;
-    }
-
-    // Paper start - Particle API expansion
-    /**
-     * Creates a {@link com.destroystokyo.paper.ParticleBuilder}
-     *
-     * @return a {@link com.destroystokyo.paper.ParticleBuilder} for the particle
-     */
-    public com.destroystokyo.paper.ParticleBuilder builder() {
-        return new com.destroystokyo.paper.ParticleBuilder(this);
-    }
-    // Paper end
-    /**
-     * Options which can be applied to redstone dust particles - a particle
-     * color and size.
-     */
-    public static class DustOptions {
-
-        private final Color color;
-        private final float size;
-
-        public DustOptions(Color color, float size) {
-            Preconditions.checkArgument(color != null, "color");
-            this.color = color;
-            this.size = size;
-        }
-
-        /**
-         * The color of the particles to be displayed.
-         *
-         * @return particle color
-         */
-        public Color getColor() {
-            return color;
-        }
-
-        /**
-         * Relative size of the particle.
-         *
-         * @return relative particle size
-         */
-        public float getSize() {
-            return size;
-        }
     }
 }

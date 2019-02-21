@@ -1,0 +1,22 @@
+--- ../src-base/minecraft/net/minecraft/client/gui/inventory/GuiContainerCreative.java
++++ ../src-work/minecraft/net/minecraft/client/gui/inventory/GuiContainerCreative.java
+@@ -40,6 +40,7 @@
+ import net.minecraft.util.text.TextFormatting;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.inventory.InventoryView;
+ import org.lwjgl.input.Keyboard;
+ import org.lwjgl.input.Mouse;
+ 
+@@ -1042,6 +1043,11 @@
+                 return this.itemList.size() > 45;
+             }
+ 
++            @Override
++            public InventoryView getBukkitView() {
++                return null;
++            }
++
+             public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
+             {
+                 if (index >= this.inventorySlots.size() - 9 && index < this.inventorySlots.size())

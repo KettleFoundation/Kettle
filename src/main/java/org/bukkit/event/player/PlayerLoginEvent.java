@@ -6,11 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 /**
- * Stores details for players attempting to log in.
- * <br>
- * Note that this event is called <i>early</i> in the player initialization
- * process. It is recommended that most options involving the Player
- * <i>entity</i> be postponed to the {@link PlayerJoinEvent} instead.
+ * Stores details for players attempting to log in
  */
 public class PlayerLoginEvent extends PlayerEvent {
     private static final HandlerList handlers = new HandlerList();
@@ -28,7 +24,6 @@ public class PlayerLoginEvent extends PlayerEvent {
      * @param hostname The hostname that was used to connect to the server
      * @param address The address the player used to connect, provided for
      *     timing issues
-     * @param realAddress The unspoofed, actual address, that the player used to connect
      */
     public PlayerLoginEvent(final Player player, final String hostname, final InetAddress address, final InetAddress realAddress) { // Spigot
         super(player);
@@ -52,7 +47,6 @@ public class PlayerLoginEvent extends PlayerEvent {
      *     timing issues
      * @param result The result status for this event
      * @param message The message to be displayed if result denies login
-     * @param realAddress The unspoofed, actual address, that the player used to connect
      */
     public PlayerLoginEvent(final Player player, String hostname, final InetAddress address, final Result result, final String message, final InetAddress realAddress) { // Spigot
         this(player, hostname, address, realAddress); // Spigot

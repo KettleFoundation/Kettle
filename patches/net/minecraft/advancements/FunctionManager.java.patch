@@ -1,0 +1,109 @@
+--- ../src-base/minecraft/net/minecraft/advancements/FunctionManager.java
++++ ../src-work/minecraft/net/minecraft/advancements/FunctionManager.java
+@@ -27,10 +27,13 @@
+     private final Map<ResourceLocation, FunctionObject> functions = Maps.<ResourceLocation, FunctionObject>newHashMap();
+     private String currentGameLoopFunctionId = "-";
+     private FunctionObject gameLoopFunction;
+-    private final ArrayDeque<FunctionManager.QueuedCommand> commandQueue = new ArrayDeque<FunctionManager.QueuedCommand>();
++    private final ArrayDeque<QueuedCommand> commandQueue = new ArrayDeque<QueuedCommand>();
+     private boolean isExecuting = false;
+-    private final ICommandSender gameLoopFunctionSender = new ICommandSender()
+-    {
++    private final ICommandSender gameLoopFunctionSender = new CustomFunctionListener();
++
++    public class CustomFunctionListener implements ICommandSender {
++
++        public org.bukkit.command.CommandSender sender = new org.bukkit.craftbukkit.command.CraftFunctionCommandSender(this);
+         public String getName()
+         {
+             return FunctionManager.this.currentGameLoopFunctionId;
+@@ -41,7 +44,7 @@
+         }
+         public World getEntityWorld()
+         {
+-            return FunctionManager.this.server.worlds[0];
++            return FunctionManager.this.server.worldServerList.get(0);
+         }
+         public MinecraftServer getServer()
+         {
+@@ -69,7 +72,7 @@
+ 
+     public int getMaxCommandChainLength()
+     {
+-        return this.server.worlds[0].getGameRules().getInt("maxCommandChainLength");
++        return this.server.worldServerList.get(0).getGameRules().getInt("maxCommandChainLength");
+     }
+ 
+     public Map<ResourceLocation, FunctionObject> getFunctions()
+@@ -79,7 +82,7 @@
+ 
+     public void update()
+     {
+-        String s = this.server.worlds[0].getGameRules().getString("gameLoopFunction");
++        String s = this.server.worldServerList.get(0).getGameRules().getString("gameLoopFunction");
+ 
+         if (!s.equals(this.currentGameLoopFunctionId))
+         {
+@@ -101,7 +104,7 @@
+         {
+             if (this.commandQueue.size() < i)
+             {
+-                this.commandQueue.addFirst(new FunctionManager.QueuedCommand(this, sender, new FunctionObject.FunctionEntry(function)));
++                this.commandQueue.addFirst(new QueuedCommand(this, sender, new FunctionObject.FunctionEntry(function)));
+             }
+ 
+             return 0;
+@@ -118,7 +121,7 @@
+ 
+                 for (int k = afunctionobject$entry.length - 1; k >= 0; --k)
+                 {
+-                    this.commandQueue.push(new FunctionManager.QueuedCommand(this, sender, afunctionobject$entry[k]));
++                    this.commandQueue.push(new QueuedCommand(this, sender, afunctionobject$entry[k]));
+                 }
+ 
+                 while (true)
+@@ -192,26 +195,26 @@
+     }
+ 
+     public static class QueuedCommand
++    {
++        private final FunctionManager functionManager;
++        private final ICommandSender sender;
++        private final FunctionObject.Entry entry;
++
++        public QueuedCommand(FunctionManager functionManagerIn, ICommandSender senderIn, FunctionObject.Entry entryIn)
+         {
+-            private final FunctionManager functionManager;
+-            private final ICommandSender sender;
+-            private final FunctionObject.Entry entry;
++            this.functionManager = functionManagerIn;
++            this.sender = senderIn;
++            this.entry = entryIn;
++        }
+ 
+-            public QueuedCommand(FunctionManager functionManagerIn, ICommandSender senderIn, FunctionObject.Entry entryIn)
+-            {
+-                this.functionManager = functionManagerIn;
+-                this.sender = senderIn;
+-                this.entry = entryIn;
+-            }
++        public void execute(ArrayDeque<QueuedCommand> commandQueue, int maxCommandChainLength)
++        {
++            this.entry.execute(this.functionManager, this.sender, commandQueue, maxCommandChainLength);
++        }
+ 
+-            public void execute(ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength)
+-            {
+-                this.entry.execute(this.functionManager, this.sender, commandQueue, maxCommandChainLength);
+-            }
+-
+-            public String toString()
+-            {
+-                return this.entry.toString();
+-            }
++        public String toString()
++        {
++            return this.entry.toString();
+         }
++    }
+ }

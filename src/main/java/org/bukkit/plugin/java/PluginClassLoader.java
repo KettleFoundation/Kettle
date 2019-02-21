@@ -11,22 +11,20 @@ import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
  */
-public final class PluginClassLoader extends URLClassLoader { // Spigot
-    public JavaPlugin getPlugin() { return plugin; } // Spigot
+final class PluginClassLoader extends URLClassLoader {
     private final JavaPluginLoader loader;
-    private final Map<String, Class<?>> classes = new ConcurrentHashMap<String, Class<?>>();
+    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
     private final PluginDescriptionFile description;
     private final File dataFolder;
     private final File file;
@@ -36,11 +34,30 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
     final JavaPlugin plugin;
     private JavaPlugin pluginInit;
     private IllegalStateException pluginState;
-    private java.util.logging.Logger logger; // Paper - add field
 
-    static {
-        ClassLoader.registerAsParallelCapable();
+    // Spigot Start
+    static
+    {
+        try
+        {
+            java.lang.reflect.Method method = ClassLoader.class.getDeclaredMethod( "registerAsParallelCapable" );
+            if ( method != null )
+            {
+                boolean oldAccessible = method.isAccessible();
+                method.setAccessible( true );
+                method.invoke( null );
+                method.setAccessible( oldAccessible );
+                org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.INFO, "Set PluginClassLoader as parallel capable" );
+            }
+        } catch ( NoSuchMethodException ex )
+        {
+            // Ignore
+        } catch ( Exception ex )
+        {
+            org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.WARNING, "Error setting PluginClassLoader as parallel capable", ex );
+        }
     }
+    // Spigot End
 
     PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws IOException, InvalidPluginException, MalformedURLException {
         super(new URL[] {file.toURI().toURL()}, parent);
@@ -53,8 +70,6 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
         this.jar = new JarFile(file);
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
-
-        this.logger = com.destroystokyo.paper.utils.PaperPluginLogger.getLogger(description); // Paper - Register logger early
 
         try {
             Class<?> jarClass;
@@ -107,8 +122,6 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
                     } catch (IOException ex) {
                         throw new ClassNotFoundException(name, ex);
                     }
-
-                    classBytes = loader.server.getUnsafe().processClass(description, path, classBytes);
 
                     int dot = name.lastIndexOf('.');
                     if (dot != -1) {
@@ -172,7 +185,6 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
         pluginState = new IllegalStateException("Initial initialization");
         this.pluginInit = javaPlugin;
 
-        javaPlugin.logger = this.logger; // Paper - set logger
         javaPlugin.init(loader, loader.server, description, dataFolder, file, this);
     }
 }

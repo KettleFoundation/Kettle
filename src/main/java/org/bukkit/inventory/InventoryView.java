@@ -1,6 +1,5 @@
 package org.bukkit.inventory;
 
-import com.google.common.base.Preconditions;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 
@@ -158,9 +157,12 @@ public abstract class InventoryView {
      * @param item The new item to put in the slot, or null to clear it.
      */
     public void setItem(int slot, ItemStack item) {
-        Inventory inventory = getInventory(slot);
-        if (inventory != null) {
-            inventory.setItem(convertSlot(slot), item);
+        if (slot != OUTSIDE) {
+            if (slot < getTopInventory().getSize()) {
+                getTopInventory().setItem(convertSlot(slot), item);
+            } else {
+                getBottomInventory().setItem(convertSlot(slot), item);
+            }
         } else {
             getPlayer().getWorld().dropItemNaturally(getPlayer().getLocation(), item);
         }
@@ -173,8 +175,14 @@ public abstract class InventoryView {
      * @return The item currently in the slot.
      */
     public ItemStack getItem(int slot) {
-        Inventory inventory = getInventory(slot);
-        return (inventory == null) ? null : inventory.getItem(convertSlot(slot));
+        if (slot == OUTSIDE) {
+            return null;
+        }
+        if (slot < getTopInventory().getSize()) {
+            return getTopInventory().getItem(convertSlot(slot));
+        } else {
+            return getBottomInventory().getItem(convertSlot(slot));
+        }
     }
 
     /**
@@ -195,34 +203,6 @@ public abstract class InventoryView {
      */
     public final ItemStack getCursor() {
         return getPlayer().getItemOnCursor();
-    }
-
-    /**
-     * Gets the inventory corresponding to the given raw slot ID.
-     *
-     * If the slot ID is {@link #OUTSIDE} null will be returned, otherwise
-     * behaviour for illegal and negative slot IDs is undefined.
-     *
-     * May be used with {@link #convertSlot(int)} to directly index an
-     * underlying inventory.
-     *
-     * @param rawSlot The raw slot ID.
-     * @return corresponding inventory, or null
-     */
-    public final Inventory getInventory(int rawSlot) {
-        // Slot may be -1 if not properly detected due to client bug
-        // e.g. dropping an item into part of the enchantment list section of an enchanting table
-        if (rawSlot == OUTSIDE || rawSlot == -1) {
-            return null;
-        }
-        Preconditions.checkArgument(rawSlot >= 0, "Negative, non outside slot %s", rawSlot);
-        Preconditions.checkArgument(rawSlot < countSlots(), "Slot %s greater than inventory slot count", rawSlot);
-
-        if (rawSlot < getTopInventory().getSize()) {
-            return getTopInventory();
-        } else {
-            return getBottomInventory();
-        }
     }
 
     /**
@@ -299,82 +279,6 @@ public abstract class InventoryView {
         }
 
         return slot;
-    }
-
-    /**
-     * Determine the type of the slot by its raw slot ID.
-     * <p>
-     * If the type of the slot is unknown, then
-     * {@link InventoryType.SlotType#CONTAINER} will be returned.
-     *
-     * @param slot The raw slot ID
-     * @return the slot type
-     */
-    public final InventoryType.SlotType getSlotType(int slot) {
-        InventoryType.SlotType type = InventoryType.SlotType.CONTAINER;
-        if (slot >= 0 && slot < this.getTopInventory().getSize()) {
-            switch(this.getType()) {
-            case FURNACE:
-                if (slot == 2) {
-                    type = InventoryType.SlotType.RESULT;
-                } else if(slot == 1) {
-                    type = InventoryType.SlotType.FUEL;
-                } else {
-                    type = InventoryType.SlotType.CRAFTING;
-                }
-                break;
-            case BREWING:
-                if (slot == 3) {
-                    type = InventoryType.SlotType.FUEL;
-                } else {
-                    type = InventoryType.SlotType.CRAFTING;
-                }
-                break;
-            case ENCHANTING:
-                type = InventoryType.SlotType.CRAFTING;
-                break;
-            case WORKBENCH:
-            case CRAFTING:
-                if (slot == 0) {
-                    type = InventoryType.SlotType.RESULT;
-                } else {
-                    type = InventoryType.SlotType.CRAFTING;
-                }
-                break;
-            case MERCHANT:
-                if (slot == 2) {
-                    type = InventoryType.SlotType.RESULT;
-                } else {
-                    type = InventoryType.SlotType.CRAFTING;
-                }
-                break;
-            case BEACON:
-                type = InventoryType.SlotType.CRAFTING;
-                break;
-            case ANVIL:
-                if (slot == 2) {
-                    type = InventoryType.SlotType.RESULT;
-                } else {
-                    type = InventoryType.SlotType.CRAFTING;
-                }
-                break;
-            default:
-                // Nothing to do, it's a CONTAINER slot
-            }
-        } else {
-            if (slot < 0) {
-                type = InventoryType.SlotType.OUTSIDE;
-            } else if (this.getType() == InventoryType.CRAFTING) { // Also includes creative inventory
-                if (slot < 9) {
-                    type = InventoryType.SlotType.ARMOR;
-                } else if (slot > 35) {
-                    type = InventoryType.SlotType.QUICKBAR;
-                }
-            } else if (slot >= (this.countSlots() - (9 + 4 + 1))) { // Quickbar, Armor, Offhand
-                type = InventoryType.SlotType.QUICKBAR;
-            }
-        }
-        return type;
     }
 
     /**

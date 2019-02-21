@@ -1,7 +1,7 @@
 package org.bukkit.conversations;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * BooleanPrompt is the base class for any prompt that requires a boolean
@@ -15,13 +15,13 @@ public abstract class BooleanPrompt extends ValidatingPrompt {
 
     @Override
     protected boolean isInputValid(ConversationContext context, String input) {
-        String[] accepted = {/* Apache values: */"true", "false", "on", "off", "yes", "no",/* Additional values: */ "y", "n", "1", "0", "right", "wrong", "correct", "incorrect", "valid", "invalid"};
+        String[] accepted = {"true", "false", "on", "off", "yes", "no" /* Spigot: */, "y", "n", "1", "0", "right", "wrong", "correct", "incorrect", "valid", "invalid"}; // Spigot
         return ArrayUtils.contains(accepted, input.toLowerCase());
     }
 
     @Override
     protected Prompt acceptValidatedInput(ConversationContext context, String input) {
-        if (input.equalsIgnoreCase("y") || input.equals("1") || input.equalsIgnoreCase("right") || input.equalsIgnoreCase("correct") || input.equalsIgnoreCase("valid")) input = "true";
+        if (input.equalsIgnoreCase("y") || input.equals("1") || input.equalsIgnoreCase("right") || input.equalsIgnoreCase("correct") || input.equalsIgnoreCase("valid")) input = "true"; // Spigot
         return acceptValidatedInput(context, BooleanUtils.toBoolean(input));
     }
 

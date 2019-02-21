@@ -1,18 +1,9 @@
 package org.bukkit.craftbukkit;
 
-import com.google.common.base.Preconditions;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
-import org.bukkit.block.Biome;
-import org.bukkit.block.data.BlockData;
+import net.minecraft.world.biome.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
-import org.bukkit.craftbukkit.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-
-import net.minecraft.server.BiomeBase;
-import net.minecraft.server.DataPaletteBlock;
-import net.minecraft.server.HeightMap;
-import net.minecraft.server.IBlockData;
 
 /**
  * Represents a static, thread-safe snapshot of chunk of blocks
@@ -21,27 +12,31 @@ import net.minecraft.server.IBlockData;
 public class CraftChunkSnapshot implements ChunkSnapshot {
     private final int x, z;
     private final String worldname;
-    private final DataPaletteBlock<IBlockData>[] blockids;
+    private final short[][] blockids; /* Block IDs, by section */
+    private final byte[][] blockdata;
     private final byte[][] skylight;
     private final byte[][] emitlight;
     private final boolean[] empty;
-    private final HeightMap hmap; // Height map
+    private final int[] hmap; // Height map
     private final long captureFulltime;
-    private final BiomeBase[] biome;
+    private final Biome[] biome;
     private final double[] biomeTemp;
+    private final double[] biomeRain;
 
-    CraftChunkSnapshot(int x, int z, String wname, long wtime, DataPaletteBlock<IBlockData>[] sectionBlockIDs, byte[][] sectionSkyLights, byte[][] sectionEmitLights, boolean[] sectionEmpty, HeightMap hmap, BiomeBase[] biome, double[] biomeTemp) {
+    CraftChunkSnapshot(int x, int z, String wname, long wtime, short[][] sectionBlockIDs, byte[][] sectionBlockData, byte[][] sectionSkyLights, byte[][] sectionEmitLights, boolean[] sectionEmpty, int[] hmap, Biome[] biome, double[] biomeTemp, double[] biomeRain) {
         this.x = x;
         this.z = z;
         this.worldname = wname;
         this.captureFulltime = wtime;
         this.blockids = sectionBlockIDs;
+        this.blockdata = sectionBlockData;
         this.skylight = sectionSkyLights;
         this.emitlight = sectionEmitLights;
         this.empty = sectionEmpty;
         this.hmap = hmap;
         this.biome = biome;
         this.biomeTemp = biomeTemp;
+        this.biomeRain = biomeRain;
     }
 
     public int getX() {
@@ -58,55 +53,42 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
 
     @Override
     public Material getBlockType(int x, int y, int z) {
-        CraftChunk.validateChunkCoordinates(x, y, z);
-
-        return CraftMagicNumbers.getMaterial(blockids[y >> 4].a(x, y & 0xF, z).getBlock());
+        return Material.getMaterial(getBlockTypeId(x, y, z));
     }
 
-    @Override
-    public final BlockData getBlockData(int x, int y, int z) {
-        CraftChunk.validateChunkCoordinates(x, y, z);
-
-        return CraftBlockData.fromData(blockids[y >> 4].a(x, y & 0xF, z));
+    public final int getBlockTypeId(int x, int y, int z) {
+        return blockids[y >> 4][((y & 0xF) << 8) | (z << 4) | x];
     }
 
-    @Override
-    public final int getData(int x, int y, int z) {
-        CraftChunk.validateChunkCoordinates(x, y, z);
-
-        return CraftMagicNumbers.toLegacyData(blockids[y >> 4].a(x, y & 0xF, z));
+    public final int getBlockData(int x, int y, int z) {
+        int off = ((y & 0xF) << 7) | (z << 3) | (x >> 1);
+        return (blockdata[y >> 4][off] >> ((x & 1) << 2)) & 0xF;
     }
 
     public final int getBlockSkyLight(int x, int y, int z) {
-        CraftChunk.validateChunkCoordinates(x, y, z);
-
         int off = ((y & 0xF) << 7) | (z << 3) | (x >> 1);
         return (skylight[y >> 4][off] >> ((x & 1) << 2)) & 0xF;
     }
 
     public final int getBlockEmittedLight(int x, int y, int z) {
-        CraftChunk.validateChunkCoordinates(x, y, z);
-
         int off = ((y & 0xF) << 7) | (z << 3) | (x >> 1);
         return (emitlight[y >> 4][off] >> ((x & 1) << 2)) & 0xF;
     }
 
     public final int getHighestBlockYAt(int x, int z) {
-        CraftChunk.validateChunkCoordinates(x, 0, z);
-
-        return hmap.a(x, z);
+        return hmap[z << 4 | x];
     }
 
-    public final Biome getBiome(int x, int z) {
-        CraftChunk.validateChunkCoordinates(x, 0, z);
-
+    public final org.bukkit.block.Biome getBiome(int x, int z) {
         return CraftBlock.biomeBaseToBiome(biome[z << 4 | x]);
     }
 
     public final double getRawBiomeTemperature(int x, int z) {
-        CraftChunk.validateChunkCoordinates(x, 0, z);
-
         return biomeTemp[z << 4 | x];
+    }
+
+    public final double getRawBiomeRainfall(int x, int z) {
+        return biomeRain[z << 4 | x];
     }
 
     public final long getCaptureFullTime() {

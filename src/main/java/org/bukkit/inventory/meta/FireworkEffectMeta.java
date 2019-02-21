@@ -5,7 +5,7 @@ import org.bukkit.Material;
 
 /**
  * Represents a meta that can store a single FireworkEffect. An example
- * includes {@link Material#FIREWORK_STAR}.
+ * includes {@link Material#FIREWORK_CHARGE}.
  */
 public interface FireworkEffectMeta extends ItemMeta {
 

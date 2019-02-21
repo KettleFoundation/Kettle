@@ -39,9 +39,7 @@ public class BlockIterator implements Iterator<Block> {
     private BlockFace thirdFace;
 
     /**
-     * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
+     * Constructs the BlockIterator
      *
      * @param world The world to use for tracing
      * @param start A Vector giving the initial location for the trace
@@ -222,9 +220,7 @@ public class BlockIterator implements Iterator<Block> {
     }
 
     /**
-     * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
+     * Constructs the BlockIterator
      *
      * @param loc The location for the start of the ray trace
      * @param yOffset The trace begins vertically offset from the start vector
@@ -239,8 +235,6 @@ public class BlockIterator implements Iterator<Block> {
 
     /**
      * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
      *
      * @param loc The location for the start of the ray trace
      * @param yOffset The trace begins vertically offset from the start vector
@@ -253,8 +247,6 @@ public class BlockIterator implements Iterator<Block> {
 
     /**
      * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
      *
      * @param loc The location for the start of the ray trace
      */
@@ -265,8 +257,6 @@ public class BlockIterator implements Iterator<Block> {
 
     /**
      * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
      *
      * @param entity Information from the entity is used to set up the trace
      * @param maxDistance This is the maximum distance in blocks for the
@@ -280,8 +270,6 @@ public class BlockIterator implements Iterator<Block> {
 
     /**
      * Constructs the BlockIterator.
-     * <p>
-     * This considers all blocks as 1x1x1 in size.
      *
      * @param entity Information from the entity is used to set up the trace
      */

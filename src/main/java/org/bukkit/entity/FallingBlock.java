@@ -1,7 +1,6 @@
 package org.bukkit.entity;
 
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 
 /**
  * Represents a falling block
@@ -12,17 +11,26 @@ public interface FallingBlock extends Entity {
      * Get the Material of the falling block
      *
      * @return Material of the block
-     * @deprecated use {@link #getBlockData()}
+     */
+    Material getMaterial();
+
+    /**
+     * Get the ID of the falling block
+     *
+     * @return ID type of the block
+     * @deprecated Magic value
      */
     @Deprecated
-    Material getMaterial();
+    int getBlockId();
 
     /**
      * Get the data for the falling block
      *
      * @return data of the block
+     * @deprecated Magic value
      */
-    BlockData getBlockData();
+    @Deprecated
+    byte getBlockData();
 
     /**
      * Get if the falling block will break into an item if it cannot be placed
@@ -51,15 +59,4 @@ public interface FallingBlock extends Entity {
      * @param hurtEntities whether entities will be damaged by this block.
      */
     void setHurtEntities(boolean hurtEntities);
-
-    /**
-     * Gets the source block location of the FallingBlock
-     *
-     * @return the source block location the FallingBlock was spawned from
-     * @deprecated replaced by {@link Entity#getOrigin()}
-     */
-    @Deprecated
-    default org.bukkit.Location getSourceLoc() {
-        return this.getOrigin();
-    }
 }

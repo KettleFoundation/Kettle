@@ -10,9 +10,9 @@ import org.bukkit.event.HandlerList;
 public class HangingBreakEvent extends HangingEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
-    private final HangingBreakEvent.RemoveCause cause;
+    private final RemoveCause cause;
 
-    public HangingBreakEvent(final Hanging hanging, final HangingBreakEvent.RemoveCause cause) {
+    public HangingBreakEvent(final Hanging hanging, final RemoveCause cause) {
         super(hanging);
         this.cause = cause;
     }
@@ -22,7 +22,7 @@ public class HangingBreakEvent extends HangingEvent implements Cancellable {
      *
      * @return the RemoveCause for the hanging entity's removal
      */
-    public HangingBreakEvent.RemoveCause getCause() {
+    public RemoveCause getCause() {
         return cause;
     }
 

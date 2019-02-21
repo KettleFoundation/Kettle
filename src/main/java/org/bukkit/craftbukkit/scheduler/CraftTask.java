@@ -1,14 +1,13 @@
 package org.bukkit.craftbukkit.scheduler;
 
-import java.util.function.Consumer;
 import org.bukkit.Bukkit;
-import co.aikar.timings.MinecraftTimings; // Paper
-import co.aikar.timings.Timing; // Paper
+import org.bukkit.craftbukkit.SpigotTimings; // Spigot
+import org.spigotmc.CustomTimingsHandler; // Spigot
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 
-public class CraftTask implements BukkitTask, Runnable { // Spigot
+public class CraftTask implements BukkitTask, Runnable {
 
     private volatile CraftTask next = null;
     public static final int ERROR = 0;
@@ -26,64 +25,55 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
      */
     private volatile long period;
     private long nextRun;
-    public final Runnable rTask; // Paper
-    public final Consumer<BukkitTask> cTask; // Paper
-    public Timing timings; // Paper
+    public final Runnable task;
     private final Plugin plugin;
     private final int id;
 
+    final CustomTimingsHandler timings; // Spigot
     CraftTask() {
         this(null, null, CraftTask.NO_REPEATING, CraftTask.NO_REPEATING);
     }
 
-    CraftTask(final Object task) {
+    CraftTask(final Runnable task) {
         this(null, task, CraftTask.NO_REPEATING, CraftTask.NO_REPEATING);
     }
 
-    CraftTask(final Plugin plugin, final Object task, final int id, final long period) { // Paper
+    // Spigot start
+    public String timingName = null;
+    CraftTask(String timingName) {
+        this(timingName, null, null, -1, -1);
+    }
+    CraftTask(String timingName, final Runnable task) {
+        this(timingName, null, task, -1, -1);
+    }
+    CraftTask(String timingName, final Plugin plugin, final Runnable task, final int id, final long period) {
         this.plugin = plugin;
-        if (task instanceof Runnable) {
-            this.rTask = (Runnable) task;
-            this.cTask = null;
-        } else if (task instanceof Consumer) {
-            this.cTask = (Consumer<BukkitTask>) task;
-            this.rTask = null;
-        } else if (task == null) {
-            // Head or Future task
-            this.rTask = null;
-            this.cTask = null;
-        } else {
-            throw new AssertionError("Illegal task class " + task);
-        }
+        this.task = task;
         this.id = id;
         this.period = period;
-        timings = task != null ? MinecraftTimings.getPluginTaskTimings(this, period) : null; // Paper
+        this.timingName = timingName == null && task == null ? "Unknown" : timingName;
+        timings = this.isSync() ? SpigotTimings.getPluginTaskTimings(this, period) : null;
     }
 
-    @Override
+    CraftTask(final Plugin plugin, final Runnable task, final int id, final long period) {
+        this(null, plugin, task, id, period);
+        // Spigot end
+    }
+
     public final int getTaskId() {
         return id;
     }
 
-    @Override
     public final Plugin getOwner() {
         return plugin;
     }
 
-    @Override
     public boolean isSync() {
         return true;
     }
 
-    @Override
     public void run() {
-        if (timings != null && isSync()) timings.startTiming(); // Paper
-        if (rTask != null) {
-            rTask.run();
-        } else {
-            cTask.accept(this);
-        }
-        if (timings != null && isSync()) timings.stopTiming(); // Paper
+        task.run();
     }
 
     long getPeriod() {
@@ -110,8 +100,8 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         this.next = next;
     }
 
-    public Class<?> getTaskClass() {
-        return (rTask != null) ? rTask.getClass() : ((cTask != null) ? cTask.getClass() : null);
+    Class<? extends Runnable> getTaskClass() {
+        return task.getClass();
     }
 
     @Override
@@ -119,7 +109,6 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         return (period == CraftTask.CANCEL);
     }
 
-    @Override
     public void cancel() {
         Bukkit.getScheduler().cancelTask(id);
     }
@@ -134,4 +123,12 @@ public class CraftTask implements BukkitTask, Runnable { // Spigot
         return true;
     }
 
+    // Spigot start
+    public String getTaskName() {
+        if (timingName != null) {
+            return timingName;
+        }
+        return task.getClass().getName();
+    }
+    // Spigot end
 }

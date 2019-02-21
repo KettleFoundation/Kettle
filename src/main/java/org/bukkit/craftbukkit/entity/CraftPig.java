@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPig;
-
+import net.minecraft.entity.passive.EntityPig;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Pig;
@@ -12,11 +11,11 @@ public class CraftPig extends CraftAnimals implements Pig {
     }
 
     public boolean hasSaddle() {
-        return getHandle().hasSaddle();
+        return getHandle().getSaddled();
     }
 
     public void setSaddle(boolean saddled) {
-        getHandle().setSaddle(saddled);
+        getHandle().setSaddled(saddled);
     }
 
     public EntityPig getHandle() {

@@ -1,9 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.TileEntity;
-import net.minecraft.server.World;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -21,67 +20,47 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
 
         // get tile entity from block:
         CraftWorld world = (CraftWorld) this.getWorld();
-        this.tileEntity = tileEntityClass.cast(world.getHandle().getTileEntity(this.getPosition()));
+        this.tileEntity = tileEntityClass.cast(world.getTileEntityAt(this.getX(), this.getY(), this.getZ()));
 
-        // Paper start
-        this.snapshotDisabled = DISABLE_SNAPSHOT;
-        if (DISABLE_SNAPSHOT) {
-            this.snapshot = this.tileEntity;
-        } else {
-            this.snapshot = this.createSnapshot(this.tileEntity, world.getHandle());
-        }
         // copy tile entity data:
-        if(this.snapshot != null) {
-            this.load(this.snapshot);
-        }
-        // Paper end
+        this.snapshot = this.createSnapshot(tileEntity);
+        this.load(snapshot);
     }
-
-    public final boolean snapshotDisabled; // Paper
-    public static boolean DISABLE_SNAPSHOT = false; // Paper
 
     public CraftBlockEntityState(Material material, T tileEntity) {
         super(material);
 
         this.tileEntityClass = (Class<T>) tileEntity.getClass();
         this.tileEntity = tileEntity;
-        // Paper start
-        this.snapshotDisabled = DISABLE_SNAPSHOT;
-        if (DISABLE_SNAPSHOT) {
-            this.snapshot = this.tileEntity;
-        } else {
-            this.snapshot = this.createSnapshot(this.tileEntity, null);
-        }
+
         // copy tile entity data:
-        if(this.snapshot != null) {
-            this.load(this.snapshot);
-        }
-        // Paper end
+        this.snapshot = this.createSnapshot(tileEntity);
+        this.load(snapshot);
     }
 
-    private T createSnapshot(T tileEntity, World world) {
+    private T createSnapshot(T tileEntity) {
         if (tileEntity == null) {
             return null;
         }
 
-        NBTTagCompound nbtTagCompound = tileEntity.save(new NBTTagCompound());
-        T snapshot = (T) TileEntity.create(nbtTagCompound, world);
+        NBTTagCompound nbtTagCompound = tileEntity.writeToNBT(new NBTTagCompound());
+        T snapshot = (T) TileEntity.create(tileEntity.getWorld(), nbtTagCompound);
 
         return snapshot;
     }
 
     // copies the TileEntity-specific data, retains the position
     private void copyData(T from, T to) {
-        BlockPosition pos = to.getPosition();
-        NBTTagCompound nbtTagCompound = from.save(new NBTTagCompound());
-        to.load(nbtTagCompound);
+        BlockPos pos = to.getPos();
+        NBTTagCompound nbtTagCompound = from.writeToNBT(new NBTTagCompound());
+        to.readFromNBT(nbtTagCompound);
 
         // reset the original position:
-        to.setPosition(pos);
+        to.setPos(pos);
     }
 
     // gets the wrapped TileEntity
-    public T getTileEntity() { // Paper - protected -> public
+    protected T getTileEntity() {
         return tileEntity;
     }
 
@@ -94,7 +73,7 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
     protected TileEntity getTileEntityFromWorld() {
         requirePlaced();
 
-        return ((CraftWorld) this.getWorld()).getHandle().getTileEntity(this.getPosition());
+        return ((CraftWorld) this.getWorld()).getTileEntityAt(this.getX(), this.getY(), this.getZ());
     }
 
     // gets the NBT data of the TileEntity represented by this block state
@@ -102,7 +81,7 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
         // update snapshot
         applyTo(snapshot);
 
-        return snapshot.save(new NBTTagCompound());
+        return snapshot.writeToNBT(new NBTTagCompound());
     }
 
     // copies the data of the given tile entity to this block state
@@ -131,12 +110,8 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
             TileEntity tile = getTileEntityFromWorld();
 
             if (isApplicable(tile)) {
-                // Paper start
-                if (!snapshotDisabled) {
-                    applyTo(tileEntityClass.cast(tile));
-                }
-                // Paper end
-                tile.update();
+                applyTo(tileEntityClass.cast(tile));
+                tile.markDirty();
             }
         }
 

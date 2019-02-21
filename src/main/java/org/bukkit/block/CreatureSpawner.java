@@ -26,7 +26,7 @@ public interface CreatureSpawner extends BlockState {
      *
      * @param creatureType The creature type's name.
      * @deprecated magic value, use
-     * {@link #setSpawnedType(org.bukkit.entity.EntityType)}.
+     * {@link #setSpawnedType(EntityType)}.
      */
     @Deprecated
     public void setCreatureTypeByName(String creatureType);

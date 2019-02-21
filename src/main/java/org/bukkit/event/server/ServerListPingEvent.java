@@ -3,7 +3,7 @@ package org.bukkit.event.server;
 import java.net.InetAddress;
 import java.util.Iterator;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.CachedServerIcon;
@@ -21,7 +21,6 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
     private int maxPlayers;
 
     public ServerListPingEvent(final InetAddress address, final String motd, final int numPlayers, final int maxPlayers) {
-        super(); // Paper - Is this event being fired async?
         Validate.isTrue(numPlayers >= 0, "Cannot have negative number of players online", numPlayers);
         this.address = address;
         this.motd = motd;
@@ -39,7 +38,6 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
      * @param maxPlayers the max number of players
      */
     protected ServerListPingEvent(final InetAddress address, final String motd, final int maxPlayers) {
-        super(); // Paper - Is this event being fired async?
         this.numPlayers = MAGIC_PLAYER_COUNT;
         this.address = address;
         this.motd = motd;

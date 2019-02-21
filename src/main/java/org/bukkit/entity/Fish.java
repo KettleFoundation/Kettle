@@ -1,6 +1,8 @@
 package org.bukkit.entity;
 
 /**
- * Represents a fish entity.
+ * Represents a fishing hook.
+ * @deprecated in favor of {@link FishHook}
  */
-public interface Fish extends WaterMob { }
+public interface Fish extends FishHook {
+}

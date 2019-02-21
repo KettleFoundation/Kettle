@@ -3,7 +3,7 @@ package org.bukkit;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Maps;
 
@@ -275,7 +275,7 @@ public enum ChatColor{
      * Gets the color represented by the specified color code
      *
      * @param code Code to check
-     * @return Associative {@link org.bukkit.ChatColor} with the given code,
+     * @return Associative {@link ChatColor} with the given code,
      *     or null if it doesn't exist
      */
     public static ChatColor getByChar(char code) {
@@ -286,7 +286,7 @@ public enum ChatColor{
      * Gets the color represented by the specified color code
      *
      * @param code Code to check
-     * @return Associative {@link org.bukkit.ChatColor} with the given code,
+     * @return Associative {@link ChatColor} with the given code,
      *     or null if it doesn't exist
      */
     public static ChatColor getByChar(String code) {

@@ -3,7 +3,7 @@ package org.bukkit.entity;
 /**
  * Represents a Slime.
  */
-public interface Slime extends Mob {
+public interface Slime extends LivingEntity {
 
     /**
      * @return The size of the slime
@@ -15,19 +15,18 @@ public interface Slime extends Mob {
      */
     public void setSize(int sz);
 
-    // Paper start
     /**
-     * Get whether this slime can randomly wander/jump around on its own
+     * Set the {@link LivingEntity} target for this slime. Set to null to clear
+     * the target.
      *
-     * @return true if can wander
+     * @param target the entity to target
      */
-    public boolean canWander();
+    public void setTarget(LivingEntity target);
 
     /**
-     * Set whether this slime can randomly wander/jump around on its own
+     * Get the {@link LivingEntity} this slime is currently targeting.
      *
-     * @param canWander true if can wander
+     * @return the current target, or null if no target exists.
      */
-    public void setWander(boolean canWander);
-    // Paper end
+    public LivingEntity getTarget();
 }

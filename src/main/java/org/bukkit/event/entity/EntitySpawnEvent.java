@@ -2,7 +2,6 @@ package org.bukkit.event.entity;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -10,8 +9,7 @@ import org.bukkit.event.HandlerList;
  * <p>
  * If an Entity Spawn event is cancelled, the entity will not spawn.
  */
-public class EntitySpawnEvent extends EntityEvent implements Cancellable {
-
+public class EntitySpawnEvent extends EntityEvent implements org.bukkit.event.Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean canceled;
 
@@ -19,12 +17,10 @@ public class EntitySpawnEvent extends EntityEvent implements Cancellable {
         super(spawnee);
     }
 
-    @Override
     public boolean isCancelled() {
         return canceled;
     }
 
-    @Override
     public void setCancelled(boolean cancel) {
         canceled = cancel;
     }

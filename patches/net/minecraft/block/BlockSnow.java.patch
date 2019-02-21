@@ -1,0 +1,12 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockSnow.java
++++ ../src-work/minecraft/net/minecraft/block/BlockSnow.java
+@@ -131,6 +131,9 @@
+     {
+         if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11)
+         {
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callBlockFadeEvent(worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), Blocks.AIR).isCancelled()) {
++                return;
++            }
+             worldIn.setBlockToAir(pos);
+         }
+     }

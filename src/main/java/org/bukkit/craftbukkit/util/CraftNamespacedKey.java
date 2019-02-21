@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
-import net.minecraft.server.MinecraftKey;
+import net.minecraft.util.ResourceLocation;
 import org.bukkit.NamespacedKey;
 
 public final class CraftNamespacedKey {
@@ -8,23 +8,15 @@ public final class CraftNamespacedKey {
     public CraftNamespacedKey() {
     }
 
-    public static NamespacedKey fromStringOrNull(String string) {
-        if (string == null || string.isEmpty()) {
-            return null;
-        }
-        MinecraftKey minecraft = MinecraftKey.a(string);
-        return (minecraft == null) ? null : fromMinecraft(minecraft);
-    }
-
     public static NamespacedKey fromString(String string) {
-        return fromMinecraft(new MinecraftKey(string));
+        return fromMinecraft(new ResourceLocation(string));
     }
 
-    public static NamespacedKey fromMinecraft(MinecraftKey minecraft) {
-        return new NamespacedKey(minecraft.b(), minecraft.getKey());
+    public static NamespacedKey fromMinecraft(ResourceLocation minecraft) {
+        return new NamespacedKey(minecraft.getResourceDomain(), minecraft.getResourcePath());
     }
 
-    public static MinecraftKey toMinecraft(NamespacedKey key) {
-        return new MinecraftKey(key.getNamespace(), key.getKey());
+    public static ResourceLocation toMinecraft(NamespacedKey key) {
+        return new ResourceLocation(key.getNamespace(), key.getKey());
     }
 }

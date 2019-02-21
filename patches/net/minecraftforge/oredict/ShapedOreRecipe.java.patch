@@ -1,0 +1,53 @@
+--- ../src-base/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
++++ ../src-work/minecraft/net/minecraftforge/oredict/ShapedOreRecipe.java
+@@ -29,7 +29,6 @@
+ import net.minecraft.util.NonNullList;
+ import net.minecraft.util.ResourceLocation;
+ import net.minecraft.world.World;
+-import net.minecraftforge.common.ForgeHooks;
+ import net.minecraftforge.common.crafting.CraftingHelper;
+ import net.minecraftforge.common.crafting.CraftingHelper.ShapedPrimer;
+ import net.minecraftforge.common.crafting.IShapedRecipe;
+@@ -41,7 +40,6 @@
+ import java.util.Map.Entry;
+ 
+ import javax.annotation.Nonnull;
+-import javax.annotation.Nullable;
+ 
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+@@ -49,6 +47,7 @@
+ import com.google.gson.JsonElement;
+ import com.google.gson.JsonObject;
+ import com.google.gson.JsonSyntaxException;
++import org.bukkit.inventory.Recipe;
+ 
+ public class ShapedOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IShapedRecipe
+ {
+@@ -188,9 +187,9 @@
+     }
+ 
+     @Override
+-    public boolean canFit(int p_194133_1_, int p_194133_2_)
++    public boolean canFit(int width, int height)
+     {
+-        return p_194133_1_ >= this.width && p_194133_2_ >= this.height;
++        return width >= this.width && height >= this.height;
+     }
+ 
+     public static ShapedOreRecipe factory(JsonContext context, JsonObject json)
+@@ -254,4 +253,14 @@
+         ItemStack result = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
+         return new ShapedOreRecipe(group.isEmpty() ? null : new ResourceLocation(group), result, primer);
+     }
++
++    @Override
++    public Recipe toBukkitRecipe() {
++        throw new UnsupportedOperationException("Cannot get bukkit-recipe from ShapedOreRecipe!");
++    }
++
++    @Override
++    public void setKey(ResourceLocation key) {
++
++    }
+ }

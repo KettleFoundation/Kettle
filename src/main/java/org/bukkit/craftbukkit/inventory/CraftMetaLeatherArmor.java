@@ -4,9 +4,8 @@ import static org.bukkit.craftbukkit.inventory.CraftItemFactory.DEFAULT_LEATHER_
 
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagInt;
-
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagInt;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -34,13 +33,9 @@ class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta {
     CraftMetaLeatherArmor(NBTTagCompound tag) {
         super(tag);
         if (tag.hasKey(DISPLAY.NBT)) {
-            NBTTagCompound display = tag.getCompound(DISPLAY.NBT);
+            NBTTagCompound display = tag.getCompoundTag(DISPLAY.NBT);
             if (display.hasKey(COLOR.NBT)) {
-                try {
-                    color = Color.fromRGB(display.getInt(COLOR.NBT));
-                } catch (IllegalArgumentException ex) {
-                    // Invalid colour
-                }
+                color = Color.fromRGB(display.getInteger(COLOR.NBT));
             }
         }
     }

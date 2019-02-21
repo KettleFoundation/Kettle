@@ -8,7 +8,7 @@ import org.bukkit.block.BlockFace;
  */
 public class Skull extends MaterialData implements Directional {
     public Skull() {
-        super(Material.LEGACY_SKULL);
+        super(Material.SKULL);
     }
 
     /**
@@ -21,8 +21,27 @@ public class Skull extends MaterialData implements Directional {
         setFacingDirection(direction);
     }
 
+    /**
+     * @param type the raw type id
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Skull(final int type) {
+        super(type);
+    }
+
     public Skull(final Material type) {
         super(type);
+    }
+
+    /**
+     * @param type the raw type id
+     * @param data the raw data value
+     * @deprecated Magic value
+     */
+    @Deprecated
+    public Skull(final int type, final byte data) {
+        super(type, data);
     }
 
     /**

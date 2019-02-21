@@ -1,0 +1,18 @@
+--- ../src-base/minecraft/net/minecraft/advancements/PlayerAdvancements.java
++++ ../src-work/minecraft/net/minecraft/advancements/PlayerAdvancements.java
+@@ -16,7 +16,6 @@
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.Map.Entry;
+-import java.util.function.Function;
+ import java.util.stream.Collectors;
+ import java.util.stream.Stream;
+ import javax.annotation.Nullable;
+@@ -211,6 +210,7 @@
+ 
+             if (!flag1 && advancementprogress.isDone())
+             {
++                this.player.world.getServer().getPluginManager().callEvent(new org.bukkit.event.player.PlayerAdvancementDoneEvent(this.player.getBukkitEntity(), p_192750_1_.bukkit));
+                 p_192750_1_.getRewards().apply(this.player);
+ 
+                 if (p_192750_1_.getDisplay() != null && p_192750_1_.getDisplay().shouldAnnounceToChat() && this.player.world.getGameRules().getBoolean("announceAdvancements"))

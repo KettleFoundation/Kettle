@@ -15,7 +15,7 @@ public enum PotionType {
     JUMP(PotionEffectType.JUMP, true, true),
     FIRE_RESISTANCE(PotionEffectType.FIRE_RESISTANCE, false, true),
     SPEED(PotionEffectType.SPEED, true, true),
-    SLOWNESS(PotionEffectType.SLOW, true, true),
+    SLOWNESS(PotionEffectType.SLOW, false, true),
     WATER_BREATHING(PotionEffectType.WATER_BREATHING, false, true),
     INSTANT_HEAL(PotionEffectType.HEAL, true, false),
     INSTANT_DAMAGE(PotionEffectType.HARM, true, false),
@@ -23,9 +23,7 @@ public enum PotionType {
     REGEN(PotionEffectType.REGENERATION, true, true),
     STRENGTH(PotionEffectType.INCREASE_DAMAGE, true, true),
     WEAKNESS(PotionEffectType.WEAKNESS, false, true),
-    LUCK(PotionEffectType.LUCK, false, false),
-    TURTLE_MASTER(PotionEffectType.SLOW, true, true), // TODO: multiple effects
-    SLOW_FALLING(PotionEffectType.SLOW_FALLING, false, true),
+    LUCK(PotionEffectType.LUCK, false, false);
     ;
 
     private final PotionEffectType effect;
@@ -68,7 +66,6 @@ public enum PotionType {
     }
 
     /**
-     * @return Damage value associated with this PotionType, broken
      * @deprecated Non-functional
      */
     @Deprecated
@@ -81,8 +78,6 @@ public enum PotionType {
     }
 
     /**
-     * @param damage Damage value associated with a PotionType
-     * @return PotionType for given damage value, broken
      * @deprecated Non-functional
      */
     @Deprecated
@@ -91,8 +86,6 @@ public enum PotionType {
     }
 
     /**
-     * @param effectType EffectType
-     * @return Associated PotionType
      * @deprecated Misleading
      */
     @Deprecated

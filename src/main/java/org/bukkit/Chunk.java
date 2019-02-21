@@ -23,32 +23,6 @@ public interface Chunk {
      */
     int getZ();
 
-    // Paper start
-    /**
-     * @return The Chunks X and Z coordinates packed into a long
-     */
-    default long getChunkKey() {
-        return getChunkKey(getX(), getZ());
-    }
-
-    /**
-     * @param loc Location to get chunk key
-     * @return Location's chunk coordinates packed into a long
-     */
-    static long getChunkKey(Location loc) {
-        return getChunkKey((int) Math.floor(loc.getX()) << 4, (int) Math.floor(loc.getZ()) << 4);
-    }
-
-    /**
-     * @param x X Coordinate
-     * @param z Z Coordinate
-     * @return Chunk coordinates packed into a long
-     */
-    static long getChunkKey(int x, int z) {
-        return (long) x & 0xffffffffL | ((long) z & 0xffffffffL) << 32;
-    }
-    // Paper end
-
     /**
      * Gets the world containing this chunk
      *
@@ -93,24 +67,12 @@ public interface Chunk {
      */
     Entity[] getEntities();
 
-    // Paper start
     /**
      * Get a list of all tile entities in the chunk.
      *
      * @return The tile entities.
      */
-    default BlockState[] getTileEntities() {
-        return getTileEntities(true);
-    }
-
-    /**
-     * Get a list of all tile entities in the chunk.
-     *
-     * @param useSnapshot Take snapshots or direct references
-     * @return The tile entities.
-     */
-    BlockState[] getTileEntities(boolean useSnapshot);
-    // Paper end
+    BlockState[] getTileEntities();
 
     /**
      * Checks if the chunk is loaded.
@@ -168,26 +130,4 @@ public interface Chunk {
      * @return true if slimes are able to spawn in this chunk
      */
     boolean isSlimeChunk();
-
-    /**
-     * Gets whether the chunk at the specified chunk coordinates is force
-     * loaded.
-     * <p>
-     * A force loaded chunk will not be unloaded due to lack of player activity.
-     *
-     * @return force load status
-     * @see World#isChunkForceLoaded(int, int)
-     */
-    boolean isForceLoaded();
-
-    /**
-     * Sets whether the chunk at the specified chunk coordinates is force
-     * loaded.
-     * <p>
-     * A force loaded chunk will not be unloaded due to lack of player activity.
-     *
-     * @param forced
-     * @see World#setChunkForceLoaded(int, int, boolean)
-     */
-    void setForceLoaded(boolean forced);
 }

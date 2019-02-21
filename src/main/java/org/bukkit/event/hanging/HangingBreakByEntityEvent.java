@@ -10,10 +10,10 @@ public class HangingBreakByEntityEvent extends HangingBreakEvent {
     private final Entity remover;
 
     public HangingBreakByEntityEvent(final Hanging hanging, final Entity remover) {
-        this(hanging, remover, HangingBreakEvent.RemoveCause.ENTITY);
+        this(hanging, remover, RemoveCause.ENTITY);
     }
 
-    public HangingBreakByEntityEvent(final Hanging hanging, final Entity remover, final HangingBreakEvent.RemoveCause cause) {
+    public HangingBreakByEntityEvent(final Hanging hanging, final Entity remover, final RemoveCause cause) {
         super(hanging, cause);
         this.remover = remover;
     }

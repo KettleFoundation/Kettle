@@ -74,7 +74,7 @@ public class FileConfigurationOptions extends MemoryConfigurationOptions {
      * <p>
      * If this is true, if a default {@link FileConfiguration} is passed to
      * {@link
-     * FileConfiguration#setDefaults(org.bukkit.configuration.Configuration)}
+     * FileConfiguration#setDefaults(Configuration)}
      * then upon saving it will use the header from that config, instead of
      * the one provided here.
      * <p>
@@ -96,7 +96,7 @@ public class FileConfigurationOptions extends MemoryConfigurationOptions {
      * <p>
      * If this is true, if a default {@link FileConfiguration} is passed to
      * {@link
-     * FileConfiguration#setDefaults(org.bukkit.configuration.Configuration)}
+     * FileConfiguration#setDefaults(Configuration)}
      * then upon saving it will use the header from that config, instead of
      * the one provided here.
      * <p>

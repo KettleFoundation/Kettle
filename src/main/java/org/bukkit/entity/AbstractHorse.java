@@ -22,7 +22,7 @@ public interface AbstractHorse extends Animals, Vehicle, InventoryHolder, Tameab
     public Horse.Variant getVariant();
 
     /**
-     * @param variant Variant to set
+     * @param variant
      * @deprecated you are required to spawn a different entity
      */
     @Deprecated

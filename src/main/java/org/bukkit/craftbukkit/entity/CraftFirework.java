@@ -1,47 +1,43 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFireworks;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.Items;
-
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.Random;
-import java.util.UUID;
 
 public class CraftFirework extends CraftEntity implements Firework {
 
     private final Random random = new Random();
     private final CraftItemStack item;
 
-    public CraftFirework(CraftServer server, EntityFireworks entity) {
+    public CraftFirework(CraftServer server, EntityFireworkRocket entity) {
         super(server, entity);
 
-        ItemStack item = getHandle().getDataWatcher().get(EntityFireworks.FIREWORK_ITEM);
+        ItemStack item = getHandle().getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
 
         if (item.isEmpty()) {
-            item = new ItemStack(Items.FIREWORK_ROCKET);
-            getHandle().getDataWatcher().set(EntityFireworks.FIREWORK_ITEM, item);
+            item = new ItemStack(Items.FIREWORKS);
+            getHandle().getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, item);
         }
 
         this.item = CraftItemStack.asCraftMirror(item);
 
         // Ensure the item is a firework...
-        if (this.item.getType() != Material.FIREWORK_ROCKET) {
-            this.item.setType(Material.FIREWORK_ROCKET);
+        if (this.item.getType() != Material.FIREWORK) {
+            this.item.setType(Material.FIREWORK);
         }
     }
 
     @Override
-    public EntityFireworks getHandle() {
-        return (EntityFireworks) entity;
+    public EntityFireworkRocket getHandle() {
+        return (EntityFireworkRocket) entity;
     }
 
     @Override
@@ -64,27 +60,13 @@ public class CraftFirework extends CraftEntity implements Firework {
         item.setItemMeta(meta);
 
         // Copied from EntityFireworks constructor, update firework lifetime/power
-        getHandle().expectedLifespan = 10 * (1 + meta.getPower()) + random.nextInt(6) + random.nextInt(7);
+        getHandle().lifetime = 10 * (1 + meta.getPower()) + random.nextInt(6) + random.nextInt(7);
 
-        getHandle().getDataWatcher().markDirty(EntityFireworks.FIREWORK_ITEM);
+        getHandle().getDataManager().setDirty(EntityFireworkRocket.FIREWORK_ITEM);
     }
 
     @Override
     public void detonate() {
-        getHandle().expectedLifespan = 0;
+        getHandle().lifetime = 0;
     }
-
-    // Paper start
-
-    @Override
-    public UUID getSpawningEntity() {
-        return getHandle().spawningEntity;
-    }
-
-    @Override
-    public LivingEntity getBoostedEntity() {
-        EntityLiving boostedEntity = getHandle().getBoostedEntity();
-        return boostedEntity != null ? (LivingEntity) boostedEntity.getBukkitEntity() : null;
-    }
-    // Paper end
 }

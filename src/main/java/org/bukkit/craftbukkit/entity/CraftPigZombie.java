@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPigZombie;
-
+import net.minecraft.entity.monster.EntityPigZombie;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.PigZombie;
@@ -40,20 +39,5 @@ public class CraftPigZombie extends CraftZombie implements PigZombie {
 
     public EntityType getType() {
         return EntityType.PIG_ZOMBIE;
-    }
-
-    @Override
-    public boolean isConverting() {
-        return false;
-    }
-
-    @Override
-    public int getConversionTime() {
-        throw new UnsupportedOperationException("Not supported by this Entity.");
-    }
-
-    @Override
-    public void setConversionTime(int time) {
-        throw new UnsupportedOperationException("Not supported by this Entity.");
     }
 }

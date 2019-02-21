@@ -2,8 +2,6 @@ package org.bukkit.event.block;
 
 import org.bukkit.block.Block;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -14,33 +12,32 @@ import org.bukkit.event.HandlerList;
  * <li>The Block returned by getBlock() is the block we are trying to place
  *     on, not the block we are trying to place.
  * <li>If you want to figure out what is being placed, use {@link
- *     #getMaterial()} instead.
+ *     #getMaterial()} or {@link #getMaterialId()} instead.
  * </ul>
  */
 public class BlockCanBuildEvent extends BlockEvent {
     private static final HandlerList handlers = new HandlerList();
     protected boolean buildable;
 
-    protected BlockData blockData;
-    private final Player player;
-
+    /**
+     *
+     * @deprecated Magic value
+     */
     @Deprecated
-    public BlockCanBuildEvent(final Block block, final BlockData type, final boolean canBuild) {
-        this(block, null, type, canBuild);
-    }
+    protected int material;
 
     /**
      *
+     * @deprecated Magic value
      * @param block the block involved in this event
-     * @param player the player placing the block
-     * @param type the id of the block to place
-     * @param canBuild whether we can build
+     * @param id the id of the block to place
+     * @param canBuild whether we can build 
      */
-    public BlockCanBuildEvent(final Block block, final Player player, final BlockData type, final boolean canBuild) {
+    @Deprecated
+    public BlockCanBuildEvent(final Block block, final int id, final boolean canBuild) {
         super(block);
-        this.player = player;
-        this.buildable = canBuild;
-        this.blockData = type;
+        buildable = canBuild;
+        material = id;
     }
 
     /**
@@ -71,27 +68,18 @@ public class BlockCanBuildEvent extends BlockEvent {
      * @return The Material that we are trying to place
      */
     public Material getMaterial() {
-        return blockData.getMaterial();
+        return Material.getMaterial(material);
     }
 
     /**
-     * Gets the BlockData that we are trying to place.
+     * Gets the Material ID for the Material that we are trying to place.
      *
-     * @return The BlockData that we are trying to place
+     * @return The Material ID for the Material that we are trying to place
+     * @deprecated Magic value
      */
-    public BlockData getBlockData() {
-        return blockData;
-    }
-
-    /**
-     * Gets the player who placed the block involved in this event.
-     * <br>
-     * May be null for legacy calls of the event.
-     *
-     * @return The Player who placed the block involved in this event
-     */
-    public Player getPlayer() {
-        return player;
+    @Deprecated
+    public int getMaterialId() {
+        return material;
     }
 
     @Override

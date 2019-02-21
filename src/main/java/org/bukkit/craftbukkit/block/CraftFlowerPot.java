@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.TileEntityFlowerPot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityFlowerPot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.FlowerPot;
@@ -24,7 +24,7 @@ public class CraftFlowerPot extends CraftBlockEntityState<TileEntityFlowerPot> i
     public void load(TileEntityFlowerPot pot) {
         super.load(pot);
 
-        contents = (pot.getItem() == null) ? null : CraftItemStack.asBukkitCopy(pot.getContents()).getData();
+        contents = (pot.getFlowerPotItem() == null) ? null : CraftItemStack.asBukkitCopy(pot.getFlowerItemStack()).getData();
     }
 
     @Override
@@ -41,6 +41,6 @@ public class CraftFlowerPot extends CraftBlockEntityState<TileEntityFlowerPot> i
     public void applyTo(TileEntityFlowerPot pot) {
         super.applyTo(pot);
 
-        pot.setContents(contents == null ? ItemStack.a : CraftItemStack.asNMSCopy(contents.toItemStack(1)));
+        pot.setItemStack(contents == null ? ItemStack.EMPTY : CraftItemStack.asNMSCopy(contents.toItemStack(1)));
     }
 }

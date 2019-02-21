@@ -1,7 +1,6 @@
 package org.bukkit;
 
 import org.bukkit.block.Biome;
-import org.bukkit.block.data.BlockData;
 
 /**
  * Represents a static, thread-safe snapshot of chunk of blocks.
@@ -36,39 +35,41 @@ public interface ChunkSnapshot {
      * Get block type for block at corresponding coordinate in the chunk
      *
      * @param x 0-15
-     * @param y 0-255
+     * @param y 0-127
      * @param z 0-15
      * @return block material type
      */
     Material getBlockType(int x, int y, int z);
 
     /**
-     * Get block data for block at corresponding coordinate in the chunk
+     * Get block type for block at corresponding coordinate in the chunk
      *
      * @param x 0-15
-     * @param y 0-255
+     * @param y 0-127
      * @param z 0-15
-     * @return block material type
+     * @return 0-255
+     * @deprecated Magic value
      */
-    BlockData getBlockData(int x, int y, int z);
+    @Deprecated
+    int getBlockTypeId(int x, int y, int z);
 
     /**
      * Get block data for block at corresponding coordinate in the chunk
      *
      * @param x 0-15
-     * @param y 0-255
+     * @param y 0-127
      * @param z 0-15
      * @return 0-15
      * @deprecated Magic value
      */
     @Deprecated
-    int getData(int x, int y, int z);
+    int getBlockData(int x, int y, int z);
 
     /**
      * Get sky light level for block at corresponding coordinate in the chunk
      *
      * @param x 0-15
-     * @param y 0-255
+     * @param y 0-127
      * @param z 0-15
      * @return 0-15
      */
@@ -79,7 +80,7 @@ public interface ChunkSnapshot {
      * chunk
      *
      * @param x 0-15
-     * @param y 0-255
+     * @param y 0-127
      * @param z 0-15
      * @return 0-15
      */
@@ -88,8 +89,8 @@ public interface ChunkSnapshot {
     /**
      * Gets the highest non-air coordinate at the given coordinates
      *
-     * @param x X-coordinate of the blocks (0-15)
-     * @param z Z-coordinate of the blocks (0-15)
+     * @param x X-coordinate of the blocks
+     * @param z Z-coordinate of the blocks
      * @return Y-coordinate of the highest non-air block
      */
     int getHighestBlockYAt(int x, int z);
@@ -97,8 +98,8 @@ public interface ChunkSnapshot {
     /**
      * Get biome at given coordinates
      *
-     * @param x X-coordinate (0-15)
-     * @param z Z-coordinate (0-15)
+     * @param x X-coordinate
+     * @param z Z-coordinate
      * @return Biome at given coordinate
      */
     Biome getBiome(int x, int z);
@@ -106,11 +107,22 @@ public interface ChunkSnapshot {
     /**
      * Get raw biome temperature (0.0-1.0) at given coordinate
      *
-     * @param x X-coordinate (0-15)
-     * @param z Z-coordinate (0-15)
+     * @param x X-coordinate
+     * @param z Z-coordinate
      * @return temperature at given coordinate
      */
     double getRawBiomeTemperature(int x, int z);
+
+    /**
+     * Get raw biome rainfall (0.0-1.0) at given coordinate
+     *
+     * @param x X-coordinate
+     * @param z Z-coordinate
+     * @return rainfall at given coordinate
+     * @deprecated this is not a chunk property in current Minecraft versions
+     */
+    @Deprecated
+    double getRawBiomeRainfall(int x, int z);
 
     /**
      * Get world full time when chunk snapshot was captured
@@ -122,7 +134,7 @@ public interface ChunkSnapshot {
     /**
      * Test if section is empty
      *
-     * @param sy - section Y coordinate (block Y / 16, 0-255)
+     * @param sy - section Y coordinate (block Y / 16)
      * @return true if empty, false if not
      */
     boolean isSectionEmpty(int sy);

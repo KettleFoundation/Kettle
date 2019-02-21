@@ -3,7 +3,7 @@ package org.bukkit.configuration.file;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 import java.io.BufferedReader;

@@ -1,15 +1,18 @@
 package org.bukkit.craftbukkit.inventory;
 
-import org.apache.commons.lang.Validate;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.ChatComponentText;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.IMerchant;
-import net.minecraft.server.ItemStack;
-import net.minecraft.server.MerchantRecipe;
-import net.minecraft.server.MerchantRecipeList;
-import net.minecraft.server.World;
+import net.minecraft.entity.IMerchant;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.village.MerchantRecipe;
+import net.minecraft.village.MerchantRecipeList;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nullable;
 
 public class CraftMerchantCustom extends CraftMerchant {
 
@@ -24,43 +27,49 @@ public class CraftMerchantCustom extends CraftMerchant {
 
     private static class MinecraftMerchant implements IMerchant {
 
-        private final IChatBaseComponent title;
+        private final String title;
         private final MerchantRecipeList trades = new MerchantRecipeList();
-        private EntityHuman tradingPlayer;
+        private EntityPlayer tradingPlayer;
 
         public MinecraftMerchant(String title) {
-            Validate.notNull(title, "Title cannot be null");
-            this.title = new ChatComponentText(title);
+            this.title = title;
         }
 
         @Override
-        public void setTradingPlayer(EntityHuman entityhuman) {
+        public void setCustomer(EntityPlayer entityhuman) {
             this.tradingPlayer = entityhuman;
         }
 
         @Override
-        public EntityHuman getTrader() {
+        public EntityPlayer getCustomer() {
             return this.tradingPlayer;
         }
 
         @Override
-        public MerchantRecipeList getOffers(EntityHuman entityhuman) {
+        public MerchantRecipeList getRecipes(EntityPlayer entityhuman) {
             return this.trades;
         }
 
         @Override
-        public void a(MerchantRecipe merchantrecipe) {
+        @SideOnly(Side.CLIENT)
+        public void setRecipes(@Nullable MerchantRecipeList recipeList) {
+
+        }
+
+        @Override
+        public void useRecipe(MerchantRecipe merchantrecipe) {
             // increase recipe's uses
-            merchantrecipe.increaseUses();
+            merchantrecipe.incrementToolUses();
         }
 
         @Override
-        public void a(ItemStack itemstack) {
+        public void verifySellingItem(ItemStack itemstack) {
+
         }
 
         @Override
-        public IChatBaseComponent getScoreboardDisplayName() {
-            return title;
+        public ITextComponent getDisplayName() {
+            return new TextComponentString(title);
         }
 
         @Override
@@ -69,7 +78,7 @@ public class CraftMerchantCustom extends CraftMerchant {
         }
 
         @Override
-        public BlockPosition getPosition() {
+        public BlockPos getPos() {
             return null;
         }
     }

@@ -33,7 +33,7 @@ public interface Team {
      * Sets the name displayed to entries for this team
      *
      * @param displayName New display name
-     * @throws IllegalArgumentException if displayName is longer than 128
+     * @throws IllegalArgumentException if displayName is longer than 32
      *     characters.
      * @throws IllegalStateException if this team has been unregistered
      */
@@ -52,7 +52,7 @@ public interface Team {
      *
      * @param prefix New prefix
      * @throws IllegalArgumentException if prefix is null
-     * @throws IllegalArgumentException if prefix is longer than 64
+     * @throws IllegalArgumentException if prefix is longer than 16
      *     characters
      * @throws IllegalStateException if this team has been unregistered
      */
@@ -71,7 +71,7 @@ public interface Team {
      *
      * @param suffix the new suffix for this team.
      * @throws IllegalArgumentException if suffix is null
-     * @throws IllegalArgumentException if suffix is longer than 64
+     * @throws IllegalArgumentException if suffix is longer than 16
      *     characters
      * @throws IllegalStateException if this team has been unregistered
      */
@@ -84,7 +84,7 @@ public interface Team {
      * names are handled by prefixes / suffixes.
      *
      * @return team color, defaults to {@link ChatColor#RESET}
-     * @throws IllegalStateException if this team has been unregistered
+     * @throws IllegalStateException
      */
     ChatColor getColor() throws IllegalStateException;
 
@@ -138,7 +138,7 @@ public interface Team {
      *
      * @return the current name tag visibility for the team
      * @throws IllegalArgumentException if this team has been unregistered
-     * @deprecated see {@link #getOption(org.bukkit.scoreboard.Team.Option)}
+     * @deprecated see {@link #getOption(Option)}
      */
     @Deprecated
     NameTagVisibility getNameTagVisibility() throws IllegalArgumentException;
@@ -149,7 +149,7 @@ public interface Team {
      * @param visibility The nameTagVisibilty to set
      * @throws IllegalArgumentException if this team has been unregistered
      * @deprecated see
-     * {@link #setOption(org.bukkit.scoreboard.Team.Option, org.bukkit.scoreboard.Team.OptionStatus)}
+     * {@link #setOption(Option, OptionStatus)}
      */
     @Deprecated
     void setNameTagVisibility(NameTagVisibility visibility) throws IllegalArgumentException;
