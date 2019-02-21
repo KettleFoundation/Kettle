@@ -15,7 +15,17 @@ Kettle is dependent on custom Forge and Paper builds, meaning it can run both Cr
 
 We hope to eliminate all issues with craftbukkit forge servers. In the end, we envision a seamless, low lag Kettle experience with support for new 1.12+ versions of Minecraft.
 
-## Installation
+## Depolyment
+
+### Installation
+1. Download the universal server & bundled libraries
+2. Download the minecraft server via the link in the release
+3. Make a new folder for the server
+4. Move the server to the folder and rename it to `kettle.jar`
+5. Extract the `libraries` folder to the same folder as `kettle.jar`
+6. Make a [launch script](https://gist.github.com/aolko/3b7a93107d162b21730c92e5236e3239)
+
+### Building the sources
 Coming soon.
 
 ## Chat
