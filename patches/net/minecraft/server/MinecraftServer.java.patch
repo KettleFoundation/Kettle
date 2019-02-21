@@ -8,50 +8,59 @@
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -23,19 +24,23 @@
+@@ -23,19 +24,13 @@
  import java.nio.charset.StandardCharsets;
  import java.security.KeyPair;
  import java.text.SimpleDateFormat;
-+import java.util.ArrayList;
- import java.util.Arrays;
- import java.util.Collections;
-+import java.util.Comparator;
- import java.util.Date;
- import java.util.List;
- import java.util.Queue;
- import java.util.Random;
-+import java.util.Set;
- import java.util.UUID;
+-import java.util.Arrays;
+-import java.util.Collections;
+-import java.util.Date;
+-import java.util.List;
+-import java.util.Queue;
+-import java.util.Random;
+-import java.util.UUID;
++import java.util.*;
  import java.util.concurrent.Callable;
  import java.util.concurrent.Executors;
  import java.util.concurrent.FutureTask;
 -import java.util.function.Supplier;
  import javax.annotation.Nullable;
  import javax.imageio.ImageIO;
-+
 +import joptsimple.OptionSet;
  import net.minecraft.advancements.AdvancementManager;
  import net.minecraft.advancements.FunctionManager;
  import net.minecraft.command.CommandBase;
-@@ -55,6 +60,7 @@
+@@ -55,53 +50,47 @@
  import net.minecraft.profiler.Profiler;
  import net.minecraft.profiler.Snooper;
  import net.minecraft.server.dedicated.DedicatedServer;
 +import net.minecraft.server.dedicated.PropertyManager;
  import net.minecraft.server.management.PlayerList;
  import net.minecraft.server.management.PlayerProfileCache;
- import net.minecraft.util.IProgressUpdate;
-@@ -73,35 +79,101 @@
- import net.minecraft.world.MinecraftException;
- import net.minecraft.world.ServerWorldEventHandler;
- import net.minecraft.world.World;
-+import net.minecraft.world.WorldProvider;
- import net.minecraft.world.WorldServer;
- import net.minecraft.world.WorldServerDemo;
- import net.minecraft.world.WorldServerMulti;
- import net.minecraft.world.WorldSettings;
- import net.minecraft.world.WorldType;
+-import net.minecraft.util.IProgressUpdate;
+-import net.minecraft.util.IThreadListener;
+-import net.minecraft.util.ITickable;
+-import net.minecraft.util.ReportedException;
+-import net.minecraft.util.Util;
++import net.minecraft.util.*;
+ import net.minecraft.util.datafix.DataFixer;
+ import net.minecraft.util.datafix.DataFixesManager;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraft.util.text.TextComponentString;
+-import net.minecraft.world.EnumDifficulty;
+-import net.minecraft.world.GameType;
+-import net.minecraft.world.MinecraftException;
+-import net.minecraft.world.ServerWorldEventHandler;
+-import net.minecraft.world.World;
+-import net.minecraft.world.WorldServer;
+-import net.minecraft.world.WorldServerDemo;
+-import net.minecraft.world.WorldServerMulti;
+-import net.minecraft.world.WorldSettings;
+-import net.minecraft.world.WorldType;
 -import net.minecraft.world.chunk.storage.AnvilSaveConverter;
++import net.minecraft.world.*;
 +import net.minecraft.world.chunk.storage.AnvilSaveHandler;
  import net.minecraft.world.storage.ISaveFormat;
  import net.minecraft.world.storage.ISaveHandler;
@@ -71,65 +80,6 @@
 -{
 -    private static final Logger LOGGER = LogManager.getLogger();
 +//import jline.console.ConsoleReader;
-+import joptsimple.OptionSet;
-+import net.minecraft.advancements.AdvancementManager;
-+import net.minecraft.advancements.FunctionManager;
-+import net.minecraft.command.CommandBase;
-+import net.minecraft.command.ICommandManager;
-+import net.minecraft.command.ICommandSender;
-+import net.minecraft.command.ServerCommandManager;
-+import net.minecraft.crash.CrashReport;
-+import net.minecraft.crash.ICrashReportDetail;
-+import net.minecraft.entity.Entity;
-+import net.minecraft.entity.player.EntityPlayer;
-+import net.minecraft.entity.player.EntityPlayerMP;
-+import net.minecraft.init.Bootstrap;
-+import net.minecraft.network.NetworkSystem;
-+import net.minecraft.network.ServerStatusResponse;
-+import net.minecraft.network.play.server.SPacketTimeUpdate;
-+import net.minecraft.profiler.ISnooperInfo;
-+import net.minecraft.profiler.Profiler;
-+import net.minecraft.profiler.Snooper;
-+import net.minecraft.server.dedicated.DedicatedServer;
-+import net.minecraft.server.dedicated.PropertyManager;
-+import net.minecraft.server.management.PlayerList;
-+import net.minecraft.server.management.PlayerProfileCache;
-+import net.minecraft.util.IProgressUpdate;
-+import net.minecraft.util.IThreadListener;
-+import net.minecraft.util.ITickable;
-+import net.minecraft.util.ReportedException;
-+import net.minecraft.util.Util;
-+import net.minecraft.util.datafix.DataFixer;
-+import net.minecraft.util.datafix.DataFixesManager;
-+import net.minecraft.util.math.BlockPos;
-+import net.minecraft.util.math.MathHelper;
-+import net.minecraft.util.text.ITextComponent;
-+import net.minecraft.util.text.TextComponentString;
-+import net.minecraft.world.EnumDifficulty;
-+import net.minecraft.world.GameType;
-+import net.minecraft.world.MinecraftException;
-+import net.minecraft.world.ServerWorldEventHandler;
-+import net.minecraft.world.World;
-+import net.minecraft.world.WorldProvider;
-+import net.minecraft.world.WorldServer;
-+import net.minecraft.world.WorldServerDemo;
-+import net.minecraft.world.WorldServerMulti;
-+import net.minecraft.world.WorldSettings;
-+import net.minecraft.world.WorldType;
-+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
-+import net.minecraft.world.storage.ISaveFormat;
-+import net.minecraft.world.storage.ISaveHandler;
-+import net.minecraft.world.storage.WorldInfo;
-+import net.minecraftforge.common.DimensionManager;
-+import net.minecraftforge.fml.relauncher.Side;
-+import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.apache.commons.lang3.Validate;
-+import org.apache.logging.log4j.LogManager;
-+import org.apache.logging.log4j.Logger;
-+import org.bukkit.Bukkit;
-+import org.bukkit.craftbukkit.CraftServer;
-+import org.bukkit.craftbukkit.Main;
-+import org.bukkit.craftbukkit.SpigotTimings; // Spigot
 +
 +public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo {
 +    public static final Logger LOGGER = LogManager.getLogger();
@@ -150,7 +100,7 @@
      @SideOnly(Side.SERVER)
      private String hostname;
      private int serverPort = -1;
-@@ -128,7 +200,6 @@
+@@ -128,7 +117,6 @@
      private KeyPair serverKeyPair;
      private String serverOwner;
      private String folderName;
@@ -158,7 +108,7 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,88 +215,126 @@
+@@ -144,88 +132,129 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
@@ -183,9 +133,12 @@
  
 -    public MinecraftServer(File anvilFileIn, Proxy proxyIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn)
 -    {
++    private static MinecraftServer instance;
++
 +    public MinecraftServer(OptionSet options, Proxy proxyIn, DataFixer dataFixerIn,
 +            YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn,
 +            GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
++        instance = this;
          this.serverProxy = proxyIn;
          this.authService = authServiceIn;
          this.sessionService = sessionServiceIn;
@@ -319,7 +272,7 @@
          WorldSettings worldsettings;
  
          if (worldinfo == null)
-@@ -294,28 +403,141 @@
+@@ -294,28 +323,141 @@
              }
          }
          } //Forge: End dead code
@@ -472,7 +425,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +545,52 @@
+@@ -323,45 +465,52 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -552,7 +505,7 @@
          }
      }
  
-@@ -379,112 +608,107 @@
+@@ -379,112 +528,107 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -711,7 +664,7 @@
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,20 +716,20 @@
+@@ -492,20 +636,20 @@
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
@@ -739,7 +692,7 @@
                          LOGGER.warn("Time ran backwards! Did the system time change?");
                          j = 0L;
                      }
-@@ -513,15 +737,12 @@
+@@ -513,15 +657,12 @@
                      i += j;
                      this.currentTime = k;
  
@@ -759,7 +712,7 @@
                              i -= 50L;
                              this.tick();
                          }
-@@ -532,80 +753,67 @@
+@@ -532,80 +673,67 @@
                  }
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopping();
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
@@ -870,7 +823,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +821,42 @@
+@@ -613,52 +741,42 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -934,7 +887,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +865,15 @@
+@@ -667,16 +785,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -956,7 +909,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,12 +881,14 @@
+@@ -684,12 +801,14 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -972,7 +925,7 @@
          }
  
          this.profiler.startSection("tallying");
-@@ -697,191 +896,220 @@
+@@ -697,191 +816,220 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1292,7 +1245,7 @@
                  }
              });
          }
-@@ -889,145 +1117,110 @@
+@@ -889,145 +1037,110 @@
          return report;
      }
  
@@ -1478,7 +1431,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1228,75 @@
+@@ -1035,80 +1148,75 @@
          }
      }
  
@@ -1588,7 +1541,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1305,186 @@
+@@ -1117,228 +1225,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1865,7 +1818,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1493,116 @@
+@@ -1347,130 +1413,120 @@
          return null;
      }
  
@@ -1885,6 +1838,10 @@
  
 -    public int getMaxWorldSize()
 -    {
++    public static MinecraftServer getServerInstance() {
++         return instance;
++    }
++
 +    @Nullable
 +    @Deprecated
 +    public static MinecraftServer getServerCB() {
@@ -2038,7 +1995,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1666,19 @@
+@@ -1534,13 +1590,19 @@
                      ++i1;
                  }
              }
@@ -2063,7 +2020,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1717,87 @@
+@@ -1579,84 +1641,87 @@
                      dedicatedserver.stopServer();
                  }
              });

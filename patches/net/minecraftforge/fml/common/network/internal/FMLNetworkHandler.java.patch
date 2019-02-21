@@ -25,7 +25,28 @@
  
  import javax.annotation.Nullable;
  
-@@ -210,7 +218,7 @@
+@@ -88,6 +96,20 @@
+             Container remoteGuiContainer = NetworkRegistry.INSTANCE.getRemoteGuiContainer(mc, entityPlayerMP, modGuiId, world, x, y, z);
+             if (remoteGuiContainer != null)
+             {
++                // Kettle start
++                if(remoteGuiContainer.getBukkitView() == null){
++                    TileEntity te = entityPlayer.world.getTileEntity(new BlockPos(x,y,z));
++                    if(te instanceof  IInventory){
++                        remoteGuiContainer.setBukkitView(new CraftInventoryView(entityPlayer.getBukkitEntity(), new CraftInventory((IInventory) te), remoteGuiContainer));
++                    }else{
++                        remoteGuiContainer.setBukkitView(new CraftInventoryView(entityPlayer.getBukkitEntity(), Bukkit.createInventory(entityPlayer.getBukkitEntity(), InventoryType.CHEST), remoteGuiContainer));
++                    }
++                    remoteGuiContainer = CraftEventFactory.callInventoryOpenEvent((EntityPlayerMP) entityPlayer, remoteGuiContainer, false);
++                    if(remoteGuiContainer == null){
++                        return;
++                    }
++                }
++                // Kettle end
+                 entityPlayerMP.getNextWindowId();
+                 entityPlayerMP.closeContainer();
+                 int windowId = entityPlayerMP.currentWindowId;
+@@ -210,7 +232,7 @@
      public static void enhanceStatusQuery(JsonObject jsonobject)
      {
          JsonObject fmlData = new JsonObject();
