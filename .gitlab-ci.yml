@@ -18,7 +18,7 @@ cache:
   - .gradle/caches
 
 setup:
-  stage: test
+  stage: setup
   script:
   - chmod +x gradlew && ./gradlew setup
   - mv src/main/java/org* projects/Kettle/src/main/java
