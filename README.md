@@ -1,4 +1,6 @@
-**:warning: Kettle has and will never, and does not condone third parties who do so, use defamation of other services or products to promote itself**
+~~**:warning: Kettle has and will never, and does not condone third parties who do so, use defamation of other services or products to promote itself**~~
+
+![Contradiction](https://i.imgur.com/nHM7uQM.png)
 
 **:warning: Kettle is still __very raw__ and you may encounter issues in using it with your server. You have been warned!**
 
