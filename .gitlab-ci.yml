@@ -4,6 +4,7 @@ stages:
 - setup
 - test
 - build
+- publish
 
 before_script:
 #  - echo `pwd` # debug
@@ -37,6 +38,11 @@ build:
   artifacts:
     paths:
       - build/distributions/*.jar
+
+publish:
+  stage: publish
+  script:
+  - chmod +x gradlew && ./gradlew githubRelease
 
 after_script:
 - echo "End CI"

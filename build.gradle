@@ -13,10 +13,14 @@ buildscript {
         maven {
             url  "https://jcenter.bintray.com"
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
         classpath 'net.nemerosa:versioning:2.7.1'
+        classpath "gradle.plugin.com.github.breadmoirai:github-release:2.2.4"
     }
 }
 
@@ -26,10 +30,10 @@ apply plugin: "idea"
 apply plugin: 'net.minecraftforge.gradle.patcher'
 apply plugin: 'net.minecraftforge.gradle.launch4j'
 apply plugin: 'net.nemerosa.versioning'
-
+apply plugin: "com.github.breadmoirai.github-release"
 
 group 'kettlefoundation'
-version 'git-' +  versioning.info.full
+version 'git-' +  versioning.info.branch + "-" + versioning.info.build
 
 repositories {
     clear()
@@ -202,6 +206,8 @@ genGradleProjects {
 
 import groovy.json.JsonSlurper
 
+import java.util.stream.Collectors
+
 String getServerClasspath(File file) {
     def node = new JsonSlurper().parse(file)
     def out = new StringBuilder()
@@ -219,7 +225,28 @@ String getServerClasspath(File file) {
     return out.toString()
 }
 
-task dumpLibs(type: Copy) {
-    into "$buildDir/libraries"
-    from configurations.libraries
+task copyLibsToBuild(type: Copy) {
+    from file("release/libraries.zip").canonicalPath
+    into file("build/distributions/").canonicalPath
+}
+
+tasks.githubRelease.dependsOn 'copyLibsToBuild'
+githubRelease {
+    token System.getenv("GITHUB_TOKEN")
+    token "17910fdb95b229d6942e230f82efb06e33042105"
+    owner "KettleFoundation"
+    repo "Kettle"
+    releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
+    body {
+        """\
+## Setup Info
+Don't forget to download [Minecraft Server 1.12.2](https://launcher.mojang.com/mc/game/1.12.2/server/886945bfb2b978778c3a0288fd7fab09d315b25f/server.jar) 
+
+(Rename it to `minecraft_server.1.12.2.jar`)
+
+${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.joining('\n', '## Changelog\n', '')))}
+        """
+    }
+    prerelease true
+    releaseAssets = fileTree("build/distributions/").filter { it.name.endsWith("jar") || it.name.endsWith("zip") }
 }
