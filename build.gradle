@@ -233,7 +233,6 @@ task copyLibsToBuild(type: Copy) {
 tasks.githubRelease.dependsOn 'copyLibsToBuild'
 githubRelease {
     token System.getenv("GITHUB_TOKEN")
-    token "17910fdb95b229d6942e230f82efb06e33042105"
     owner "KettleFoundation"
     repo "Kettle"
     releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
