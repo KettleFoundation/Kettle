@@ -28,3 +28,44 @@
      }
  
      protected int getBonemealAgeIncrease(World worldIn)
+@@ -202,23 +205,23 @@
+     {
+         super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
+ 
+-        if (false && !worldIn.isRemote) // Forge: NOP all this.
+-        {
+-            int i = this.getAge(state);
+-
+-            if (i >= this.getMaxAge())
+-            {
+-                int j = 3 + fortune;
+-
+-                for (int k = 0; k < j; ++k)
+-                {
+-                    if (worldIn.rand.nextInt(2 * this.getMaxAge()) <= i)
+-                    {
+-                        spawnAsEntity(worldIn, pos, new ItemStack(this.getSeed()));
+-                    }
+-                }
+-            }
+-        }
++//        if (!worldIn.isRemote) // Forge: NOP all this.
++//        {
++//            int i = this.getAge(state);
++//
++//            if (i >= this.getMaxAge())
++//            {
++//                int j = 3 + fortune;
++//
++//                for (int k = 0; k < j; ++k)
++//                {
++//                    if (worldIn.rand.nextInt(2 * this.getMaxAge()) <= i)
++//                    {
++//                        spawnAsEntity(worldIn, pos, new ItemStack(this.getSeed()));
++//                    }
++//                }
++//            }
++//        }
+     }
+ 
+     public Item getItemDropped(IBlockState state, Random rand, int fortune)
