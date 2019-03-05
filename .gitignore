@@ -16,9 +16,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# Editor-based Rest Client
-.idea/httpRequests
-
 ### Gradle template
 .gradle
 /build/
@@ -36,7 +33,7 @@ gradle-app.setting
 *.rej
 
 ### Kettle
-/projects
+/projects/
 /bin/
 
 ### IDEs
