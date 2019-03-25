@@ -15,7 +15,7 @@ Kettle is dependent on custom Forge and Paper builds, meaning it can run both Cr
 
 We hope to eliminate all issues with craftbukkit forge servers. In the end, we envision a seamless, low lag Kettle experience with support for new 1.12+ versions of Minecraft.
 
-## Depolyment
+## Deployment
 
 
 ### Installation
