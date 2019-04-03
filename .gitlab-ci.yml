@@ -31,8 +31,7 @@ test:
 build:
   stage: build
   script:
-  - chmod +x gradlew && ./gradlew build
-  - chmod +x gradlew && ./gradlew githubRelease
+  - chmod +x gradlew && ./gradlew build githubRelease
   only:
   - master
   artifacts:

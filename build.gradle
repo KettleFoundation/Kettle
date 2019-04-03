@@ -56,7 +56,7 @@ repositories {
     }
     maven {
         name 'KettleFoundation'
-        url 'http://repo.strezz.org/artifactory/Kettle/'
+        url 'http://repo.hexeption.co.uk/artifactory/Kettle/'
     }
     flatDir {
         dirs 'src/main/resources'
@@ -201,7 +201,7 @@ extractForgeSources {
 genGradleProjects {
     addCompileDep "junit:junit:4.12"
     addCompileDep "bukkit:bukkit:1.12.2-R0.1"
-    addRepo("KettleFoundation", "http://repo.strezz.org/artifactory/Kettle/")
+    addRepo("KettleFoundation", "http://repo.hexeption.co.uk/artifactory/Kettle/")
 }
 
 import groovy.json.JsonSlurper
@@ -232,7 +232,11 @@ task copyLibsToBuild(type: Copy) {
 
 tasks.githubRelease.dependsOn 'copyLibsToBuild'
 githubRelease {
-    token System.getenv("GITHUB_TOKEN")
+    if(System.getenv("GITHUB_TOKEN") != null){
+        token System.getenv("GITHUB_TOKEN")
+    }else{
+        token ""
+    }
     owner "KettleFoundation"
     repo "Kettle"
     releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
@@ -247,5 +251,6 @@ ${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.jo
         """
     }
     prerelease true
+    draft true
     releaseAssets = fileTree("build/distributions/").filter { it.name.endsWith("jar") || it.name.endsWith("zip") }
 }
