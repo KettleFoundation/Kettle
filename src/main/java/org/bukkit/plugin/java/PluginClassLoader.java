@@ -62,7 +62,7 @@ final class PluginClassLoader extends URLClassLoader {
         provider.add(new ClassInheritanceProvider());
         provider.add(new ClassLoaderProvider(this));
         jarMapping.setFallbackInheritanceProvider(provider);
-        remapper = new CatServerRemapper(jarMapping);
+        remapper = new NMSServerRemapper(jarMapping);
 
         try {
             Class<?> jarClass;
