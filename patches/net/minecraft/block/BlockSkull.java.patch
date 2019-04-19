@@ -40,6 +40,15 @@
      public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player)
      {
          if (player.capabilities.isCreativeMode)
+@@ -135,7 +161,7 @@
+             state = state.withProperty(NODROP, Boolean.valueOf(true));
+             worldIn.setBlockState(pos, state, 4);
+         }
+-        this.dropBlockAsItem(worldIn, pos, state, 0);
++        // this.dropBlockAsItem(worldIn, pos, state, 0); Kettle - prevents doubled and creative mode drops
+ 
+         super.onBlockHarvested(worldIn, pos, state, player);
+     }
 @@ -147,7 +173,9 @@
      public void getDrops(net.minecraft.util.NonNullList<ItemStack> drops, IBlockAccess worldIn, BlockPos pos, IBlockState state, int fortune)
      {

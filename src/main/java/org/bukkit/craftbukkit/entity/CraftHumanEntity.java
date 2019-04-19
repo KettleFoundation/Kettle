@@ -23,6 +23,7 @@ import net.minecraft.tileentity.TileEntityBeacon;
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.tileentity.TileEntityEnchantmentTable;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.tileentity.TileEntityLockable;
@@ -350,7 +351,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         BlockPos pos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         TileEntity container = getHandle().world.getTileEntity(pos);
         if (container == null && force) {
-            container = new TileEntityBrewingStand();
+            container = new TileEntityEnchantmentTable();
             container.setWorld(getHandle().world);
             container.setPos(pos);
         }

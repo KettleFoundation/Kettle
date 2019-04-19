@@ -13,21 +13,6 @@
  
  public class BlockFire extends Block
  {
-@@ -42,10 +44,10 @@
-         if (!worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP) && !Blocks.FIRE.canCatchFire(worldIn, pos.down(), EnumFacing.UP))
-         {
-             return state.withProperty(NORTH, this.canCatchFire(worldIn, pos.north(), EnumFacing.SOUTH))
--                .withProperty(EAST,  this.canCatchFire(worldIn, pos.east(), EnumFacing.WEST))
--                .withProperty(SOUTH, this.canCatchFire(worldIn, pos.south(), EnumFacing.NORTH))
--                .withProperty(WEST,  this.canCatchFire(worldIn, pos.west(), EnumFacing.EAST))
--                .withProperty(UPPER, this.canCatchFire(worldIn, pos.up(), EnumFacing.DOWN));
-+                        .withProperty(EAST,  this.canCatchFire(worldIn, pos.east(), EnumFacing.WEST))
-+                        .withProperty(SOUTH, this.canCatchFire(worldIn, pos.south(), EnumFacing.NORTH))
-+                        .withProperty(WEST,  this.canCatchFire(worldIn, pos.west(), EnumFacing.EAST))
-+                        .withProperty(UPPER, this.canCatchFire(worldIn, pos.up(), EnumFacing.DOWN));
-         }
-         return this.getDefaultState();
-     }
 @@ -138,7 +140,7 @@
              if (!worldIn.isAreaLoaded(pos, 2)) return; // Forge: prevent loading unloaded chunks when spreading fire
              if (!this.canPlaceBlockAt(worldIn, pos))
