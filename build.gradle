@@ -225,12 +225,6 @@ String getServerClasspath(File file) {
     return out.toString()
 }
 
-task copyLibsToBuild(type: Copy) {
-    from file("release/libraries.zip").canonicalPath
-    into file("build/distributions/").canonicalPath
-}
-
-tasks.githubRelease.dependsOn 'copyLibsToBuild'
 githubRelease {
     if(System.getenv("GITHUB_TOKEN") != null){
         token System.getenv("GITHUB_TOKEN")
@@ -252,5 +246,8 @@ ${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.jo
     }
     prerelease true
     draft true
-    releaseAssets = fileTree("build/distributions/").filter { it.name.endsWith("jar") || it.name.endsWith("zip") }
+    releaseAssets = [
+        fileTree("build/distributions/").filter { it.name.endsWith("jar") || it.name.endsWith("zip") },
+        fileTree("/release/").filter { it.name.endsWith("zip") }
+    ]
 }
