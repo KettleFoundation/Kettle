@@ -16,7 +16,6 @@
 +    // CraftBukkit start - Special case dropping so we can get info from the tile entity
 +    @Override
 +    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-+    	
 +        if (worldIn.rand.nextFloat() < chance) {
 +            TileEntity tileentity = worldIn.getTileEntity(pos);
 +
@@ -31,6 +30,7 @@
 +                    NBTUtil.writeGameProfile(nbttagcompound, tileentityskull.getPlayerProfile());
 +                    itemstack.getTagCompound().setTag("SkullOwner", nbttagcompound);
 +                }
++
 +                spawnAsEntity(worldIn, pos, itemstack);
 +            }
 +        }
@@ -45,63 +45,22 @@
              worldIn.setBlockState(pos, state, 4);
          }
 -        this.dropBlockAsItem(worldIn, pos, state, 0);
-+        // this.dropBlockAsItem(worldIn, pos, state, 0); Kettle - Prevents doubled drop and drop in Creative mode
++        // this.dropBlockAsItem(worldIn, pos, state, 0); Kettle - prevents doubled and creative mode drops
  
          super.onBlockHarvested(worldIn, pos, state, player);
      }
-@@ -146,28 +172,29 @@
-     }
+@@ -147,7 +173,9 @@
      public void getDrops(net.minecraft.util.NonNullList<ItemStack> drops, IBlockAccess worldIn, BlockPos pos, IBlockState state, int fortune)
      {
--        {
+         {
 -            if (!((Boolean)state.getValue(NODROP)).booleanValue())
--            {
--                TileEntity tileentity = worldIn.getTileEntity(pos);
--
--                if (tileentity instanceof TileEntitySkull)
--                {
--                    TileEntitySkull tileentityskull = (TileEntitySkull)tileentity;
--                    ItemStack itemstack = new ItemStack(Items.SKULL, 1, tileentityskull.getSkullType());
--
--                    if (tileentityskull.getSkullType() == 3 && tileentityskull.getPlayerProfile() != null)
--                    {
--                        itemstack.setTagCompound(new NBTTagCompound());
--                        NBTTagCompound nbttagcompound = new NBTTagCompound();
--                        NBTUtil.writeGameProfile(nbttagcompound, tileentityskull.getPlayerProfile());
--                        itemstack.getTagCompound().setTag("SkullOwner", nbttagcompound);
--                    }
--
--                    drops.add(itemstack);
--                }
--            }
--        }
-+//        {
-+//            CraftBukkit start - Drop item in code above, not here
-+//            if (!((Boolean)state.getValue(NODROP)).booleanValue())
-+//            {
-+//                TileEntity tileentity = worldIn.getTileEntity(pos);
-+//
-+//                if (tileentity instanceof TileEntitySkull)
-+//                {
-+//                    TileEntitySkull tileentityskull = (TileEntitySkull)tileentity;
-+//                    ItemStack itemstack = new ItemStack(Items.SKULL, 1, tileentityskull.getSkullType());
-+//
-+//                    if (tileentityskull.getSkullType() == 3 && tileentityskull.getPlayerProfile() != null)
-+//                    {
-+//                        itemstack.setTagCompound(new NBTTagCompound());
-+//                        NBTTagCompound nbttagcompound = new NBTTagCompound();
-+//                        NBTUtil.writeGameProfile(nbttagcompound, tileentityskull.getPlayerProfile());
-+//                        itemstack.getTagCompound().setTag("SkullOwner", nbttagcompound);
-+//                    }
-+//
-+//                    drops.add(itemstack);
-+//                }
-+//            }
-+//        }
-     }
++            // CraftBukkit start - Drop item in code above, not here
++            // if (!((Boolean)state.getValue(NODROP)).booleanValue())
++            if (false)
+             {
+                 TileEntity tileentity = worldIn.getTileEntity(pos);
  
-     public Item getItemDropped(IBlockState state, Random rand, int fortune)
-@@ -189,6 +216,7 @@
+@@ -189,6 +217,7 @@
  
      public void checkWitherSpawn(World worldIn, BlockPos pos, TileEntitySkull te)
      {
@@ -109,7 +68,7 @@
          if (te.getSkullType() == 1 && pos.getY() >= 2 && worldIn.getDifficulty() != EnumDifficulty.PEACEFUL && !worldIn.isRemote)
          {
              BlockPattern blockpattern = this.getWitherPattern();
-@@ -196,10 +224,14 @@
+@@ -196,10 +225,14 @@
  
              if (blockpattern$patternhelper != null)
              {
@@ -125,7 +84,7 @@
                  }
  
                  for (int j = 0; j < blockpattern.getPalmLength(); ++j)
-@@ -207,7 +239,10 @@
+@@ -207,7 +240,10 @@
                      for (int k = 0; k < blockpattern.getThumbLength(); ++k)
                      {
                          BlockWorldState blockworldstate1 = blockpattern$patternhelper.translateOffset(j, k, 0);
@@ -137,7 +96,7 @@
                      }
                  }
  
-@@ -217,25 +252,24 @@
+@@ -217,25 +253,24 @@
                  entitywither.setLocationAndAngles((double)blockpos1.getX() + 0.5D, (double)blockpos1.getY() + 0.55D, (double)blockpos1.getZ() + 0.5D, blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F, 0.0F);
                  entitywither.renderYawOffset = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? 0.0F : 90.0F;
                  entitywither.ignite();

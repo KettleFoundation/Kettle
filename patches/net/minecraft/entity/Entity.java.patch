@@ -493,27 +493,18 @@
      {
          ResourceLocation resourcelocation = EntityList.getKey(this);
          return resourcelocation == null ? null : resourcelocation.toString();
-@@ -1940,11 +2198,18 @@
-         }
-         else
-         {
-+            boolean bukkitCaptureDrops = false;
-+            // CraftBukkit start - Capture drops for death event
-+            if (this instanceof EntityLiving && !((EntityLiving) this).forceDrops) {
-+                ((EntityLiving) this).drops.add(org.bukkit.craftbukkit.inventory.CraftItemStack.asBukkitCopy(stack));
-+                bukkitCaptureDrops = true;
-+            }
-+            // CraftBukkit end
-             EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double)offsetY, this.posZ, stack);
-             entityitem.setDefaultPickupDelay();
+@@ -1945,7 +2203,9 @@
              if (captureDrops)
                  this.capturedDrops.add(entityitem);
--            else
-+            else if (!bukkitCaptureDrops)
-                 this.world.spawnEntity(entityitem);
+             else
+-                this.world.spawnEntity(entityitem);
++            {
++            	this.world.spawnEntity(entityitem);
++            }
              return entityitem;
          }
-@@ -2013,7 +2278,7 @@
+     }
+@@ -2013,7 +2273,7 @@
              this.motionY = 0.0D;
              this.motionZ = 0.0D;
              if(!updateBlocked)
@@ -522,7 +513,7 @@
  
              if (this.isRiding())
              {
-@@ -2110,6 +2375,29 @@
+@@ -2110,6 +2370,29 @@
          }
          else
          {
@@ -552,7 +543,7 @@
              if (!this.world.isRemote && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer))
              {
                  this.riddenByEntities.add(0, passenger);
-@@ -2129,6 +2417,21 @@
+@@ -2129,6 +2412,21 @@
          }
          else
          {
@@ -574,7 +565,7 @@
              this.riddenByEntities.remove(passenger);
              passenger.rideCooldown = 60;
          }
-@@ -2325,12 +2628,12 @@
+@@ -2325,12 +2623,12 @@
          this.setFlag(5, invisible);
      }
  
@@ -589,7 +580,7 @@
      {
          byte b0 = ((Byte)this.dataManager.get(FLAGS)).byteValue();
  
-@@ -2351,17 +2654,53 @@
+@@ -2351,17 +2649,53 @@
  
      public void setAir(int air)
      {
@@ -646,7 +637,7 @@
          }
      }
  
-@@ -2551,20 +2890,75 @@
+@@ -2551,20 +2885,75 @@
              if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
              this.world.profiler.startSection("changeDimension");
              MinecraftServer minecraftserver = this.getServer();
@@ -726,7 +717,7 @@
              BlockPos blockpos;
  
              if (dimensionIn == 1 && teleporter.isVanilla())
-@@ -2596,8 +2990,12 @@
+@@ -2596,8 +2985,12 @@
                  teleporter.placeEntity(worldserver1, this, f);
                  blockpos = new BlockPos(this);
              }
@@ -740,7 +731,7 @@
              this.world.profiler.endStartSection("reloading");
              Entity entity = EntityList.newEntity(this.getClass(), worldserver1);
  
-@@ -2605,6 +3003,7 @@
+@@ -2605,6 +2998,7 @@
              {
                  entity.copyDataFromOld(this);
  
@@ -748,7 +739,7 @@
                  if (i == 1 && dimensionIn == 1 && teleporter.isVanilla())
                  {
                      BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
-@@ -2614,19 +3013,28 @@
+@@ -2614,19 +3008,28 @@
                  {
                      entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
                  }
@@ -778,7 +769,7 @@
              return entity;
          }
          else
-@@ -2755,6 +3163,11 @@
+@@ -2755,6 +3158,11 @@
  
      public void setCustomNameTag(String name)
      {
@@ -790,7 +781,7 @@
          this.dataManager.set(CUSTOM_NAME, name);
      }
  
-@@ -2838,7 +3251,25 @@
+@@ -2838,7 +3246,25 @@
  
      public void setEntityBoundingBox(AxisAlignedBB bb)
      {
@@ -817,7 +808,7 @@
      }
  
      public float getEyeHeight()
-@@ -3030,7 +3461,7 @@
+@@ -3030,7 +3456,7 @@
          {
              return ((net.minecraft.entity.item.EntityMinecart)this).getCartItem();
          }
@@ -826,7 +817,7 @@
          {
              return new ItemStack(((EntityBoat)this).getItemBoat());
          }
-@@ -3109,14 +3540,14 @@
+@@ -3109,14 +3535,14 @@
      }
  
      @Override
@@ -843,7 +834,7 @@
      {
          return capabilities == null ? null : capabilities.getCapability(capability, facing);
      }
-@@ -3319,7 +3750,7 @@
+@@ -3319,7 +3745,7 @@
          return SoundCategory.NEUTRAL;
      }
  
