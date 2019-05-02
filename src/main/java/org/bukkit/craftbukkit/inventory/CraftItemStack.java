@@ -63,11 +63,17 @@ public final class CraftItemStack extends ItemStack {
         if (original.isEmpty()) {
             return new ItemStack(Material.AIR);
         }
+        
+        // Kettle start - don't use strict Bukkit stacks as we don't have Bukkit Materials for modded item stacks, create wrapper? (Cauldron)
+        return asCraftMirror(copyNMSStack(original, original.getCount()));
+        /*
         ItemStack stack = new ItemStack(CraftMagicNumbers.getMaterial(original.getItem()), original.getCount(), (short) original.getMetadata());
         if (hasItemMeta(original)) {
             stack.setItemMeta(getItemMeta(original));
         }
         return stack;
+        */
+        // Kettle end
     }
 
     public static CraftItemStack asCraftMirror(net.minecraft.item.ItemStack original) {
