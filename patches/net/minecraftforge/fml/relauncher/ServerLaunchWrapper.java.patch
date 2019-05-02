@@ -1,0 +1,36 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
++++ ../src-work/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
+@@ -20,10 +20,8 @@
+ package net.minecraftforge.fml.relauncher;
+ 
+ import java.lang.reflect.Method;
++import kettlefoundation.kettle.downloads.DownloadServerFiles;
+ 
+-import org.apache.logging.log4j.LogManager;
+-import org.apache.logging.log4j.core.LoggerContext;
+-
+ public class ServerLaunchWrapper {
+ 
+     /**
+@@ -31,7 +29,10 @@
+      */
+     public static void main(String[] args)
+     {
+-        new ServerLaunchWrapper().run(args);
++      System.out.println("Starting Kettle");
++      DownloadServerFiles.downloadMinecraftServer();
++      DownloadServerFiles.downloadServerLibraries();
++      new ServerLaunchWrapper().run(args);
+     }
+ 
+     private ServerLaunchWrapper()
+@@ -56,8 +57,7 @@
+         {
+             System.err.printf("We appear to be missing one or more essential library files.\n" +
+             		"You will need to add them to your server before FML and Forge will run successfully.");
+-            e.printStackTrace(System.err);
+-            System.exit(1);
++
+         }
+ 
+         try
