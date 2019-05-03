@@ -7,7 +7,7 @@
 
 ### What's Kettle?
 Kettle is the next link in the hybrid server chain:
-**Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: Cauldron :arrow_right: MCPC+
+**Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: KCauldron :arrow_right: Cauldron :arrow_right: MCPC+
 
 Kettle was initially concieved as a fork of Contigo, but after a few iterations got rid of Contigo's dependencies and can no longer be concidered it's fork, but a standalone hybrid server.
 
