@@ -794,7 +794,7 @@
      }
  
      public PlayerAdvancements getAdvancements()
-@@ -1474,4 +1769,144 @@
+@@ -1474,4 +1769,145 @@
      {
          return this.enteredNetherPosition;
      }
@@ -932,6 +932,7 @@
 +            this.addExperience(this.newExp);
 +        }
 +        this.keepLevel = false;
++        getEntityData().getKeySet().removeIf(tag -> !PERSISTED_NBT_TAG.equals(tag));
 +    }
 +
 +    @Override

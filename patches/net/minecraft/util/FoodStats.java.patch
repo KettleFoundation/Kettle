@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/util/FoodStats.java
 +++ ../src-work/minecraft/net/minecraft/util/FoodStats.java
-@@ -1,21 +1,34 @@
+@@ -1,21 +1,30 @@
  package net.minecraft.util;
  
  import net.minecraft.entity.player.EntityPlayer;
@@ -12,6 +12,8 @@
  import net.minecraft.world.EnumDifficulty;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.FoodLevelChangeEvent;
  
  public class FoodStats
  {
@@ -29,52 +31,58 @@
 +    public EntityPlayer player;  // CraftBukkit // Kettle private - public  entityplayer - player Fix mcp duplicate naming causes AppleCore to recognize errors
 +
 +    public FoodStats() {
-+
-+    }
-+
-+    public FoodStats(EntityPlayer entityplayer) {
-+        org.apache.commons.lang3.Validate.notNull(entityplayer);
-+        this.player = entityplayer;
 +    }
 +
      public void addStats(int foodLevelIn, float foodSaturationModifier)
      {
          this.foodLevel = Math.min(foodLevelIn + this.foodLevel, 20);
-@@ -24,7 +37,16 @@
+@@ -24,7 +33,22 @@
  
      public void addStats(ItemFood foodItem, ItemStack stack)
      {
 -        this.addStats(foodItem.getHealAmount(stack), foodItem.getSaturationModifier(stack));
-+        // this.addStats(foodItem.getHealAmount(stack), foodItem.getSaturationModifier(stack));
-+        int oldFoodLevel = foodLevel;
++        // CraftBukkit start
++        if (player == null) // Fix NPE
++        {
++            this.addStats(foodItem.getHealAmount(stack), foodItem.getSaturationModifier(stack));
++        } else {
++            int oldFoodLevel = foodLevel;
 +
-+        org.bukkit.event.entity.FoodLevelChangeEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callFoodLevelChangeEvent(player, foodItem.getHealAmount(stack) + oldFoodLevel);
++            FoodLevelChangeEvent event = CraftEventFactory.callFoodLevelChangeEvent(player, foodItem.getHealAmount(stack) + oldFoodLevel);
 +
-+        if (!event.isCancelled()) {
-+            this.addStats(event.getFoodLevel() - oldFoodLevel, foodItem.getSaturationModifier(stack));
++            if (!event.isCancelled()) {
++                this.addStats(event.getFoodLevel() - oldFoodLevel, foodItem.getSaturationModifier(stack));
++            }
++
++            ((EntityPlayerMP) player).getBukkitEntity().sendHealthUpdate();
++            // CraftBukkit end
 +        }
-+
-+        ((EntityPlayerMP) player).getBukkitEntity().sendHealthUpdate();
      }
  
      public void onUpdate(EntityPlayer player)
-@@ -42,7 +64,14 @@
+@@ -42,7 +66,20 @@
              }
              else if (enumdifficulty != EnumDifficulty.PEACEFUL)
              {
 -                this.foodLevel = Math.max(this.foodLevel - 1, 0);
-+                // this.foodLevel = Math.max(this.foodLevel - 1, 0);
-+                org.bukkit.event.entity.FoodLevelChangeEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callFoodLevelChangeEvent(player, Math.max(this.foodLevel - 1, 0));
++                // CraftBukkit start
++                if (player == null) // Fix NPE
++                {
++                    this.foodLevel = Math.max(this.foodLevel - 1, 0);
++                } else {
++                    org.bukkit.event.entity.FoodLevelChangeEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callFoodLevelChangeEvent(player, Math.max(this.foodLevel - 1, 0));
 +
-+                if (!event.isCancelled()) {
-+                    this.foodLevel = event.getFoodLevel();
++                    if (!event.isCancelled()) {
++                        this.foodLevel = event.getFoodLevel();
++                    }
++
++                    ((EntityPlayerMP) player).connection.sendPacket(new SPacketUpdateHealth(((EntityPlayerMP) player).getBukkitEntity().getScaledHealth(), this.foodLevel, this.foodSaturationLevel));
++                    // CraftBukkit end
 +                }
-+
-+                ((EntityPlayerMP) player).connection.sendPacket(new SPacketUpdateHealth(((EntityPlayerMP) player).getBukkitEntity().getScaledHealth(), this.foodLevel, this.foodSaturationLevel));
              }
          }
  
-@@ -55,7 +84,7 @@
+@@ -55,7 +92,7 @@
              if (this.foodTimer >= 10)
              {
                  float f = Math.min(this.foodSaturationLevel, 6.0F);
@@ -83,7 +91,7 @@
                  this.addExhaustion(f);
                  this.foodTimer = 0;
              }
-@@ -66,7 +95,7 @@
+@@ -66,7 +103,7 @@
  
              if (this.foodTimer >= 80)
              {
