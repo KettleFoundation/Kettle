@@ -236,7 +236,10 @@ githubRelease {
     releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
     body {
         """\
-## Dev builds may break
+## Setup Info
+
+Don't forget to download [Minecraft Server 1.12.2](https://launcher.mojang.com/mc/game/1.12.2/server/886945bfb2b978778c3a0288fd7fab09d315b25f/server.jar) 
+(Rename it to `minecraft_server.1.12.2.jar`)
 
 ${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.joining('\n', '## Changelog\n', '')))}
         """
