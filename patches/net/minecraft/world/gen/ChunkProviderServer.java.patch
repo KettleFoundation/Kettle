@@ -58,7 +58,7 @@
          }
  
          return chunk;
-@@ -266,11 +273,14 @@
+@@ -266,17 +273,21 @@
  
                      if (chunk != null && chunk.unloadQueued)
                      {
@@ -78,7 +78,15 @@
                          ++i;
                      }
                  }
-@@ -284,6 +294,37 @@
+             }
+ 
+-            if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
++            // Kettle - Stops foge automatically unloading world on startup.
++//            if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
+ 
+             this.chunkLoader.chunkTick();
+         }
+@@ -284,6 +295,37 @@
          return false;
      }
  
