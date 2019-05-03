@@ -236,6 +236,8 @@ githubRelease {
     releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
     body {
         """\
+## Dev builds may break
+
 ${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.joining('\n', '## Changelog\n', '')))}
         """
     }

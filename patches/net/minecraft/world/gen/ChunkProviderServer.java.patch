@@ -81,7 +81,7 @@
              }
  
 -            if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
-+            // Kettle - Stops foge automatically unloading world on startup.
++            // Kettle - Stops forge automatically unloading world on startup.
 +//            if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
  
              this.chunkLoader.chunkTick();
