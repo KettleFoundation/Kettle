@@ -8,12 +8,12 @@
  import net.minecraft.init.Items;
  import net.minecraft.item.Item;
  import net.minecraft.item.ItemStack;
-@@ -71,7 +72,16 @@
+@@ -71,7 +72,17 @@
          else
          {
              player.addStat(StatList.CAKE_SLICES_EATEN);
--            player.getFoodStats().addStats(2, 0.1F);
-+            // player.getFoodStats().addStats(2, 0.1F);
++            // Kettle Restore CraftBukkit changes for AppleCore recognition
+             player.getFoodStats().addStats(2, 0.1F);
 +            int oldFoodLevel = player.getFoodStats().foodLevel;
 +
 +            org.bukkit.event.entity.FoodLevelChangeEvent event = org.bukkit.craftbukkit.event.CraftEventFactory.callFoodLevelChangeEvent(player, 2 + oldFoodLevel);
