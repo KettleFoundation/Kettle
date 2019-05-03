@@ -478,27 +478,32 @@
  
      private boolean canSpawnNPCs()
      {
-@@ -845,9 +1077,57 @@
+@@ -845,9 +1077,62 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
 -        return new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
-+        // return new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
-+        // CraftBukkit start
-+        org.bukkit.craftbukkit.generator.InternalChunkGenerator gen;
++        // Kettle - if provider is vanilla, proceed to create a bukkit compatible chunk generator
++        if (this.provider.getClass().toString().length() <= 3 || this.provider.getClass().toString().contains("net.minecraft")) {
++            // CraftBukkit start
++            org.bukkit.craftbukkit.generator.InternalChunkGenerator gen;
 +
-+        if (this.generator != null) {
-+            gen = new org.bukkit.craftbukkit.generator.CustomChunkGenerator(this, this.getSeed(), this.generator);
-+        } else if (this.provider instanceof WorldProviderHell) {
-+            gen = new org.bukkit.craftbukkit.generator.NetherChunkGenerator(this, this.getSeed());
-+        } else if (this.provider instanceof WorldProviderEnd) {
-+            gen = new org.bukkit.craftbukkit.generator.SkyLandsChunkGenerator(this, this.getSeed());
-+        } else {
-+            gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
++            if (this.generator != null) {
++                gen = new org.bukkit.craftbukkit.generator.CustomChunkGenerator(this, this.getSeed(), this.generator);
++            } else if (this.provider instanceof WorldProviderHell) {
++                gen = new org.bukkit.craftbukkit.generator.NetherChunkGenerator(this, this.getSeed());
++            } else if (this.provider instanceof WorldProviderEnd) {
++                gen = new org.bukkit.craftbukkit.generator.SkyLandsChunkGenerator(this, this.getSeed());
++            } else {
++                gen = new org.bukkit.craftbukkit.generator.NormalChunkGenerator(this, this.getSeed());
++            }
++
++            this.chunkProvider = new ChunkProviderServer(this, ichunkloader, gen);
++            // CraftBukkit end
++        } else { // custom provider, load normally for forge compatibility
++            this.chunkProvider = new ChunkProviderServer(this, ichunkloader, this.provider.createChunkGenerator());
 +        }
-+
-+        return new ChunkProviderServer(this, ichunkloader, gen);
-+        // CraftBukkit end
++        return chunkProvider;
      }
  
 +    public List<TileEntity> getTileEntities(int i, int j, int k, int l, int i1, int j1) {
@@ -537,7 +542,7 @@
      public boolean isBlockModifiable(EntityPlayer player, BlockPos pos)
      {
          return super.isBlockModifiable(player, pos);
-@@ -929,6 +1209,23 @@
+@@ -929,6 +1214,23 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 8;
  
@@ -561,7 +566,7 @@
              if (blockpos != null)
              {
                  i = blockpos.getX();
-@@ -941,7 +1238,7 @@
+@@ -941,7 +1243,7 @@
  
              int l = 0;
  
@@ -570,7 +575,7 @@
              {
                  i += random.nextInt(64) - random.nextInt(64);
                  k += random.nextInt(64) - random.nextInt(64);
-@@ -992,6 +1289,7 @@
+@@ -992,6 +1294,7 @@
  
          if (chunkproviderserver.canSave())
          {
@@ -578,7 +583,7 @@
              if (progressCallback != null)
              {
                  progressCallback.displaySavingString("Saving level");
-@@ -1039,6 +1337,12 @@
+@@ -1039,6 +1342,12 @@
              }
          }
  
@@ -591,7 +596,7 @@
          this.worldInfo.setBorderSize(this.getWorldBorder().getDiameter());
          this.worldInfo.getBorderCenterX(this.getWorldBorder().getCenterX());
          this.worldInfo.getBorderCenterZ(this.getWorldBorder().getCenterZ());
-@@ -1058,6 +1362,12 @@
+@@ -1058,6 +1367,12 @@
          return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn) : false;
      }
  
@@ -604,7 +609,7 @@
      public void loadEntities(Collection<Entity> entityCollection)
      {
          for (Entity entity : Lists.newArrayList(entityCollection))
-@@ -1074,7 +1384,7 @@
+@@ -1074,7 +1389,7 @@
      {
          if (entityIn.isDead)
          {
@@ -613,7 +618,7 @@
              return false;
          }
          else
-@@ -1093,7 +1403,7 @@
+@@ -1093,7 +1408,7 @@
                  {
                      if (!(entityIn instanceof EntityPlayer))
                      {
@@ -622,7 +627,7 @@
                          return false;
                      }
  
-@@ -1141,9 +1451,15 @@
+@@ -1141,9 +1456,15 @@
  
      public boolean addWeatherEffect(Entity entityIn)
      {
@@ -639,7 +644,7 @@
              return true;
          }
          else
-@@ -1164,11 +1480,18 @@
+@@ -1164,11 +1485,18 @@
  
      public Explosion newExplosion(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking)
      {
@@ -660,7 +665,7 @@
          if (!isSmoking)
          {
              explosion.clearAffectedBlockPositions();
-@@ -1211,7 +1534,8 @@
+@@ -1211,7 +1539,8 @@
              {
                  if (this.fireBlockEvent(blockeventdata))
                  {
@@ -670,7 +675,7 @@
                  }
              }
  
-@@ -1298,11 +1622,18 @@
+@@ -1298,11 +1627,18 @@
  
      public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
      {
@@ -689,7 +694,7 @@
              this.sendPacketWithinDistance(entityplayermp, longDistance, xCoord, yCoord, zCoord, spacketparticles);
          }
      }
-@@ -1356,7 +1687,7 @@
+@@ -1356,7 +1692,7 @@
          return this.functionManager;
      }
  

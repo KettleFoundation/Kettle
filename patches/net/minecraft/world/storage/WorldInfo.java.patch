@@ -87,7 +87,7 @@
      {
          // one time set for this
          if (this.additionalProperties == null)
-@@ -869,4 +897,12 @@
+@@ -869,4 +897,21 @@
      {
          return this.versionName;
      }
@@ -99,4 +99,13 @@
 +        }
 +    }
 +    // CraftBukkit end
++
++
++    public int getDimension() {
++        return dimension;
++    }
++
++    public void setDimension(int dimension) {
++        this.dimension = dimension;
++    }
  }
