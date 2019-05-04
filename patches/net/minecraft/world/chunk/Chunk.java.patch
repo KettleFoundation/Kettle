@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/Chunk.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/Chunk.java
-@@ -8,15 +8,17 @@
+@@ -8,15 +8,19 @@
  import java.util.Map;
  import java.util.Random;
  import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,11 +15,13 @@
  import net.minecraft.crash.CrashReportCategory;
  import net.minecraft.crash.ICrashReportDetail;
  import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityLiving;
++import net.minecraft.entity.EnumCreatureType;
 +import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Biomes;
  import net.minecraft.init.Blocks;
  import net.minecraft.network.PacketBuffer;
-@@ -40,6 +42,7 @@
+@@ -40,6 +44,7 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -27,14 +29,33 @@
  
  public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider
  {
-@@ -69,6 +72,35 @@
+@@ -50,13 +55,13 @@
+     private final int[] precipitationHeightMap;
+     private final boolean[] updateSkylightColumns;
+     private boolean loaded;
+-    private final World world;
+-    private final int[] heightMap;
++    public final World world;
++    public final int[] heightMap;
+     public final int x;
+     public final int z;
+     private boolean isGapLightingUpdated;
+-    private final Map<BlockPos, TileEntity> tileEntities;
+-    private final ClassInheritanceMultiMap<Entity>[] entityLists;
++    public final Map<BlockPos, TileEntity> tileEntities;
++    public final ClassInheritanceMultiMap<Entity>[] entityLists;  // Spigot
+     private boolean isTerrainPopulated;
+     private boolean isLightPopulated;
+     private boolean ticked;
+@@ -68,7 +73,36 @@
+     private int queuedLightChecks;
      private final ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
      public boolean unloadQueued;
- 
++    public gnu.trove.map.hash.TObjectIntHashMap<Class> entityCount = new gnu.trove.map.hash.TObjectIntHashMap<Class>(); // Spigot
 +    // CraftBukkit start - Neighbor loaded cache for chunk lighting and entity ticking
 +    private int neighbors = 0x1 << 12;
 +    public long chunkKey;
-+
+ 
 +    public boolean areNeighborsLoaded(final int radius) {
 +        switch (radius) {
 +            case 2:
@@ -63,7 +84,7 @@
      public Chunk(World worldIn, int x, int z)
      {
          this.storageArrays = new ExtendedBlockStorage[16];
-@@ -92,8 +124,13 @@
+@@ -92,8 +126,13 @@
          Arrays.fill(this.precipitationHeightMap, -999);
          Arrays.fill(this.blockBiomeArray, (byte) - 1);
          capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);
@@ -77,7 +98,7 @@
      public Chunk(World worldIn, ChunkPrimer primer, int x, int z)
      {
          this(worldIn, x, z);
-@@ -565,12 +602,12 @@
+@@ -565,12 +604,12 @@
                  {
                      if (block1 != block) //Only fire block breaks when the block changes.
                      block1.breakBlock(this.world, pos, iblockstate);
@@ -92,7 +113,7 @@
                      if (te != null && te.shouldRefresh(this.world, pos, iblockstate, state))
                      this.world.removeTileEntity(pos);
                  }
-@@ -608,6 +645,7 @@
+@@ -608,6 +647,7 @@
                      }
                  }
  
@@ -100,7 +121,7 @@
                  // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
                  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
                  {
-@@ -616,7 +654,7 @@
+@@ -616,7 +656,7 @@
  
                  if (block.hasTileEntity(state))
                  {
@@ -109,7 +130,51 @@
  
                      if (tileentity1 == null)
                      {
-@@ -783,9 +821,15 @@
+@@ -743,6 +783,20 @@
+         entityIn.chunkCoordZ = this.z;
+         this.entityLists[k].add(entityIn);
+         this.markDirty(); // Forge - ensure chunks are marked to save after an entity add
++        // Spigot start - increment creature type count
++        // Keep this synced up with World.a(Class)
++        if (entityIn instanceof EntityLiving) {
++            EntityLiving entityinsentient = (EntityLiving) entityIn;
++            if (entityinsentient.canDespawn() && entityinsentient.isNoDespawnRequired()) {
++                return;
++            }
++        }
++        for (EnumCreatureType creatureType : EnumCreatureType.values()) {
++            if (creatureType.getCreatureClass().isAssignableFrom(entityIn.getClass())) {
++                this.entityCount.adjustOrPutValue(creatureType.getCreatureClass(), 1, 1);
++            }
++        }
++        // Spigot end
+     }
+ 
+     public void removeEntity(Entity entityIn)
+@@ -764,6 +818,22 @@
+ 
+         this.entityLists[index].remove(entityIn);
+         this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
++        // Spigot start - decrement creature type count
++        // Keep this synced up with World.a(Class)
++        if (entityIn instanceof EntityLiving) {
++            EntityLiving entityinsentient = (EntityLiving) entityIn;
++            if (entityinsentient.canDespawn() && entityinsentient.isNoDespawnRequired()) {
++                return;
++            }
++        }
++        for ( EnumCreatureType creatureType : EnumCreatureType.values() )
++        {
++            if ( creatureType.getCreatureClass().isAssignableFrom( entityIn.getClass() ) )
++            {
++                this.entityCount.adjustValue( creatureType.getCreatureClass(), -1 );
++            }
++        }
++        // Spigot end
+     }
+ 
+     public boolean canSeeSky(BlockPos pos)
+@@ -783,9 +853,15 @@
      }
  
      @Nullable
@@ -127,7 +192,7 @@
  
          if (tileentity != null && tileentity.isInvalid())
          {
-@@ -795,12 +839,12 @@
+@@ -795,12 +871,12 @@
  
          if (tileentity == null)
          {
@@ -142,7 +207,7 @@
              {
                  this.tileEntityPosQueue.add(pos.toImmutable());
              }
-@@ -834,6 +878,11 @@
+@@ -834,6 +910,11 @@
  
              tileEntityIn.validate();
              this.tileEntities.put(pos, tileEntityIn);
@@ -154,7 +219,7 @@
          }
      }
  
-@@ -864,7 +913,7 @@
+@@ -864,7 +945,7 @@
  
      public void onUnload()
      {
@@ -163,7 +228,7 @@
          this.loaded = false;
  
          for (TileEntity tileentity : this.tileEntities.values())
-@@ -874,7 +923,14 @@
+@@ -874,7 +955,14 @@
  
          for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
          {
@@ -179,7 +244,7 @@
          }
          net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
      }
-@@ -1001,6 +1057,65 @@
+@@ -1001,6 +1089,65 @@
          }
      }
  
@@ -245,7 +310,7 @@
      protected void populate(IChunkGenerator generator)
      {
          if (populating != null && net.minecraftforge.common.ForgeModContainer.logCascadingWorldGeneration) logCascadingWorldGeneration();
-@@ -1017,6 +1132,26 @@
+@@ -1017,6 +1164,26 @@
          {
              this.checkLight();
              generator.populate(this.x, this.z);
@@ -272,7 +337,7 @@
              net.minecraftforge.fml.common.registry.GameRegistry.generateWorld(this.x, this.z, this.world, generator, this.world.getChunkProvider());
              this.markDirty();
          }
-@@ -1075,7 +1210,7 @@
+@@ -1075,7 +1242,7 @@
          {
              BlockPos blockpos = this.tileEntityPosQueue.poll();
  
@@ -281,3 +346,12 @@
              {
                  TileEntity tileentity = this.createNewTileEntity(blockpos);
                  this.world.setTileEntity(blockpos, tileentity);
+@@ -1086,7 +1253,7 @@
+ 
+     public boolean isPopulated()
+     {
+-        return this.ticked && this.isTerrainPopulated && this.isLightPopulated;
++        return this.ticked && this.isTerrainPopulated;
+     }
+ 
+     public boolean wasTicked()

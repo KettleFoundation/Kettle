@@ -138,7 +138,7 @@
          this.worldScoreboard = new ServerScoreboard(this.mcServer);
          ScoreboardSaveData scoreboardsavedata = (ScoreboardSaveData)this.mapStorage.getOrLoadData(ScoreboardSaveData.class, "scoreboard");
  
-@@ -152,9 +200,21 @@
+@@ -152,8 +200,19 @@
  
          scoreboardsavedata.setScoreboard(this.worldScoreboard);
          ((ServerScoreboard)this.worldScoreboard).addDirtyRunnable(new WorldSavedDataCallableSave(scoreboardsavedata));
@@ -147,7 +147,6 @@
 +        }
          this.lootTable = new LootTableManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "loot_tables"));
 -        this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
--        this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
 +        // this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
 +        // this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
 +        if (this.dimension != 0) { // SPIGOT-3899 multiple worlds of advancements not supported
@@ -156,13 +155,11 @@
 +        if (this.advancementManager == null) {
 +            this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
 +        }
-+        if (this.functionManager == null) {
-+            this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
-+        }
++        // CraftBukkit end
+         this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
          this.getWorldBorder().setCenter(this.worldInfo.getBorderCenterX(), this.worldInfo.getBorderCenterZ());
          this.getWorldBorder().setDamageAmount(this.worldInfo.getBorderDamagePerBlock());
-         this.getWorldBorder().setDamageBuffer(this.worldInfo.getBorderSafeZone());
-@@ -171,9 +231,141 @@
+@@ -171,9 +230,141 @@
          }
  
          this.initCapabilities();
@@ -304,7 +301,7 @@
      public void tick()
      {
          super.tick();
-@@ -198,11 +390,17 @@
+@@ -198,11 +389,17 @@
  
          this.profiler.startSection("mobSpawner");
  
@@ -324,7 +321,7 @@
          this.profiler.endStartSection("chunkSource");
          this.chunkProvider.tick();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -219,23 +417,39 @@
+@@ -219,23 +416,39 @@
              this.setWorldTime(this.getWorldTime() + 1L);
          }
  
@@ -364,7 +361,7 @@
      }
  
      @Nullable
-@@ -268,7 +482,7 @@
+@@ -268,7 +481,7 @@
                  {
                      ++i;
                  }
@@ -373,7 +370,7 @@
                  {
                      ++j;
                  }
-@@ -298,19 +512,26 @@
+@@ -298,19 +511,26 @@
          this.provider.resetRainAndThunder();
      }
  
@@ -402,7 +399,7 @@
          }
          else
          {
-@@ -346,7 +567,7 @@
+@@ -346,7 +566,7 @@
          this.worldInfo.setSpawnZ(j);
      }
  
@@ -411,6 +408,14 @@
      {
          return this.getChunkProvider().chunkExists(x, z);
      }
+@@ -398,6 +618,7 @@
+                 chunk.enqueueRelightChecks();
+                 this.profiler.endStartSection("tickChunk");
+                 chunk.onTick(false);
++                if (!chunk.areNeighborsLoaded(1)) continue; // Spigot
+                 this.profiler.endStartSection("thunder");
+ 
+                 if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
 @@ -416,7 +637,7 @@
                              entityskeletonhorse.setTrap(true);
                              entityskeletonhorse.setGrowingAge(0);
@@ -437,15 +442,6 @@
                      }
  
                      if (flag && this.getBiome(blockpos2).canRain())
-@@ -597,7 +820,7 @@
- 
-     public void updateEntities()
-     {
--        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty())
-+        if (false && this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) // CraftBukkit - this prevents entity cleanup, other issues on servers with no players
-         {
-             if (this.updateEntityTick++ >= 300)
-             {
 @@ -694,7 +917,14 @@
              {
                  if (i > 65536)
