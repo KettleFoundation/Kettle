@@ -338,24 +338,28 @@
                      if (ItemDye.applyBonemeal(stack, world, blockpos))
                      {
                          if (!world.isRemote)
-@@ -364,6 +548,24 @@
+@@ -364,6 +548,28 @@
                          this.successful = false;
                      }
  
 +                    world.captureTreeGeneration = false;
-+                    if (world.capturedBlockStates.size() > 0) {
++                    if (world.capturedBlockSnapshots.size() > 0) {
 +                        TreeType treeType = BlockSapling.treeType;
 +                        BlockSapling.treeType = null;
 +                        Location location = new Location(world.getWorld(), blockpos.getX(), blockpos.getY(), blockpos.getZ());
-+                        List<BlockState> blocks = (List<BlockState>) world.capturedBlockStates.clone();
-+                        world.capturedBlockStates.clear();
++                        List<net.minecraftforge.common.util.BlockSnapshot> blocks = (List) world.capturedBlockSnapshots.clone();
++                        List<BlockState> blockstates = new java.util.ArrayList();
++                        for (net.minecraftforge.common.util.BlockSnapshot snapshot : blocks) {
++                            blockstates.add(new org.bukkit.craftbukkit.block.CraftBlockState(snapshot));
++                        }
++                        world.capturedBlockSnapshots.clear();
 +                        StructureGrowEvent structureEvent = null;
 +                        if (treeType != null) {
-+                            structureEvent = new StructureGrowEvent(location, treeType, false, null, blocks);
++                            structureEvent = new StructureGrowEvent(location, treeType, false, null, blockstates);
 +                            org.bukkit.Bukkit.getPluginManager().callEvent(structureEvent);
 +                        }
 +                        if (structureEvent == null || !structureEvent.isCancelled()) {
-+                            for (BlockState blockstate : blocks) {
++                            for (org.bukkit.block.BlockState blockstate : blockstates) {
 +                                blockstate.update(true);
 +                            }
 +                        }
@@ -363,7 +367,7 @@
                      return stack;
                  }
                  else
-@@ -378,14 +580,38 @@
+@@ -378,14 +584,38 @@
              {
                  World world = source.getWorld();
                  BlockPos blockpos = source.getBlockPos().offset((EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING));
@@ -405,7 +409,7 @@
          {
              protected ItemStack dispenseStack(IBlockSource source, ItemStack stack)
              {
-@@ -393,6 +619,27 @@
+@@ -393,6 +623,27 @@
                  EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
                  BlockPos blockpos = source.getBlockPos().offset(enumfacing);
                  BlockSkull blockskull = Blocks.SKULL;
@@ -433,7 +437,7 @@
                  this.successful = true;
  
                  if (world.isAirBlock(blockpos) && blockskull.canDispenserPlace(world, blockpos, stack))
-@@ -449,13 +696,34 @@
+@@ -449,13 +700,34 @@
                  return stack;
              }
          });
@@ -469,7 +473,7 @@
                  this.successful = true;
  
                  if (world.isAirBlock(blockpos) && blockpumpkin.canDispenserPlace(world, blockpos))
-@@ -483,7 +751,7 @@
+@@ -483,7 +755,7 @@
  
          for (EnumDyeColor enumdyecolor : EnumDyeColor.values())
          {
@@ -478,7 +482,7 @@
          }
      }
  
-@@ -588,11 +856,37 @@
+@@ -588,11 +860,37 @@
                      d3 = 0.0D;
                  }
  
@@ -519,7 +523,7 @@
                  return stack;
              }
  
-@@ -612,7 +906,7 @@
+@@ -612,7 +910,7 @@
              }
          }
  
@@ -528,7 +532,7 @@
          {
              private BehaviorDispenseShulkerBox()
              {
-@@ -624,6 +918,27 @@
+@@ -624,6 +922,27 @@
                  World world = source.getWorld();
                  EnumFacing enumfacing = (EnumFacing)source.getBlockState().getValue(BlockDispenser.FACING);
                  BlockPos blockpos = source.getBlockPos().offset(enumfacing);

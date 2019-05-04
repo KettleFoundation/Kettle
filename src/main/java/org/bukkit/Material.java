@@ -542,7 +542,8 @@ public enum Material {
 
     private final int id;
     private final Constructor<? extends MaterialData> ctor;
-    private static Material[] byId = new Material[32000];
+    private static Material[] byId = new Material[38000];
+    private static Material[] byBlockId = new Material[4096];
     private final static Map<String, Material> BY_NAME = Maps.newHashMap();
     private final int maxStack;
     private final short durability;
@@ -587,7 +588,7 @@ public enum Material {
      * @return ID of this material
      * @deprecated Magic value
      */
-    @Deprecated
+
     public int getId() {
         return id;
     }
@@ -627,7 +628,7 @@ public enum Material {
      * @return New MaterialData with the given data
      * @deprecated Magic value
      */
-    @Deprecated
+
     public MaterialData getNewData(final byte raw) {
         try {
             return ctor.newInstance(id, raw);
@@ -651,7 +652,10 @@ public enum Material {
      * @return true if this material is a block
      */
     public boolean isBlock() {
-        return id < 256;
+        for (Material material : byBlockId) {
+            if (this == material) return true;
+        }
+        return false;
     }
 
     /**
@@ -704,7 +708,7 @@ public enum Material {
      * @return Material if found, or null
      * @deprecated Magic value
      */
-    @Deprecated
+
     public static Material getMaterial(final int id) {
         if (byId.length > id && id >= 0) {
             return byId[id];
@@ -755,6 +759,34 @@ public enum Material {
         }
 
         return result;
+    }
+
+    @Nullable
+    public static Material addMaterial(Material material) {
+        if (byId[material.id] == null) {
+            byId[material.id] = material;
+            BY_NAME.put(material.name().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", ""), material);
+            BY_NAME.put("X" + String.valueOf(material.id), material);
+            return material;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Material addBlockMaterial(Material Blockmaterial) {
+        if (byBlockId[Blockmaterial.id] == null) {
+            byBlockId[Blockmaterial.id] = Blockmaterial;
+            return Blockmaterial;
+        }
+        return null;
+    }
+
+    public static Material getBlockMaterial(final int id) {
+        if (byBlockId.length > id && id >= 0) {
+            return byBlockId[id];
+        } else {
+            return null;
+        }
     }
 
     static {
@@ -1454,16 +1486,5 @@ public enum Material {
             default:
                 return true;
         }
-    }
-
-    @Nullable
-    public static Material addMaterial(Material material) {
-        if (byId[material.id] == null) {
-            byId[material.id] = material;
-            BY_NAME.put(material.name().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", ""), material);
-            BY_NAME.put("X" + String.valueOf(material.id), material);
-            return material;
-        }
-        return null;
     }
 }

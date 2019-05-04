@@ -160,15 +160,6 @@
                  long j = System.nanoTime();
  
                  if (this.getFolderName() == null)
-@@ -275,7 +334,7 @@
- 
-                 if (this.settings.hasProperty("announce-player-achievements"))
-                 {
--                    this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
-+                    this.worldServerList.get(0).getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
-                     this.settings.removeProperty("announce-player-achievements");
-                     this.settings.saveProperties();
-                 }
 @@ -287,13 +346,21 @@
                      this.rconQueryThread.startThread();
                  }

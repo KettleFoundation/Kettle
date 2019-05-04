@@ -55,7 +55,7 @@
      protected CooldownTracker createCooldownTracker()
      {
          return new CooldownTracker();
-@@ -159,6 +175,7 @@
+@@ -159,9 +175,13 @@
          this.gameProfile = gameProfileIn;
          this.inventoryContainer = new ContainerPlayer(this.inventory, !worldIn.isRemote, this);
          this.openContainer = this.inventoryContainer;
@@ -63,7 +63,13 @@
          BlockPos blockpos = worldIn.getSpawnPoint();
          this.setLocationAndAngles((double)blockpos.getX() + 0.5D, (double)(blockpos.getY() + 1), (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
          this.unused180 = 180.0F;
-@@ -408,7 +425,7 @@
++
++        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityEvent.EntityConstructing(this));
++        super.capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);
+     }
+ 
+     protected void applyEntityAttributes()
+@@ -408,7 +428,7 @@
          return SoundCategory.PLAYERS;
      }
  
@@ -72,7 +78,7 @@
      {
          return 20;
      }
-@@ -499,7 +516,8 @@
+@@ -499,7 +519,8 @@
          {
              if (this.getHealth() < this.getMaxHealth() && this.ticksExisted % 20 == 0)
              {
@@ -82,7 +88,7 @@
              }
  
              if (this.foodStats.needFood() && this.ticksExisted % 10 == 0)
-@@ -527,7 +545,7 @@
+@@ -527,7 +548,7 @@
  
          this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
          float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -91,7 +97,7 @@
  
          if (f > 0.1F)
          {
-@@ -691,6 +709,7 @@
+@@ -691,6 +712,7 @@
      @Nullable
      public EntityItem dropItem(boolean dropAll)
      {
@@ -99,7 +105,7 @@
          ItemStack stack = inventory.getCurrentItem();
  
          if (stack.isEmpty())
-@@ -750,6 +769,30 @@
+@@ -750,6 +772,30 @@
                  entityitem.motionZ += Math.sin((double)f3) * (double)f2;
              }
  
@@ -130,7 +136,7 @@
              ItemStack itemstack = this.dropItemAndGetStack(entityitem);
  
              if (traceItem)
-@@ -893,6 +936,13 @@
+@@ -893,6 +939,13 @@
              this.wakeUpPlayer(true, true, false);
          }
  
@@ -144,7 +150,7 @@
          if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99))
          {
              this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
-@@ -987,6 +1037,7 @@
+@@ -987,6 +1040,7 @@
          {
              compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
          }
@@ -152,7 +158,7 @@
      }
  
      public boolean attackEntityFrom(DamageSource source, float amount)
-@@ -1015,13 +1066,13 @@
+@@ -1015,13 +1069,13 @@
                      this.wakeUpPlayer(true, true, false);
                  }
  
@@ -168,7 +174,7 @@
                      }
  
                      if (this.world.getDifficulty() == EnumDifficulty.EASY)
-@@ -1035,7 +1086,14 @@
+@@ -1035,7 +1089,14 @@
                      }
                  }
  
@@ -184,7 +190,7 @@
              }
          }
      }
-@@ -1052,17 +1110,30 @@
+@@ -1052,17 +1113,29 @@
  
      public boolean canAttackPlayer(EntityPlayer other)
      {
@@ -207,7 +213,7 @@
 +            }
 +        } else {
 +            // This should never be called, but is implemented anyway
-+            org.bukkit.OfflinePlayer thisPlayer = other.world.getServer().getOfflinePlayer(other.getName());
++            org.bukkit.OfflinePlayer thisPlayer = other.world.getServer().getOfflinePlayer(other.getUniqueID());
 +            team = other.world.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(thisPlayer);
 +            if (team == null || team.allowFriendlyFire()) {
 +                return true;
@@ -217,14 +223,13 @@
 -        {
 -            return !team.isSameTeam(team1) ? true : team.getAllowFriendlyFire();
 +        if (this instanceof EntityPlayerMP) {
-+            return !team.hasPlayer(((EntityPlayerMP) this).getBukkitEntity());
++            return !team.hasEntry(((EntityPlayerMP) this).getBukkitEntity().getName());
          }
-+        return !team.hasPlayer(this.world.getServer().getOfflinePlayer(this.getName()));
-+        // CraftBukkit end
++        return !team.hasEntry(this.world.getServer().getOfflinePlayer(this.getUniqueID()).getName());
      }
  
      protected void damageArmor(float damage)
-@@ -1140,6 +1211,7 @@
+@@ -1140,6 +1213,7 @@
                  }
              }
          }
@@ -232,7 +237,7 @@
      }
  
      public void openEditSign(TileEntitySign signTile)
-@@ -1317,8 +1389,17 @@
+@@ -1317,8 +1391,17 @@
  
                          if (j > 0 && !targetEntity.isBurning())
                          {
@@ -252,7 +257,7 @@
                          }
                      }
  
-@@ -1353,8 +1434,10 @@
+@@ -1353,8 +1436,10 @@
                              {
                                  if (entitylivingbase != this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D)
                                  {
@@ -265,7 +270,7 @@
                                  }
                              }
  
-@@ -1364,11 +1447,28 @@
+@@ -1364,11 +1449,28 @@
  
                          if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged)
                          {
@@ -299,7 +304,7 @@
                          }
  
                          if (flag2)
-@@ -1434,7 +1534,15 @@
+@@ -1434,7 +1536,15 @@
  
                              if (j > 0)
                              {
@@ -316,7 +321,7 @@
                              }
  
                              if (this.world instanceof WorldServer && f5 > 2.0F)
-@@ -1454,6 +1562,11 @@
+@@ -1454,6 +1564,11 @@
                          {
                              targetEntity.extinguish();
                          }
@@ -328,7 +333,7 @@
                      }
                  }
              }
-@@ -1527,9 +1640,9 @@
+@@ -1527,9 +1642,9 @@
          return this.gameProfile;
      }
  
@@ -340,7 +345,7 @@
          if (ret != null) return ret;
          final IBlockState state = this.world.isBlockLoaded(bedLocation) ? this.world.getBlockState(bedLocation) : null;
          final boolean isBed = state != null && state.getBlock().isBed(state, this.world, bedLocation, this);
-@@ -1539,31 +1652,31 @@
+@@ -1539,31 +1654,31 @@
          {
              if (this.isPlayerSleeping() || !this.isEntityAlive())
              {
@@ -379,7 +384,7 @@
              }
          }
  
-@@ -1572,6 +1685,20 @@
+@@ -1572,6 +1687,20 @@
              this.dismountRidingEntity();
          }
  
@@ -400,7 +405,7 @@
          this.spawnShoulderEntities();
          this.setSize(0.2F, 0.2F);
  
-@@ -1598,7 +1725,7 @@
+@@ -1598,7 +1727,7 @@
              this.world.updateAllPlayersSleepingFlag();
          }
  
@@ -409,7 +414,7 @@
      }
  
      private boolean bedInRange(BlockPos p_190774_1_, EnumFacing p_190774_2_)
-@@ -1651,6 +1778,23 @@
+@@ -1651,6 +1780,23 @@
              this.world.updateAllPlayersSleepingFlag();
          }
  
@@ -433,7 +438,7 @@
          this.sleepTimer = immediately ? 0 : 100;
  
          if (setSpawn)
-@@ -1757,11 +1901,13 @@
+@@ -1757,11 +1903,13 @@
          {
              this.spawnPos = pos;
              this.spawnForced = forced;
@@ -447,7 +452,7 @@
          }
      }
  
-@@ -1820,7 +1966,12 @@
+@@ -1820,7 +1968,12 @@
              this.motionY = d3 * 0.6D;
              this.jumpMovementFactor = f;
              this.fallDistance = 0.0F;
@@ -461,7 +466,7 @@
          }
          else
          {
-@@ -2225,10 +2376,16 @@
+@@ -2225,10 +2378,16 @@
  
      protected void spawnShoulderEntities()
      {
@@ -482,7 +487,7 @@
      }
  
      private void spawnShoulderEntity(@Nullable NBTTagCompound p_192026_1_)
-@@ -2247,6 +2404,23 @@
+@@ -2247,6 +2406,23 @@
          }
      }
  
@@ -506,7 +511,7 @@
      @SideOnly(Side.CLIENT)
      public boolean isInvisibleToPlayer(EntityPlayer player)
      {
-@@ -2481,7 +2655,7 @@
+@@ -2481,7 +2657,7 @@
          return (NBTTagCompound)this.dataManager.get(LEFT_SHOULDER_ENTITY);
      }
  
@@ -515,7 +520,7 @@
      {
          this.dataManager.set(LEFT_SHOULDER_ENTITY, tag);
      }
-@@ -2491,7 +2665,7 @@
+@@ -2491,7 +2667,7 @@
          return (NBTTagCompound)this.dataManager.get(RIGHT_SHOULDER_ENTITY);
      }
  
@@ -524,7 +529,7 @@
      {
          this.dataManager.set(RIGHT_SHOULDER_ENTITY, tag);
      }
-@@ -2671,7 +2845,7 @@
+@@ -2671,7 +2847,7 @@
      @SuppressWarnings("unchecked")
      @Override
      @Nullable
@@ -533,7 +538,7 @@
      {
          if (capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
          {
-@@ -2683,7 +2857,7 @@
+@@ -2683,7 +2859,7 @@
      }
  
      @Override
@@ -542,7 +547,7 @@
      {
          return capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
      }
-@@ -2702,7 +2876,7 @@
+@@ -2702,7 +2878,7 @@
          SYSTEM(1, "options.chat.visibility.system"),
          HIDDEN(2, "options.chat.visibility.hidden");
  
@@ -551,7 +556,7 @@
          private final int chatVisibility;
          private final String resourceKey;
  
-@@ -2732,7 +2906,7 @@
+@@ -2732,7 +2908,7 @@
  
          static
          {
@@ -560,7 +565,7 @@
              {
                  ID_LOOKUP[entityplayer$enumchatvisibility.chatVisibility] = entityplayer$enumchatvisibility;
              }
-@@ -2763,4 +2937,11 @@
+@@ -2763,4 +2939,11 @@
          OTHER_PROBLEM,
          NOT_SAFE;
      }
