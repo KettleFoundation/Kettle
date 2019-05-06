@@ -192,7 +192,7 @@ public class CraftWorld implements World {
     private WorldBorder worldBorder;
     private Environment environment;
     private final CraftServer server = (CraftServer) Bukkit.getServer();
-    private final ChunkGenerator generator;
+    public ChunkGenerator generator;
     private final List<BlockPopulator> populators = new ArrayList<BlockPopulator>();
     private final BlockMetadataStore blockMetadata = new BlockMetadataStore(this);
     private int monsterSpawn = -1;

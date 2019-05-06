@@ -70,24 +70,26 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final List<ItemStack> EMPTY_EQUIPMENT = Collections.<ItemStack>emptyList();
      private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
-@@ -137,7 +173,7 @@
+@@ -94,7 +130,7 @@
+     private static int nextEntityID;
+     private int entityId;
+     public boolean preventEntitySpawning;
+-    private final List<Entity> riddenByEntities;
++    public final List<Entity> riddenByEntities;  // Spigot
+     protected int rideCooldown;
+     private Entity ridingEntity;
+     public boolean forceSpawn;
+@@ -137,8 +173,8 @@
      public float entityCollisionReduction;
      protected Random rand;
      public int ticksExisted;
 -    private int fire;
+-    protected boolean inWater;
 +    public int fire;
-     protected boolean inWater;
++    public boolean inWater;
      public int hurtResistantTime;
      protected boolean firstUpdate;
-@@ -162,7 +198,7 @@
-     public boolean ignoreFrustumCheck;
-     public boolean isAirBorne;
-     public int timeUntilPortal;
--    protected boolean inPortal;
-+    public boolean inPortal;
-     protected int portalCounter;
-     public int dimension;
-     protected BlockPos lastPortalPos;
+     protected boolean isImmuneToFire;
 @@ -172,7 +208,7 @@
      protected UUID entityUniqueID;
      protected String cachedUniqueIdString;
@@ -115,9 +117,33 @@
      public Entity(World worldIn)
      {
          this.entityId = nextEntityID++;
-@@ -347,6 +394,33 @@
+@@ -215,15 +262,17 @@
+         this.dataManager.register(SILENT, Boolean.valueOf(false));
+         this.dataManager.register(NO_GRAVITY, Boolean.valueOf(false));
+         this.entityInit();
+-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityEvent.EntityConstructing(this));
+-        capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);
++        if(!(this instanceof EntityPlayer)) { // Kettle - move to EntityPlayer
++            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityEvent.EntityConstructing(this));
++            capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);
++        }
+     }
  
-     protected void setRotation(float yaw, float pitch)
+     /** Forge: Used to store custom data for each entity. */
+     private NBTTagCompound customEntityData;
+     public boolean captureDrops = false;
+     public java.util.ArrayList<EntityItem> capturedDrops = new java.util.ArrayList<EntityItem>();
+-    private net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities;
++    public net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities; // Kettle - private -> public
+ 
+     public int getEntityId()
+     {
+@@ -345,8 +394,35 @@
+         }
+     }
+ 
+-    protected void setRotation(float yaw, float pitch)
++    public void setRotation(float yaw, float pitch)
      {
 +        // CraftBukkit start - yaw was sometimes set to NaN, so we need to set it back to 0
 +        if (Float.isNaN(yaw)) {
@@ -149,7 +175,7 @@
          this.rotationYaw = yaw % 360.0F;
          this.rotationPitch = pitch % 360.0F;
      }
-@@ -389,6 +463,49 @@
+@@ -389,6 +465,49 @@
          this.onEntityUpdate();
      }
  
@@ -199,7 +225,7 @@
      public void onEntityUpdate()
      {
          this.world.profiler.startSection("entityBaseTick");
-@@ -409,7 +526,8 @@
+@@ -409,7 +528,8 @@
          this.prevPosZ = this.posZ;
          this.prevRotationPitch = this.rotationPitch;
          this.prevRotationYaw = this.rotationYaw;
@@ -209,7 +235,7 @@
          if (!this.world.isRemote && this.world instanceof WorldServer)
          {
              this.world.profiler.startSection("portal");
-@@ -462,7 +580,7 @@
+@@ -462,7 +582,7 @@
              this.decrementTimeUntilPortal();
              this.world.profiler.endSection();
          }
@@ -218,7 +244,7 @@
          this.spawnRunningParticles();
          this.handleWaterMovement();
  
-@@ -530,6 +648,26 @@
+@@ -530,6 +650,26 @@
          if (!this.isImmuneToFire)
          {
              this.attackEntityFrom(DamageSource.LAVA, 4.0F);
@@ -245,7 +271,7 @@
              this.setFire(15);
          }
      }
-@@ -572,6 +710,7 @@
+@@ -572,6 +712,7 @@
  
      public void move(MoverType type, double x, double y, double z)
      {
@@ -253,7 +279,7 @@
          if (this.noClip)
          {
              this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, y, z));
-@@ -579,6 +718,22 @@
+@@ -579,6 +720,22 @@
          }
          else
          {
@@ -276,7 +302,7 @@
              if (type == MoverType.PISTON)
              {
                  long i = this.world.getTotalWorldTime();
-@@ -912,6 +1067,26 @@
+@@ -912,6 +1069,26 @@
                  block.onLanded(this.world, this);
              }
  
@@ -303,7 +329,7 @@
              if (this.canTriggerWalking() && (!this.onGround || !this.isSneaking() || !(this instanceof EntityPlayer)) && !this.isRiding())
              {
                  double d15 = this.posX - d10;
-@@ -958,7 +1133,8 @@
+@@ -958,7 +1135,8 @@
                      this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
                  }
              }
@@ -313,7 +339,7 @@
              try
              {
                  this.doBlockCollisions();
-@@ -970,6 +1146,7 @@
+@@ -970,6 +1148,7 @@
                  this.addEntityCrashInfo(crashreportcategory);
                  throw new ReportedException(crashreport);
              }
@@ -321,7 +347,7 @@
  
              boolean flag1 = this.isWet();
  
-@@ -983,7 +1160,13 @@
+@@ -983,7 +1162,13 @@
  
                      if (this.fire == 0)
                      {
@@ -336,7 +362,7 @@
                      }
                  }
              }
-@@ -1000,6 +1183,7 @@
+@@ -1000,6 +1185,7 @@
  
              this.world.profiler.endSection();
          }
@@ -344,7 +370,16 @@
      }
  
      public void resetPositionToBB()
-@@ -1154,6 +1338,14 @@
+@@ -1008,7 +1194,7 @@
+         this.posX = (axisalignedbb.minX + axisalignedbb.maxX) / 2.0D;
+         this.posY = axisalignedbb.minY;
+         this.posZ = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
+-        if (this.isAddedToWorld() && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false); // Forge - Process chunk registration after moving.
++        if (this.isAddedToWorld && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false); // Forge - Process chunk registration after moving.
+     }
+ 
+     protected SoundEvent getSwimSound()
+@@ -1154,6 +1340,14 @@
          }
      }
  
@@ -359,7 +394,7 @@
      public final boolean isImmuneToFire()
      {
          return this.isImmuneToFire;
-@@ -1274,10 +1466,10 @@
+@@ -1274,10 +1468,10 @@
          IBlockState iblockstate = this.world.getBlockState(blockpos);
  
          if(!iblockstate.getBlock().addRunningEffects(iblockstate, world, blockpos, this))
@@ -374,7 +409,7 @@
      }
  
      public boolean isInsideOfMaterial(Material materialIn)
-@@ -1369,6 +1561,11 @@
+@@ -1369,6 +1563,11 @@
  
      public void setWorld(World worldIn)
      {
@@ -386,7 +421,7 @@
          this.world = worldIn;
      }
  
-@@ -1687,6 +1884,16 @@
+@@ -1687,6 +1886,16 @@
          {
              compound.setTag("Pos", this.newDoubleNBTList(this.posX, this.posY, this.posZ));
              compound.setTag("Motion", this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
@@ -403,7 +438,7 @@
              compound.setTag("Rotation", this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
              compound.setFloat("FallDistance", this.fallDistance);
              compound.setShort("Fire", (short)this.fire);
-@@ -1696,7 +1903,12 @@
+@@ -1696,7 +1905,12 @@
              compound.setBoolean("Invulnerable", this.invulnerable);
              compound.setInteger("PortalCooldown", this.timeUntilPortal);
              compound.setUniqueId("UUID", this.getUniqueID());
@@ -417,7 +452,7 @@
              if (this.hasCustomName())
              {
                  compound.setString("CustomName", this.getCustomNameTag());
-@@ -1784,6 +1996,7 @@
+@@ -1784,6 +1998,7 @@
              this.motionY = nbttaglist2.getDoubleAt(1);
              this.motionZ = nbttaglist2.getDoubleAt(2);
  
@@ -425,7 +460,7 @@
              if (Math.abs(this.motionX) > 10.0D)
              {
                  this.motionX = 0.0D;
-@@ -1798,6 +2011,7 @@
+@@ -1798,6 +2013,7 @@
              {
                  this.motionZ = 0.0D;
              }
@@ -433,7 +468,7 @@
  
              this.posX = nbttaglist.getDoubleAt(0);
              this.posY = nbttaglist.getDoubleAt(1);
-@@ -1869,6 +2083,50 @@
+@@ -1869,6 +2085,50 @@
              {
                  this.setPosition(this.posX, this.posY, this.posZ);
              }
@@ -484,7 +519,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -1885,7 +2143,7 @@
+@@ -1885,7 +2145,7 @@
      }
  
      @Nullable
@@ -493,7 +528,7 @@
      {
          ResourceLocation resourcelocation = EntityList.getKey(this);
          return resourcelocation == null ? null : resourcelocation.toString();
-@@ -1945,7 +2203,9 @@
+@@ -1945,7 +2205,9 @@
              if (captureDrops)
                  this.capturedDrops.add(entityitem);
              else
@@ -504,7 +539,7 @@
              return entityitem;
          }
      }
-@@ -2013,7 +2273,7 @@
+@@ -2013,7 +2275,7 @@
              this.motionY = 0.0D;
              this.motionZ = 0.0D;
              if(!updateBlocked)
@@ -513,7 +548,7 @@
  
              if (this.isRiding())
              {
-@@ -2110,6 +2370,29 @@
+@@ -2110,6 +2372,29 @@
          }
          else
          {
@@ -543,7 +578,7 @@
              if (!this.world.isRemote && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer))
              {
                  this.riddenByEntities.add(0, passenger);
-@@ -2129,6 +2412,21 @@
+@@ -2129,6 +2414,21 @@
          }
          else
          {
@@ -565,7 +600,7 @@
              this.riddenByEntities.remove(passenger);
              passenger.rideCooldown = 60;
          }
-@@ -2325,12 +2623,12 @@
+@@ -2325,12 +2625,12 @@
          this.setFlag(5, invisible);
      }
  
@@ -580,7 +615,7 @@
      {
          byte b0 = ((Byte)this.dataManager.get(FLAGS)).byteValue();
  
-@@ -2351,17 +2649,53 @@
+@@ -2351,17 +2651,53 @@
  
      public void setAir(int air)
      {
@@ -637,7 +672,16 @@
          }
      }
  
-@@ -2551,20 +2885,75 @@
+@@ -2540,7 +2876,7 @@
+     public Entity changeDimension(int dimensionIn)
+     {
+         if (this.world.isRemote || this.isDead) return null;
+-        return changeDimension(dimensionIn, this.getServer().getWorld(dimensionIn).getDefaultTeleporter());
++        return changeDimension(dimensionIn, this.getServer().getWorldServer(dimensionIn).getDefaultTeleporter());
+     }
+ 
+     @Nullable // Forge: Entities that require custom handling should override this method, not the other
+@@ -2551,20 +2887,75 @@
              if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
              this.world.profiler.startSection("changeDimension");
              MinecraftServer minecraftserver = this.getServer();
@@ -717,7 +761,7 @@
              BlockPos blockpos;
  
              if (dimensionIn == 1 && teleporter.isVanilla())
-@@ -2596,8 +2985,12 @@
+@@ -2596,8 +2987,12 @@
                  teleporter.placeEntity(worldserver1, this, f);
                  blockpos = new BlockPos(this);
              }
@@ -731,7 +775,7 @@
              this.world.profiler.endStartSection("reloading");
              Entity entity = EntityList.newEntity(this.getClass(), worldserver1);
  
-@@ -2605,6 +2998,7 @@
+@@ -2605,6 +3000,7 @@
              {
                  entity.copyDataFromOld(this);
  
@@ -739,7 +783,7 @@
                  if (i == 1 && dimensionIn == 1 && teleporter.isVanilla())
                  {
                      BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
-@@ -2614,19 +3008,28 @@
+@@ -2614,19 +3010,28 @@
                  {
                      entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
                  }
@@ -769,7 +813,7 @@
              return entity;
          }
          else
-@@ -2755,6 +3158,11 @@
+@@ -2755,6 +3160,11 @@
  
      public void setCustomNameTag(String name)
      {
@@ -781,7 +825,7 @@
          this.dataManager.set(CUSTOM_NAME, name);
      }
  
-@@ -2838,7 +3246,25 @@
+@@ -2838,7 +3248,25 @@
  
      public void setEntityBoundingBox(AxisAlignedBB bb)
      {
@@ -808,7 +852,7 @@
      }
  
      public float getEyeHeight()
-@@ -3030,7 +3456,7 @@
+@@ -3030,7 +3458,7 @@
          {
              return ((net.minecraft.entity.item.EntityMinecart)this).getCartItem();
          }
@@ -817,7 +861,7 @@
          {
              return new ItemStack(((EntityBoat)this).getItemBoat());
          }
-@@ -3109,14 +3535,14 @@
+@@ -3109,14 +3537,14 @@
      }
  
      @Override
@@ -834,7 +878,7 @@
      {
          return capabilities == null ? null : capabilities.getCapability(capability, facing);
      }
-@@ -3319,7 +3745,7 @@
+@@ -3319,7 +3747,7 @@
          return SoundCategory.NEUTRAL;
      }
  

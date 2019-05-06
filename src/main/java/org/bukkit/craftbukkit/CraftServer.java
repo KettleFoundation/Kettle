@@ -62,6 +62,9 @@ import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -243,11 +246,9 @@ public final class CraftServer implements Server {
 
         // Register all the Enchantments and PotionTypes now so we can stop new registration immediately after
         Enchantments.SHARPNESS.getClass();
-        org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations();
 
         Potion.setPotionBrewer(new CraftPotionBrewer());
         MobEffects.BLINDNESS.getClass();
-        PotionEffectType.stopAcceptingRegistrations();
         // Ugly hack :(
 
         if (!Main.useConsole) {
@@ -908,96 +909,21 @@ public final class CraftServer implements Server {
         WorldType type = WorldType.parseWorldType(creator.type().getName());
         boolean generateStructures = creator.generateStructures();
 
-        if (world != null) {
-            return world;
-        }
-
         if ((folder.exists()) && (!folder.isDirectory())) {
             throw new IllegalArgumentException("File exists with the name '" + name + "' and isn't a folder");
         }
 
-        if (generator == null) {
-            generator = getGenerator(name);
+        if (world != null) {
+            return world;
         }
 
-        ISaveFormat converter = new AnvilSaveConverter(getWorldContainer(),
-                getHandle().getServerInstance().getDataFixer());
-        if (converter.isOldMapFormat(name)) {
-            getLogger().info("Converting world '" + name + "'");
-            converter.convertMapFormat(name, new IProgressUpdate() {
-                private long b = System.currentTimeMillis();
-
-                @Override
-                public void displaySavingString(String s) {
-                }
-
-                @Override
-                public void setLoadingProgress(int i) {
-                    if (System.currentTimeMillis() - this.b >= 1000L) {
-                        this.b = System.currentTimeMillis();
-                        MinecraftServer.LOGGER.info("Converting... " + i + "%");
-                    }
-                }
-
-                @Override
-                public void displayLoadingString(String s) {
-                }
-
-                @Override
-                public void resetProgressAndMessage(String message) {
-                }
-
-                @Override
-                public void setDoneWorking() {
-                }
-            });
-        }
-
-        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + console.worldServerList.size();
-        boolean used = false;
-        do {
-            for (WorldServer server : console.worlds) {
-                used = server.dimension == dimension;
-                if (used) {
-                    dimension++;
-                    break;
-                }
-            }
-        } while (used);
         boolean hardcore = false;
 
-        ISaveHandler sdm = new AnvilSaveHandler(getWorldContainer(), name, true,
-                getHandle().getServerInstance().getDataFixer());
-        WorldInfo worlddata = sdm.loadWorldInfo();
-        WorldSettings worldSettings = null;
-        if (worlddata == null) {
-            worldSettings = new WorldSettings(creator.seed(), GameType.getByID(getDefaultGameMode().getValue()),
-                    generateStructures, hardcore, type);
-            worldSettings.setGeneratorOptions(creator.generatorSettings());
-            worlddata = new WorldInfo(worldSettings, name);
-        }
-        worlddata.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
-        WorldServer internal = (WorldServer) new WorldServer(console, sdm, worlddata, dimension, console.profiler,
-                creator.environment(), generator).init();
-
-        if (!(worlds.containsKey(name.toLowerCase(java.util.Locale.ENGLISH)))) {
-            return null;
-        }
-
-        if (worldSettings != null) {
-            internal.initialize(worldSettings);
-        }
-        internal.worldScoreboard = getScoreboardManager().getMainScoreboard().getHandle();
-
-        internal.entityTracker = new EntityTracker(internal);
-        internal.addEventListener(new ServerWorldEventHandler(console, internal));
-        internal.worldInfo.setDifficulty(EnumDifficulty.EASY);
-        internal.setAllowedSpawnTypes(true, true);
-        console.worldServerList.add(internal);
+        WorldSettings worldSettings = new WorldSettings(creator.seed(), WorldSettings.getGameTypeById(getDefaultGameMode().getValue()), generateStructures, hardcore, type);
+        WorldServer internal = DimensionManager.initDimension(creator, worldSettings);
 
         pluginManager.callEvent(new WorldInitEvent(internal.getWorld()));
-        System.out.println("Preparing start region for level " + (console.worldServerList.size() - 1) + " (Seed: "
-                + internal.getSeed() + ")");
+        System.out.println("Preparing start region for level " + (console.worldServerList.size() - 1) + " (Seed: " + internal.getSeed() + ")");
 
         if (internal.getWorld().getKeepSpawnInMemory()) {
             short short1 = 196;
@@ -1019,8 +945,7 @@ public final class CraftServer implements Server {
                     }
 
                     BlockPos chunkcoordinates = internal.getSpawnPoint();
-                    internal.getChunkProvider().provideChunk(chunkcoordinates.getX() + j >> 4,
-                            chunkcoordinates.getZ() + k >> 4);
+                    internal.getChunkProvider().loadChunk(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
                 }
             }
         }
@@ -1068,10 +993,11 @@ public final class CraftServer implements Server {
                 getLogger().log(Level.SEVERE, null, ex);
             }
         }
-
+		MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
         worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
-        console.worldServerList.remove(console.worldServerList.indexOf(handle));
-        return true;
+        DimensionManager.setWorld(handle.provider.getDimension(), null, FMLCommonHandler.instance().getMinecraftServerInstance()); // remove world from DimensionManager
+
+		return true;
     }
 
     public MinecraftServer getServer() {
@@ -1081,8 +1007,16 @@ public final class CraftServer implements Server {
     @Override
     public World getWorld(String name) {
         Validate.notNull(name, "Name cannot be null");
-
-        return worlds.get(name.toLowerCase(java.util.Locale.ENGLISH));
+        World world = worlds.get(name.toLowerCase(java.util.Locale.ENGLISH));
+        if (world == null && name.toUpperCase().startsWith("DIM")) {
+            int dimension;
+            try {
+                dimension = Integer.valueOf(name.substring(3));
+                WorldServer worldserver = console.getWorld(dimension);
+                if (worldserver != null) world = worldserver.getWorld();
+            } catch (NumberFormatException e) {}
+        }
+        return world;
     }
 
     @Override
@@ -1098,9 +1032,7 @@ public final class CraftServer implements Server {
     public void addWorld(World world) {
         // Check if a World already exists with the UID.
         if (getWorld(world.getUID()) != null) {
-            System.out.println("World " + world.getName()
-                    + " is a duplicate of another world and has been prevented from loading. Please delete the uid.dat file from "
-                    + world.getName() + "'s world directory if you want to be able to load the duplicate world.");
+            System.out.println("World " + world.getName() + " is a duplicate of another world and has been prevented from loading. Please delete the uid.dat file from " + world.getName() + "'s world directory if you want to be able to load the duplicate world.");
             return;
         }
         worlds.put(world.getName().toLowerCase(java.util.Locale.ENGLISH), world);
@@ -1299,7 +1231,7 @@ public final class CraftServer implements Server {
     @Override
     @Deprecated
     public CraftMapView getMap(short id) {
-        MapStorage collection = console.worldServerList.get(0).mapStorage;
+        MapStorage collection = console.worlds[0].mapStorage;
         MapData worldmap = (MapData) collection.getOrLoadData(MapData.class, "map_" + id);
         if (worldmap == null) {
             return null;
@@ -1473,7 +1405,7 @@ public final class CraftServer implements Server {
 
     @Override
     public GameMode getDefaultGameMode() {
-        return GameMode.getByValue(console.worldServerList.get(0).getWorldInfo().getGameType().getID());
+        return GameMode.getByValue(console.worlds[0].getWorldInfo().getGameType().getID());
     }
 
     @Override
@@ -1504,6 +1436,9 @@ public final class CraftServer implements Server {
 
     @Override
     public File getWorldContainer() {
+        if (DimensionManager.getWorld(0) != null) {
+            return ((SaveHandler)DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
+        }
         if (this.getServer().anvilFile != null) {
             return this.getServer().anvilFile;
         }
@@ -1517,7 +1452,7 @@ public final class CraftServer implements Server {
 
     @Override
     public OfflinePlayer[] getOfflinePlayers() {
-        SaveHandler storage = (SaveHandler) console.worldServerList.get(0).getSaveHandler();
+        SaveHandler storage = (SaveHandler) console.worlds[0].getSaveHandler();
         String[] files = storage.getPlayerDir().list(new DatFileFilter());
         Set<OfflinePlayer> players = new HashSet<OfflinePlayer>();
 

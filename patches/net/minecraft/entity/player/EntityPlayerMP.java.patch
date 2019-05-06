@@ -794,7 +794,7 @@
      }
  
      public PlayerAdvancements getAdvancements()
-@@ -1474,4 +1769,143 @@
+@@ -1474,4 +1769,145 @@
      {
          return this.enteredNetherPosition;
      }
@@ -912,7 +912,8 @@
 +        this.setHealth(this.getMaxHealth());
 +        this.fire = 0;
 +        this.fallDistance = 0;
-+        this.foodStats = new FoodStats(this);
++        this.foodStats = new FoodStats();
++        this.foodStats.player = this;
 +        this.experienceLevel = this.newLevel;
 +        this.experienceTotal = this.newTotalExp;
 +        this.experience = 0;
@@ -931,6 +932,7 @@
 +            this.addExperience(this.newExp);
 +        }
 +        this.keepLevel = false;
++        getEntityData().getKeySet().removeIf(tag -> !PERSISTED_NBT_TAG.equals(tag));
 +    }
 +
 +    @Override
