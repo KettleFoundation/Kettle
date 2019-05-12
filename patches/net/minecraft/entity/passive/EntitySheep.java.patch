@@ -55,9 +55,9 @@
  
                  for (int j = 0; j < i; ++j)
                  {
-+                    this.forceDrops = true; // CraftBukkit
++                    //this.forceDrops = true; // CraftBukkit
                      EntityItem entityitem = this.entityDropItem(new ItemStack(Item.getItemFromBlock(Blocks.WOOL), 1, this.getFleeceColor().getMetadata()), 1.0F);
-+                    this.forceDrops = false; // CraftBukkit
++                    //this.forceDrops = false; // CraftBukkit
                      entityitem.motionY += (double)(this.rand.nextFloat() * 0.05F);
                      entityitem.motionX += (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
                      entityitem.motionZ += (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);

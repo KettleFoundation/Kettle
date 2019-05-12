@@ -160,9 +160,9 @@
  
              if (!itemstack1.isEmpty() && (double)(this.rand.nextFloat() - 0.1F) < d0)
              {
-+                this.forceDrops = true;
++                //this.forceDrops = true;
                  this.entityDropItem(itemstack1, 0.0F);
-+                this.forceDrops = false;
++                //this.forceDrops = false;
              }
  
              this.setItemStackToSlot(entityequipmentslot, itemstack);
@@ -249,9 +249,9 @@
  
              if (!this.world.isRemote && dropLead)
              {
-+                this.forceDrops = true;
++                //this.forceDrops = true;
                  this.dropItem(Items.LEAD, 1);
-+                this.forceDrops = false;
++                //this.forceDrops = false;
              }
  
              if (!this.world.isRemote && sendPacket && this.world instanceof WorldServer)
