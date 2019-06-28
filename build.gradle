@@ -56,7 +56,7 @@ repositories {
     }
     maven {
         name 'KettleFoundation'
-        url 'http://repo.hexeption.co.uk/artifactory/Kettle/'
+        url 'https://repo.hexeption.co.uk/artifactory/Kettle/'
     }
     flatDir {
         dirs 'src/main/resources'
@@ -201,7 +201,7 @@ extractForgeSources {
 genGradleProjects {
     addCompileDep "junit:junit:4.12"
     addCompileDep "bukkit:bukkit:1.12.2-R0.1"
-    addRepo("KettleFoundation", "http://repo.hexeption.co.uk/artifactory/Kettle/")
+    addRepo("KettleFoundation", "https://repo.hexeption.co.uk/artifactory/Kettle/")
 }
 
 import groovy.json.JsonSlurper
