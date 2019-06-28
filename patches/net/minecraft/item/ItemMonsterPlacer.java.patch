@@ -12,9 +12,9 @@
          if (entityID != null && EntityList.ENTITY_EGGS.containsKey(entityID))
          {
              Entity entity = null;
-@@ -235,8 +240,15 @@
-                     entityliving.rotationYawHead = entityliving.rotationYaw;
+@@ -236,8 +241,15 @@
                      entityliving.renderYawOffset = entityliving.rotationYaw;
+                     if (net.minecraftforge.event.ForgeEventFactory.doSpecialSpawn(entityliving, worldIn, (float) x, (float) y, (float) z, null)) return null;
                      entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), (IEntityLivingData)null);
 -                    worldIn.spawnEntity(entity);
 -                    entityliving.playLivingSound();

@@ -367,7 +367,7 @@
          itemstack.setAnimationsToGo(this.getAnimationsToGo());
  
          if (this.stackTagCompound != null)
-@@ -1042,6 +1270,14 @@
+@@ -1043,6 +1271,14 @@
          nbttaglist.appendTag(nbttagcompound);
      }
  
