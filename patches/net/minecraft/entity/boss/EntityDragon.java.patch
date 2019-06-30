@@ -107,7 +107,7 @@
 +
 +                Block nmsBlock = org.bukkit.craftbukkit.util.CraftMagicNumbers.getBlock(blockId);
 +                if (nmsBlock.canDropFromExplosion(explosionSource)) {
-+                    nmsBlock.dropBlockAsItemWithChance(this.world, new BlockPos(blockX, blockY, blockZ), nmsBlock.getDefaultState(), event.getYield(), 0);
++                    nmsBlock.dropBlockAsItemWithChance(this.world, new BlockPos(blockX, blockY, blockZ), nmsBlock.getStateFromMeta(block.getData()), event.getYield(), 0);
 +                }
 +                nmsBlock.onBlockDestroyedByExplosion(world, new BlockPos(blockX, blockY, blockZ), explosionSource);
 +
