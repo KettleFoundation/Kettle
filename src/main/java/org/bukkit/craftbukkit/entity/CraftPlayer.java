@@ -438,7 +438,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         SPacketBlockChange packet = new SPacketBlockChange(((CraftWorld) loc.getWorld()).getHandle(), new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 
-        packet.blockState = CraftMagicNumbers.getBlock(material).getDefaultState();
+        packet.blockState = CraftMagicNumbers.getBlock(material).getStateFromMeta(data);
         getHandle().connection.sendPacket(packet);
     }
 

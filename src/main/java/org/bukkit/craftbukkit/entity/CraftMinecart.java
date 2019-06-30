@@ -64,7 +64,7 @@ public class CraftMinecart extends CraftVehicle implements Minecart {
 
     public void setDisplayBlock(MaterialData material) {
         if(material != null) {
-            IBlockState block = CraftMagicNumbers.getBlock(material.getItemTypeId()).getDefaultState();
+            IBlockState block = CraftMagicNumbers.getBlock(material.getItemTypeId()).getStateFromMeta(material.getData());
             this.getHandle().setDisplayTile(block);
         } else {
             // Set block to air (default) and set the flag to not have a display block.
