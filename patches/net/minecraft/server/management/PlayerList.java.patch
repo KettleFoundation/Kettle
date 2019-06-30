@@ -764,16 +764,7 @@
      public void updatePermissionLevel(EntityPlayerMP player)
      {
          GameProfile gameprofile = player.getGameProfile();
-@@ -617,7 +1038,7 @@
-         WorldServer worldserver = this.mcServer.getWorld(player.dimension);
-         player.dimension = dimensionIn;
-         WorldServer worldserver1 = this.mcServer.getWorld(player.dimension);
--        player.connection.sendPacket(new SPacketRespawn(player.dimension, worldserver1.getDifficulty(), worldserver1.getWorldInfo().getTerrainType(), player.interactionManager.getGameType()));
-+        player.connection.sendPacket(new SPacketRespawn(player.dimension, worldserver1.getDifficulty(), worldserver1.getWorldInfo().getTerrainType(), player.interactionManager.getGameType())); // Forge: Use new dimensions information
-         this.updatePermissionLevel(player);
-         worldserver.removeEntityDangerously(player);
-         player.isDead = false;
-@@ -642,7 +1063,9 @@
+@@ -642,7 +1061,9 @@
  
      public void transferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn)
      {

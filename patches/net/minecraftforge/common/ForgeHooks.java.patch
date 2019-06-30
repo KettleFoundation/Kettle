@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
 +++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
-@@ -445,7 +445,7 @@
+@@ -450,7 +450,7 @@
                  }
                  else
                  {
@@ -9,7 +9,7 @@
  
                      if (resourcelocation == null || !EntityList.ENTITY_EGGS.containsKey(resourcelocation))
                      {
-@@ -467,7 +467,7 @@
+@@ -472,7 +472,7 @@
                  }
                  else if (this.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
                  {
@@ -18,7 +18,7 @@
                  }
  
                  LOGGER.warn("Picking on: [{}] {} gave null item", new Object[] {this.objectMouseOver.typeOfHit, s});
-@@ -988,7 +988,7 @@
+@@ -993,7 +993,7 @@
      }
  
      /**

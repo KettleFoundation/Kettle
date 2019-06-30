@@ -710,12 +710,14 @@
                  loadedEntityList.add(entity4);
                  this.onEntityAdded(entity4);
              }
-@@ -3168,18 +3481,25 @@
+@@ -3168,19 +3481,27 @@
          IBlockState iblockstate1 = this.getBlockState(pos);
          AxisAlignedBB axisalignedbb = skipCollisionCheck ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
  
-+        boolean defaultReturn;
-         if (axisalignedbb != Block.NULL_AABB && !this.checkNoEntityCollision(axisalignedbb.offset(pos), placer))
++        boolean defaultReturn = false;
++
+         if (!((placer instanceof EntityPlayer) || !net.minecraftforge.event.ForgeEventFactory.onBlockPlace(placer, new net.minecraftforge.common.util.BlockSnapshot(this, pos, blockIn.getDefaultState()), sidePlacedOn).isCanceled())) return false;
+         if (axisalignedbb != Block.NULL_AABB && !this.checkNoEntityCollision(axisalignedbb.offset(pos))) // Forge: Remove second parameter, we patch placer to be non-null, passing it here skips collision checks for the placer
          {
 -            return false;
 +            defaultReturn = false;
@@ -728,18 +730,18 @@
          else
          {
 -            return iblockstate1.getBlock().isReplaceable(this, pos) && blockIn.canPlaceBlockOnSide(this, pos, sidePlacedOn);
-+            defaultReturn = iblockstate1.getBlock().isReplaceable(this, pos) && blockIn.canPlaceBlockOnSide(this, pos, sidePlacedOn);
++            defaultReturn= iblockstate1.getBlock().isReplaceable(this, pos) && blockIn.canPlaceBlockOnSide(this, pos, sidePlacedOn);
          }
++
 +        // CraftBukkit start - store default return
 +        BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), CraftMagicNumbers.getId(blockIn), defaultReturn);
 +        this.getServer().getPluginManager().callEvent(event);
-+
 +        return event.isBuildable();
 +        // CraftBukkit end
      }
  
      public int getSeaLevel()
-@@ -3344,6 +3664,12 @@
+@@ -3345,6 +3666,12 @@
          {
              EntityPlayer entityplayer1 = this.playerEntities.get(j2);
  
@@ -752,7 +754,7 @@
              if (p_190525_9_.apply(entityplayer1))
              {
                  double d1 = entityplayer1.getDistanceSq(x, y, z);
-@@ -3591,6 +3917,16 @@
+@@ -3592,6 +3919,16 @@
      {
      }
  
@@ -769,7 +771,7 @@
      public float getThunderStrength(float delta)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * delta) * this.getRainStrength(delta);
-@@ -3879,7 +4215,7 @@
+@@ -3880,7 +4217,7 @@
          int j2 = x * 16 + 8 - blockpos1.getX();
          int k2 = z * 16 + 8 - blockpos1.getZ();
          int l2 = 128;

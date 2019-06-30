@@ -4,7 +4,7 @@
 ![Kettle](https://i.imgur.com/gkmTKvR.png)
 
 # Kettle
-
+![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
 ### What's Kettle?
 Kettle is the next link in the hybrid server chain:
 **Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: KCauldron :arrow_right: Cauldron :arrow_right: MCPC+

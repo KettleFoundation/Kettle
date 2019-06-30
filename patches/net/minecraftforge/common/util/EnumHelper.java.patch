@@ -37,7 +37,7 @@
  public class EnumHelper
  {
      private static Object reflectionFactory      = null;
-@@ -423,4 +424,11 @@
+@@ -428,4 +429,11 @@
              setup();
          }
      }

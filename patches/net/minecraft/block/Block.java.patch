@@ -278,7 +278,7 @@
              return false;
          return type != null && type.equals(getHarvestTool(state));
      }
-@@ -2272,23 +2273,15 @@
+@@ -2286,23 +2287,15 @@
          return false;
      }
  

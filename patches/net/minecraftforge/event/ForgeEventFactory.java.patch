@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/event/ForgeEventFactory.java
 +++ ../src-work/minecraft/net/minecraftforge/event/ForgeEventFactory.java
-@@ -562,7 +562,7 @@
+@@ -585,7 +585,7 @@
          {
              Entity e = itr.next();
              double dist = e.getDistance(p.xCoord, p.yCoord, p.zCoord) / diameter;
