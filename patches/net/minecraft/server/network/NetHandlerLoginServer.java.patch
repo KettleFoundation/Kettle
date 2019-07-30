@@ -1,6 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
 +++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
-@@ -33,6 +33,9 @@
+@@ -29,10 +29,14 @@
+ import net.minecraft.util.CryptManager;
+ import net.minecraft.util.ITickable;
+ import net.minecraft.util.text.ITextComponent;
++import net.minecraft.util.text.TextComponentString;
+ import net.minecraft.util.text.TextComponentTranslation;
  import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -10,7 +15,7 @@
  
  public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
  {
-@@ -42,13 +45,15 @@
+@@ -42,13 +46,15 @@
      private final byte[] verifyToken = new byte[4];
      private final MinecraftServer server;
      public final NetworkManager networkManager;
@@ -27,7 +32,7 @@
      public NetHandlerLoginServer(MinecraftServer serverIn, NetworkManager networkManagerIn)
      {
          this.server = serverIn;
-@@ -58,17 +63,17 @@
+@@ -58,17 +64,17 @@
  
      public void update()
      {
@@ -48,7 +53,7 @@
                  net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.fmlServerHandshake(this.server.getPlayerList(), this.networkManager, this.player);
                  this.player = null;
              }
-@@ -80,6 +85,20 @@
+@@ -80,6 +86,20 @@
          }
      }
  
@@ -69,7 +74,7 @@
      public void disconnect(ITextComponent reason)
      {
          try
-@@ -96,20 +115,26 @@
+@@ -96,20 +116,26 @@
  
      public void tryAcceptPlayer()
      {
@@ -100,7 +105,7 @@
  
              if (this.server.getNetworkCompressionThreshold() >= 0 && !this.networkManager.isLocalChannel())
              {
-@@ -127,12 +152,12 @@
+@@ -127,12 +153,12 @@
  
              if (entityplayermp != null)
              {
@@ -116,7 +121,7 @@
              }
          }
      }
-@@ -149,23 +174,42 @@
+@@ -149,23 +175,42 @@
  
      public void processLoginStart(CPacketLoginStart packetIn)
      {
@@ -147,7 +152,7 @@
 +                    }
 +                    catch (Exception ex)
 +                    {
-+                        disconnect("Failed to verify username!");
++                        disconnect(new TextComponentString("Failed to verify username!"));
 +                        server.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + loginGameProfile.getName(), ex);
 +                    }
 +                }
@@ -163,7 +168,7 @@
          PrivateKey privatekey = this.server.getKeyPair().getPrivate();
  
          if (!Arrays.equals(this.verifyToken, packetIn.getVerifyToken(privatekey)))
-@@ -175,7 +219,7 @@
+@@ -175,7 +220,7 @@
          else
          {
              this.secretKey = packetIn.getSecretKey(privatekey);
@@ -172,7 +177,7 @@
              this.networkManager.enableEncryption(this.secretKey);
              (new Thread(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER, "User Authenticator #" + AUTHENTICATOR_THREAD_ID.incrementAndGet())
              {
-@@ -190,14 +234,18 @@
+@@ -190,14 +235,18 @@
  
                          if (NetHandlerLoginServer.this.loginGameProfile != null)
                          {
@@ -194,7 +199,7 @@
                          }
                          else
                          {
-@@ -211,13 +259,19 @@
+@@ -211,13 +260,19 @@
                          {
                              NetHandlerLoginServer.LOGGER.warn("Authentication servers are down but will let them in anyway!");
                              NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.getOfflineProfile(gameprofile);
@@ -209,13 +214,13 @@
                          }
 +                        // CraftBukkit start - catch all exceptions
 +                    } catch (Exception exception) {
-+                        disconnect("Failed to verify username!");
++                        disconnect(new TextComponentTranslation("Failed to verify username!"));
 +                        server.server.getLogger().log(java.util.logging.Level.WARNING, "Exception verifying " + gameprofile.getName(), exception);
 +                        // CraftBukkit end
                      }
                  }
                  @Nullable
-@@ -230,12 +284,75 @@
+@@ -230,12 +285,75 @@
          }
      }
  
@@ -241,12 +246,12 @@
 +                    }};
 +                NetHandlerLoginServer.this.server.processQueue.add(waitable);
 +                if (waitable.get() != PlayerPreLoginEvent.Result.ALLOWED) {
-+                    disconnect(event.getKickMessage());
++                        disconnect(new TextComponentString(event.getKickMessage()));
 +                    return;
 +                }
 +            } else {
 +                if (asyncEvent.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-+                    disconnect(asyncEvent.getKickMessage());
++                    disconnect(new TextComponentString(asyncEvent.getKickMessage()));
 +                    return;
 +                }
 +            }

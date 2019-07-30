@@ -17,7 +17,22 @@
      private EntityLivingBase boostedEntity;
  
      public EntityFireworkRocket(World worldIn)
-@@ -187,8 +188,10 @@
+@@ -38,6 +39,14 @@
+         this.setSize(0.25F, 0.25F);
+     }
+ 
++    // Spigot Start
++    @Override
++    public void inactiveTick() {
++        this.fireworkAge += 1;
++        super.inactiveTick();
++    }
++    // Spigot End
++
+     protected void entityInit()
+     {
+         this.dataManager.register(FIREWORK_ITEM, ItemStack.EMPTY);
+@@ -187,8 +196,10 @@
  
          if (!this.world.isRemote && this.fireworkAge > this.lifetime)
          {
@@ -30,7 +45,7 @@
              this.setDead();
          }
      }
-@@ -209,7 +212,9 @@
+@@ -209,7 +220,9 @@
          {
              if (this.boostedEntity != null)
              {
@@ -40,7 +55,7 @@
              }
  
              double d0 = 5.0D;
-@@ -235,7 +240,9 @@
+@@ -235,7 +248,9 @@
                      if (flag)
                      {
                          float f1 = f * (float)Math.sqrt((5.0D - (double)this.getDistance(entitylivingbase)) / 5.0D);

@@ -34,6 +34,15 @@
      public EntityItem(World worldIn, double x, double y, double z)
      {
          super(worldIn);
+@@ -60,7 +65,7 @@
+     {
+         this(worldIn, x, y, z);
+         this.setItem(stack);
+-        this.lifespan = (stack.getItem() == null ? 6000 : stack.getItem().getEntityLifespan(stack, worldIn));
++        this.lifespan = (stack.getItem() == null ? world.spigotConfig.itemDespawnRate : stack.getItem().getEntityLifespan(stack, worldIn)); // Spigot
+     }
+ 
+     protected boolean canTriggerWalking()
 @@ -93,10 +98,12 @@
          {
              super.onUpdate();
@@ -77,15 +86,63 @@
                  int hook = net.minecraftforge.event.ForgeEventFactory.onItemExpire(this, item);
                  if (hook < 0) this.setDead();
                  else          this.lifespan += hook;
-@@ -248,6 +263,7 @@
+@@ -191,9 +206,34 @@
+         }
+     }
+ 
++    // Spigot start - copied from above
++    @Override
++    public void inactiveTick() {
++        // CraftBukkit start - Use wall time for pickup and despawn timers
++        int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
++        if (this.pickupDelay != 32767) this.pickupDelay -= elapsedTicks;
++        if (this.age != -32768) this.age += elapsedTicks;
++        this.lastTick = MinecraftServer.currentTick;
++        // CraftBukkit end
++
++        if (!this.world.isRemote && this.age >= world.spigotConfig.itemDespawnRate) { // Spigot
++            // CraftBukkit start - fire ItemDespawnEvent
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemDespawnEvent(this).isCancelled()) {
++                this.age = 0;
++                return;
++            }
++            // CraftBukkit end
++            this.setDead();
++        }
++    }
++    // Spigot end
++
+     private void searchForOtherItemsNearby()
+     {
+-        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(0.5D, 0.0D, 0.5D)))
++        // Spigot start
++        double radius = world.spigotConfig.itemMerge;
++        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(radius, radius, radius)))
++            // Spigot end
+         {
+             this.combineItems(entityitem);
+         }
+@@ -248,11 +288,14 @@
                      }
                      else
                      {
-+                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemMergeEvent(this, other).isCancelled()) return false;  // CraftBukkit
-                         itemstack1.grow(itemstack.getCount());
-                         other.pickupDelay = Math.max(other.pickupDelay, this.pickupDelay);
-                         other.age = Math.min(other.age, this.age);
-@@ -314,6 +330,11 @@
+-                        itemstack1.grow(itemstack.getCount());
+-                        other.pickupDelay = Math.max(other.pickupDelay, this.pickupDelay);
+-                        other.age = Math.min(other.age, this.age);
+-                        other.setItem(itemstack1);
+-                        this.setDead();
++                        // Spigot start
++                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemMergeEvent(other, this).isCancelled()) return false;
++                        itemstack.grow(itemstack1.getCount());
++                        this.pickupDelay = Math.max(other.pickupDelay, this.pickupDelay);
++                        this.age = Math.min(other.age, this.age);
++                        this.setItem(itemstack);
++                        other.setDead();
++                        // Spigot end
+                         return true;
+                     }
+                 }
+@@ -314,6 +357,11 @@
          }
          else
          {
@@ -97,7 +154,7 @@
              this.markVelocityChanged();
              this.health = (int)((float)this.health - amount);
  
-@@ -393,6 +414,35 @@
+@@ -393,6 +441,35 @@
              Item item = itemstack.getItem();
              int i = itemstack.getCount();
  

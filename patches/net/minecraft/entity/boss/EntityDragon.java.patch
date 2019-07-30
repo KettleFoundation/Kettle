@@ -1,14 +1,37 @@
 --- ../src-base/minecraft/net/minecraft/entity/boss/EntityDragon.java
 +++ ../src-work/minecraft/net/minecraft/entity/boss/EntityDragon.java
-@@ -40,6 +40,7 @@
+@@ -19,16 +19,19 @@
+ import net.minecraft.entity.item.EntityXPOrb;
+ import net.minecraft.entity.monster.IMob;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.init.SoundEvents;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.network.datasync.DataParameter;
+ import net.minecraft.network.datasync.DataSerializers;
+ import net.minecraft.network.datasync.EntityDataManager;
++import net.minecraft.network.play.server.SPacketEffect;
+ import net.minecraft.pathfinding.Path;
+ import net.minecraft.pathfinding.PathHeap;
+ import net.minecraft.pathfinding.PathPoint;
+ import net.minecraft.potion.PotionEffect;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.DamageSource;
+ import net.minecraft.util.EntityDamageSource;
+ import net.minecraft.util.EnumParticleTypes;
+@@ -40,8 +43,10 @@
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.MathHelper;
  import net.minecraft.util.math.Vec3d;
 +import net.minecraft.world.Explosion;
  import net.minecraft.world.World;
  import net.minecraft.world.WorldProviderEnd;
++import net.minecraft.world.WorldServer;
  import net.minecraft.world.end.DragonFightManager;
-@@ -49,6 +50,8 @@
+ import net.minecraft.world.gen.feature.WorldGenEndPodium;
+ import net.minecraft.world.storage.loot.LootTableList;
+@@ -49,6 +54,8 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -17,7 +40,7 @@
  
  public class EntityDragon extends EntityLiving implements IEntityMultiPart, IMob
  {
-@@ -78,6 +81,8 @@
+@@ -78,6 +85,8 @@
      private final int[] neighbors = new int[24];
      private final PathHeap pathFindQueue = new PathHeap();
  
@@ -26,7 +49,7 @@
      public EntityDragon(World worldIn)
      {
          super(worldIn);
-@@ -241,7 +246,7 @@
+@@ -241,7 +250,7 @@
  
                      Vec3d vec3d = iphase.getTargetLocation();
  
@@ -35,7 +58,7 @@
                      {
                          double d6 = vec3d.x - this.posX;
                          double d7 = vec3d.y - this.posY;
-@@ -411,7 +416,15 @@
+@@ -411,7 +420,15 @@
              }
              else if (this.ticksExisted % 10 == 0 && this.getHealth() < this.getMaxHealth())
              {
@@ -52,7 +75,7 @@
              }
          }
  
-@@ -489,6 +502,11 @@
+@@ -489,6 +506,11 @@
          boolean flag = false;
          boolean flag1 = false;
  
@@ -64,7 +87,7 @@
          for (int k1 = i; k1 <= l; ++k1)
          {
              for (int l1 = j; l1 <= i1; ++l1)
-@@ -509,7 +527,11 @@
+@@ -509,7 +531,11 @@
                          {
                              if (block != Blocks.COMMAND_BLOCK && block != Blocks.REPEATING_COMMAND_BLOCK && block != Blocks.CHAIN_COMMAND_BLOCK && block != Blocks.IRON_BARS && block != Blocks.END_GATEWAY)
                              {
@@ -77,7 +100,7 @@
                              }
                              else
                              {
-@@ -525,6 +547,41 @@
+@@ -525,6 +551,41 @@
              }
          }
  
@@ -119,3 +142,29 @@
          if (flag1)
          {
              double d0 = p_70972_1_.minX + (p_70972_1_.maxX - p_70972_1_.minX) * (double)this.rand.nextFloat();
+@@ -638,8 +699,23 @@
+ 
+             if (this.deathTicks == 1)
+             {
+-                this.world.playBroadcastSound(1028, new BlockPos(this), 0);
+-            }
++                // CraftBukkit start - Use relative location for far away sounds
++                int viewDistance = ((WorldServer) this.world).spigotConfig.viewDistance * 16; // Spigot
++                for (EntityPlayerMP player : (List<EntityPlayerMP>) MinecraftServer.getServerCB().getPlayerList().getPlayers()) {
++                    double deltaX = this.posX - player.posX;
++                    double deltaZ = this.posZ - player.posY;
++                    double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
++                    if (world.spigotConfig.dragonDeathSoundRadius > 0 && distanceSquared > world.spigotConfig.dragonDeathSoundRadius * world.spigotConfig.dragonDeathSoundRadius) continue; // Spigot
++                    if (distanceSquared > viewDistance * viewDistance) {
++                        double deltaLength = Math.sqrt(distanceSquared);
++                        double relativeX = player.posX + (deltaX / deltaLength) * viewDistance;
++                        double relativeZ = player.posZ + (deltaZ / deltaLength) * viewDistance;
++                        player.connection.sendPacket(new SPacketEffect(1028, new BlockPos((int) relativeX, (int) this.posY, (int) relativeZ), 0, true));
++                    } else {
++                        player.connection.sendPacket(new SPacketEffect(1028, new BlockPos((int) this.posX, (int) this.posY, (int) this.posZ), 0, true));
++                    }
++                }
++             }
+         }
+ 
+         this.move(MoverType.SELF, 0.0D, 0.10000000149011612D, 0.0D);

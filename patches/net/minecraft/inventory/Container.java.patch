@@ -27,9 +27,11 @@
  public abstract class Container
  {
      public NonNullList<ItemStack> inventoryItemStacks = NonNullList.<ItemStack>create();
-@@ -32,6 +51,75 @@
+@@ -31,7 +50,77 @@
+     private final Set<Slot> dragSlots = Sets.<Slot>newHashSet();
      protected List<IContainerListener> listeners = Lists.<IContainerListener>newArrayList();
      private final Set<EntityPlayer> playerList = Sets.<EntityPlayer>newHashSet();
++    private int tickCount; // Spigot
  
 +    public boolean checkReachable = true;
 +    private InventoryView bukkitView;
@@ -103,7 +105,24 @@
      protected Slot addSlotToContainer(Slot slotIn)
      {
          slotIn.slotNumber = this.inventorySlots.size();
-@@ -174,7 +262,7 @@
+@@ -79,7 +168,7 @@
+             ItemStack itemstack = ((Slot)this.inventorySlots.get(i)).getStack();
+             ItemStack itemstack1 = this.inventoryItemStacks.get(i);
+ 
+-            if (!ItemStack.areItemStacksEqual(itemstack1, itemstack))
++            if (!ItemStack.fastMatches(itemstack1, itemstack) || (tickCount % org.spigotmc.SpigotConfig.itemDirtyTicks == 0 && !ItemStack.areItemStacksEqual(itemstack1, itemstack))) // Spigot
+             {
+                 boolean clientStackChanged = !ItemStack.areItemStacksEqualUsingNBTShareTag(itemstack1, itemstack);
+                 itemstack1 = itemstack.isEmpty() ? ItemStack.EMPTY : itemstack.copy();
+@@ -92,6 +181,7 @@
+                 }
+             }
+         }
++        tickCount++; // Spigot
+     }
+ 
+     public boolean enchantItem(EntityPlayer playerIn, int id)
+@@ -174,7 +264,7 @@
                  {
                      ItemStack itemstack9 = inventoryplayer.getItemStack().copy();
                      int k1 = inventoryplayer.getItemStack().getCount();
@@ -112,7 +131,7 @@
                      for (Slot slot8 : this.dragSlots)
                      {
                          ItemStack itemstack13 = inventoryplayer.getItemStack();
-@@ -192,12 +280,50 @@
+@@ -192,12 +282,50 @@
                              }
  
                              k1 -= itemstack14.getCount() - j3;
@@ -166,7 +185,7 @@
                  }
  
                  this.resetDrag();
-@@ -219,8 +345,9 @@
+@@ -219,8 +347,9 @@
                  {
                      if (dragType == 0)
                      {
@@ -177,7 +196,7 @@
                      }
  
                      if (dragType == 1)
-@@ -348,6 +475,15 @@
+@@ -348,6 +477,15 @@
                      }
  
                      slot6.onSlotChanged();
@@ -185,7 +204,7 @@
 +                    if (player instanceof EntityPlayerMP && slot6.getSlotStackLimit() != 64) {
 +                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(this.windowId, slot6.slotNumber, slot6.getStack()));
 +                        // Updating a crafting inventory makes the client reset the result slot, have to send it again
-+                        if (this.getBukkitView().getType() == InventoryType.WORKBENCH || this.getBukkitView().getType() == InventoryType.CRAFTING) {
++                        if (getBukkitView() != null && (this.getBukkitView().getType() == InventoryType.WORKBENCH || this.getBukkitView().getType() == InventoryType.CRAFTING)) {
 +                            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(this.windowId, 0, this.getSlot(0).getStack()));
 +                        }
 +                    }
@@ -193,12 +212,14 @@
                  }
              }
          }
-@@ -798,6 +934,8 @@
+@@ -797,7 +935,9 @@
+                 p_192389_4_.setRecipeUsed(irecipe);
                  itemstack = irecipe.getCraftingResult(p_192389_3_);
              }
- 
-+            itemstack = org.bukkit.craftbukkit.event.CraftEventFactory.callPreCraftEvent(p_192389_3_, itemstack, getBukkitView(), false); // CraftBukkit
-+
+-
++            if (p_192389_3_.resultInventory != null && getBukkitView() != null) {
++                itemstack = org.bukkit.craftbukkit.event.CraftEventFactory.callPreCraftEvent(p_192389_3_, itemstack, getBukkitView(), false); // CraftBukkit
++            }
              p_192389_4_.setInventorySlotContents(0, itemstack);
              entityplayermp.connection.sendPacket(new SPacketSetSlot(this.windowId, 0, itemstack));
          }

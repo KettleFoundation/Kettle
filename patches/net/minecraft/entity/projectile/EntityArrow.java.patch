@@ -19,7 +19,7 @@
  
  public abstract class EntityArrow extends Entity implements IProjectile
  {
-@@ -47,9 +52,9 @@
+@@ -47,21 +52,33 @@
          }
      });
      private static final DataParameter<Byte> CRITICAL = EntityDataManager.<Byte>createKey(EntityArrow.class, DataSerializers.BYTE);
@@ -31,17 +31,35 @@
 +    public int zTile;
      private Block inTile;
      private int inData;
-     protected boolean inGround;
-@@ -60,7 +65,7 @@
+-    protected boolean inGround;
++    public boolean inGround; // Spigot
+     protected int timeInGround;
+-    public EntityArrow.PickupStatus pickupStatus;
++    public PickupStatus pickupStatus;
+     public int arrowShake;
+     public Entity shootingEntity;
      private int ticksInGround;
      private int ticksInAir;
      private double damage;
 -    private int knockbackStrength;
 +    public int knockbackStrength;
  
++    // Spigot Start
++    @Override
++    public void inactiveTick()
++    {
++        if ( this.inGround )
++        {
++            this.ticksInGround += 1; // Despawn counter. First int after shooter
++        }
++        super.inactiveTick();
++    }
++    // Spigot End
++
      public EntityArrow(World worldIn)
      {
-@@ -83,6 +88,7 @@
+         super(worldIn);
+@@ -83,6 +100,7 @@
      {
          this(worldIn, shooter.posX, shooter.posY + (double)shooter.getEyeHeight() - 0.10000000149011612D, shooter.posZ);
          this.shootingEntity = shooter;
@@ -49,7 +67,16 @@
  
          if (shooter instanceof EntityPlayer)
          {
-@@ -339,7 +345,7 @@
+@@ -222,7 +240,7 @@
+             {
+                 ++this.ticksInGround;
+ 
+-                if (this.ticksInGround >= 1200)
++                if (this.ticksInGround >= world.spigotConfig.arrowDespawnRate) // Spigot - First int after shooter
+                 {
+                     this.setDead();
+                 }
+@@ -339,7 +357,7 @@
      protected void onHit(RayTraceResult raytraceResultIn)
      {
          Entity entity = raytraceResultIn.entityHit;
@@ -58,7 +85,7 @@
          if (entity != null)
          {
              float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-@@ -363,7 +369,12 @@
+@@ -363,7 +381,12 @@
  
              if (this.isBurning() && !(entity instanceof EntityEnderman))
              {
@@ -72,7 +99,7 @@
              }
  
              if (entity.attackEntityFrom(damagesource, (float)i))
-@@ -570,9 +581,20 @@
+@@ -570,9 +593,20 @@
      {
          if (!this.world.isRemote && this.inGround && this.arrowShake <= 0)
          {
@@ -95,7 +122,7 @@
              {
                  flag = false;
              }
-@@ -655,7 +677,13 @@
+@@ -655,7 +689,13 @@
  
          if (EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, p_190547_1_) > 0)
          {

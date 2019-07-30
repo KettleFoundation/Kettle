@@ -39,14 +39,14 @@
 +    public Potion secondaryEffect;
      private ItemStack payment = ItemStack.EMPTY;
      private String customName;
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
  
 -    public void update()
 -    {
 -        if (this.world.getTotalWorldTime() % 80L == 0L)
 -        {
-+    private int maxStack = MAX_STACK;
-+    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
-+
 +    public void onOpen(CraftHumanEntity who) {
 +        transaction.add(who);
 +    }

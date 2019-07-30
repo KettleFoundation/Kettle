@@ -8,7 +8,14 @@
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -23,85 +24,87 @@
+@@ -17,91 +18,97 @@
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+ import java.io.IOException;
++import java.io.OutputStream;
+ import java.io.UnsupportedEncodingException;
+ import java.net.Proxy;
+ import java.net.URLEncoder;
  import java.nio.charset.StandardCharsets;
  import java.security.KeyPair;
  import java.text.SimpleDateFormat;
@@ -26,6 +33,7 @@
 -import java.util.function.Supplier;
  import javax.annotation.Nullable;
  import javax.imageio.ImageIO;
++import jline.console.ConsoleReader;
 +import joptsimple.OptionSet;
  import net.minecraft.advancements.AdvancementManager;
  import net.minecraft.advancements.FunctionManager;
@@ -83,6 +91,7 @@
  import net.minecraft.world.storage.WorldInfo;
 +import net.minecraftforge.common.DimensionManager;
 +import net.minecraftforge.common.util.EnumHelper;
++import net.minecraftforge.fml.common.FMLCommonHandler;
 +import net.minecraftforge.fml.common.registry.EntityRegistry;
 +import net.minecraftforge.fml.common.registry.ForgeRegistries;
 +import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -101,6 +110,7 @@
 +import org.bukkit.craftbukkit.entity.CraftCustomEntity;
 +import org.bukkit.entity.EntityType;
 +import org.bukkit.potion.PotionEffectType;
++import org.spigotmc.SlackActivityAccountant;
  
 -public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo
 -{
@@ -126,7 +136,7 @@
      @SideOnly(Side.SERVER)
      private String hostname;
      private int serverPort = -1;
-@@ -128,7 +131,6 @@
+@@ -128,7 +135,6 @@
      private KeyPair serverKeyPair;
      private String serverOwner;
      private String folderName;
@@ -134,7 +144,7 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,178 +146,265 @@
+@@ -144,178 +150,264 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
@@ -150,12 +160,15 @@
 +    public OptionSet options;
 +    public org.bukkit.command.ConsoleCommandSender console;
 +    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
-+    //public ConsoleReader reader;
++	public ConsoleReader reader;
 +    public static int currentTick = (int) (System.currentTimeMillis() / 50);
 +    public Thread primaryThread;
 +    public Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
 +    public int autosavePeriod;
 +    // CraftBukkit end
++    // Spigot start
++    public final SlackActivityAccountant slackActivityAccountant = new SlackActivityAccountant();
++    // Spigot end
  
 -    public MinecraftServer(File anvilFileIn, Proxy proxyIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn)
 -    {
@@ -183,24 +196,20 @@
 +            System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
 +            Main.useJline = false;
 +        }
-+
-+        /*
 +        try {
-+            reader = new ConsoleReader(System.in, System.out);
-+            reader.setExpandEvents(false); // Avoid parsing exceptions for uncommonly used event designators
-+        } catch (Throwable e) {
++            (this.reader = new ConsoleReader(System.in, (OutputStream)System.out)).setExpandEvents(false);
++        }
++        catch (Throwable e) {
 +            try {
-+                // Try again with jline disabled for Windows users without C++ 2008 Redistributable
 +                System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
 +                System.setProperty("user.language", "en");
 +                Main.useJline = false;
-+                reader = new ConsoleReader(System.in, System.out);
-+                reader.setExpandEvents(false);
-+            } catch (IOException ex) {
-+                LOGGER.warn((String) null, ex);
++                (this.reader = new ConsoleReader(System.in, (OutputStream)System.out)).setExpandEvents(false);
 +            }
++            catch (IOException ex) {
++                MinecraftServer.LOGGER.warn((String)null, (Throwable)ex);
 +        }
-+        */
++        }
 +        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
 +        this.serverThread = primaryThread = new Thread(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER,
 +                this, "Server thread"); // Moved from main
@@ -497,7 +506,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +412,52 @@
+@@ -323,45 +415,52 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -577,7 +586,7 @@
          }
      }
  
-@@ -379,73 +475,77 @@
+@@ -379,73 +478,79 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -630,14 +639,12 @@
      }
  
 -    public void stopServer()
--    {
--        LOGGER.info("Stopping server");
 +    private boolean hasStopped = false;
 +    private final Object stopLock = new Object();
- 
--        if (this.getNetworkSystem() != null)
--        {
-+    public void stopServer() throws MinecraftException {
++
++    public void stopServer() throws MinecraftException
+     {
++        org.spigotmc.AsyncCatcher.enabled = false; // Spigot
 +        // CraftBukkit start - prevent double stopping on multiple threads
 +        synchronized (stopLock) {
 +            if (hasStopped)
@@ -645,7 +652,10 @@
 +            hasStopped = true;
 +        }
 +        // CraftBukkit end
-+        LOGGER.info("Stopping server");
+         LOGGER.info("Stopping server");
+-
+-        if (this.getNetworkSystem() != null)
+-        {
 +        if (this.server != null) {
 +            this.server.disablePlugins();
 +        }
@@ -688,7 +698,7 @@
              {
                  if (worldserver1 != null)
                  {
-@@ -453,38 +553,32 @@
+@@ -453,159 +558,213 @@
                      worldserver1.flush();
                  }
              }
@@ -709,6 +719,13 @@
          }
  
          CommandBase.setCommandListener(null); // Forge: fix MC-128561
++        // Spigot start
++        if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
++            Object[] p = {"usercache.json"};
++            LOGGER.info("Saving usercache.json");
++            this.profileCache.save();
++        }
++        // Spigot end
      }
  
 -    public boolean isServerRunning()
@@ -723,76 +740,149 @@
          this.serverRunning = false;
      }
  
--    public void run()
--    {
--        try
--        {
--            if (this.init())
--            {
-+    public void run() {
-+        try {
-+            if (this.init()) {
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
++    private static final int TPS = 20;
++    private static final long SEC_IN_NANO = 1000000000;
++    public static final long TICK_TIME = SEC_IN_NANO / TPS;
++    private static final long MAX_CATCHUP_BUFFER = TICK_TIME * TPS * 60L;
++    private static final int SAMPLE_INTERVAL = 20;
++    public final RollingAverage tps1 = new RollingAverage(60);
++    public final RollingAverage tps5 = new RollingAverage(60 * 5);
++    public final RollingAverage tps15 = new RollingAverage(60 * 15);
++    public double[] recentTps = new double[3];
++
++    public static class RollingAverage {
++        private final int size;
++        private long time;
++        private double total;
++        private int index = 0;
++        private final double[] samples;
++        private final long[] times;
++
++              RollingAverage(int size) {
++                  this.size = size;
++                  this.time = size * SEC_IN_NANO;
++                  this.total = TPS * SEC_IN_NANO * size;
++                  this.samples = new double[size];
++                  this.times = new long[size];
++                  for (int i = 0; i < size; i++) {
++                          this.samples[i] = TPS;
++                          this.times[i] = SEC_IN_NANO;
++                      }
++              }
++
++              public void add(double x, long t) {
++                  time -= times[index];
++                  total -= samples[index] * times[index];
++                  samples[index] = x;
++                  times[index] = t;
++                  time += t;
++                  total += x * t;
++                  if (++index == size) {
++                          index = 0;
++                      }
++              }
++
++              public double getAverage() {
++                  return total / time;
++              }
++    }
++
+     public void run()
+     {
+         try
+         {
+             if (this.init())
+             {
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
++                FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,20 +586,20 @@
+                 this.statusResponse.setServerDescription(new TextComponentString(this.motd));
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
--                while (this.serverRunning)
--                {
-+                while (this.serverRunning) {
-                     long k = getCurrentTimeMillis();
-                     long j = k - this.currentTime;
- 
++                // Spigot start
++                Arrays.fill( recentTps, 20 );
++                long start = System.nanoTime(), lastTick = start - TICK_TIME, catchupTime = 0, curTime, wait, tickSection = start;
+                 while (this.serverRunning)
+                 {
+-                    long k = getCurrentTimeMillis();
+-                    long j = k - this.currentTime;
+-
 -                    if (j > 2000L && this.currentTime - this.timeOfLastWarning >= 15000L)
 -                    {
 -                        LOGGER.warn("Can't keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)", Long.valueOf(j), Long.valueOf(j / 50L));
-+                    if (j > 2000L && this.currentTime - this.timeOfLastWarning >= 15000L) {
-+                        if (server.getWarnOnOverload()) // CraftBukkit
-+                            LOGGER.warn(
-+                                    "Can't keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)",
-+                                    Long.valueOf(j), Long.valueOf(j / 50L));
-                         j = 2000L;
-                         this.timeOfLastWarning = this.currentTime;
+-                        j = 2000L;
+-                        this.timeOfLastWarning = this.currentTime;
++                    curTime = System.nanoTime();
++                    wait = TICK_TIME - (curTime - lastTick);
++                    if (wait > 0) {
++                        if (catchupTime < 2E6) {
++                            wait += Math.abs(catchupTime);
++                        } else if (wait < catchupTime) {
++                            catchupTime -= wait;
++                            wait = 0;
++                    } else {
++                            wait -= catchupTime;
++                            catchupTime = 0;
++                        }
                      }
- 
+-
 -                    if (j < 0L)
 -                    {
-+                    if (j < 0L) {
-                         LOGGER.warn("Time ran backwards! Did the system time change?");
-                         j = 0L;
+-                        LOGGER.warn("Time ran backwards! Did the system time change?");
+-                        j = 0L;
++                    if (wait > 0) {
++                        Thread.sleep(wait / 1000000);
++                        curTime = System.nanoTime();
++                        wait = TICK_TIME - (curTime - lastTick);
                      }
-@@ -513,15 +607,12 @@
-                     i += j;
-                     this.currentTime = k;
  
+-                    i += j;
+-                    this.currentTime = k;
+-
 -                    if (this.worlds[0].areAllPlayersAsleep())
--                    {
-+                    if (this.worldServerList.get(0).areAllPlayersAsleep()) {
-                         this.tick();
-                         i = 0L;
--                    }
++                    catchupTime = Math.min(MAX_CATCHUP_BUFFER, catchupTime - wait);
++                    if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
+                     {
+-                        this.tick();
+-                        i = 0L;
++                        final long diff = curTime - tickSection;
++                        double currentTps = 1E9 / diff * SAMPLE_INTERVAL;
++                        tps1.add(currentTps, diff);
++                        tps5.add(currentTps, diff);
++                        tps15.add(currentTps, diff);
++                        // Backwards compat with bad plugins
++                        recentTps[0] = tps1.getAverage();
++                        recentTps[1] = tps5.getAverage();
++                        recentTps[2] = tps15.getAverage();
++                        tickSection = curTime;
+                     }
 -                    else
 -                    {
 -                        while (i > 50L)
 -                        {
-+                    } else {
-+                        while (i > 50L) {
-+                            MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
-                             i -= 50L;
-                             this.tick();
-                         }
-@@ -532,80 +623,67 @@
+-                            i -= 50L;
+-                            this.tick();
+-                        }
+-                    }
++                    lastTick = curTime;
+ 
+-                    Thread.sleep(Math.max(1L, 50L - i));
++                            this.tick();
+                     this.serverIsRunning = true;
                  }
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopping();
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
--            }
--            else
--            {
-+            } else {
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopping();
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
++                // Spigot end
++                FMLCommonHandler.instance().handleServerStopping();
++                FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+             }
+             else
+             {
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
 -                this.finalTick((CrashReport)null);
++                FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
 +                this.finalTick((CrashReport) null);
              }
 -        }
@@ -800,27 +890,25 @@
 -        {
 +        } catch (net.minecraftforge.fml.common.StartupQuery.AbortedException e) {
              // ignore silently
-             net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
--        }
--        catch (Throwable throwable1)
--        {
-+        } catch (Throwable throwable1) {
+-            net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
++            FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+         }
+         catch (Throwable throwable1)
+         {
              LOGGER.error("Encountered an unexpected exception", throwable1);
              CrashReport crashreport = null;
  
 -            if (throwable1 instanceof ReportedException)
 -            {
 -                crashreport = this.addServerInfoToCrashReport(((ReportedException)throwable1).getCrashReport());
+-            }
+-            else
+-            {
 +            if (throwable1 instanceof ReportedException) {
 +                crashreport = this.addServerInfoToCrashReport(((ReportedException) throwable1).getCrashReport());
 +            } else {
-+                crashreport = this
-+                        .addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
+                 crashreport = this.addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
              }
--            else
--            {
--                crashreport = this.addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
--            }
  
 -            File file1 = new File(new File(this.getDataDirectory(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
 +            File file1 = new File(new File(this.getDataDirectory(), "crash-reports"),
@@ -829,16 +917,16 @@
 -            if (crashreport.saveToFile(file1))
 -            {
 -                LOGGER.error("This crash report has been saved to: {}", (Object)file1.getAbsolutePath());
--            }
--            else
--            {
 +            if (crashreport.saveToFile(file1)) {
-+                LOGGER.error("This crash report has been saved to: {}", (Object) file1.getAbsolutePath());
-+            } else {
++                LOGGER.error(String.format("This crash report has been saved to: {0}", new Object[] { file1.getAbsolutePath()}));
+             }
+             else
+             {
                  LOGGER.error("We were unable to save this crash report to disk.");
              }
  
-             net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+-            net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
++            FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
              this.finalTick(crashreport);
 -        }
 -        finally
@@ -854,19 +942,23 @@
 +            } catch (Throwable throwable) {
                  LOGGER.error("Exception stopping the server", throwable);
 -            }
--            finally
--            {
-+            } finally {
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopped();
-                 this.serverStopped = true;
-+                /*
-+                // CraftBukkit start - Restore terminal to original settings
++                FMLCommonHandler.instance().handleServerStopped();
++                this.serverStopped = true;
 +                try {
-+                    reader.getTerminal().restore();
-+                } catch (Exception ignored) {
++                    this.reader.getTerminal().restore();
 +                }
-+                // CraftBukkit end
-+                */
++                catch (Exception ex) {}
++                this.systemExitNow();
++                }
+             finally
+             {
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopped();
++                FMLCommonHandler.instance().handleServerStopped();
+                 this.serverStopped = true;
++                try {
++                    this.reader.getTerminal().restore();
++                }
++                catch (Exception ex2) {}
                  this.systemExitNow();
              }
          }
@@ -894,7 +986,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +691,42 @@
+@@ -613,52 +772,42 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -958,7 +1050,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +735,15 @@
+@@ -667,16 +816,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -980,7 +1072,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,12 +751,14 @@
+@@ -684,12 +832,14 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -996,7 +1088,7 @@
          }
  
          this.profiler.startSection("tallying");
-@@ -697,130 +766,156 @@
+@@ -697,130 +847,156 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1220,7 +1312,7 @@
          LOGGER.warn(msg);
      }
  
-@@ -835,53 +930,51 @@
+@@ -835,53 +1011,51 @@
          return ret;
      }
  
@@ -1298,7 +1390,7 @@
                  }
              });
          }
-@@ -889,145 +982,110 @@
+@@ -889,145 +1063,115 @@
          return report;
      }
  
@@ -1396,7 +1488,11 @@
      }
  
 -    public ICommandManager getCommandManager()
--    {
++    public boolean canUseCommand(int permLevel, String commandName, String perm)
+     {
++        return true;
++    }
++
 +    public ICommandManager getCommandManager() {
          return this.commandManager;
      }
@@ -1484,7 +1580,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1093,75 @@
+@@ -1035,80 +1179,75 @@
          }
      }
  
@@ -1594,7 +1690,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1170,186 @@
+@@ -1117,228 +1256,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1871,7 +1967,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1358,120 @@
+@@ -1347,130 +1444,120 @@
          return null;
      }
  
@@ -2045,7 +2141,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1535,19 @@
+@@ -1534,13 +1621,19 @@
                      ++i1;
                  }
              }
@@ -2070,7 +2166,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1586,87 @@
+@@ -1579,84 +1672,87 @@
                      dedicatedserver.stopServer();
                  }
              });

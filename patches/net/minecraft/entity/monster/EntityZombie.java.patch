@@ -11,7 +11,17 @@
  
  public class EntityZombie extends EntityMob
  {
-@@ -215,7 +219,13 @@
+@@ -87,7 +91,9 @@
+         this.tasks.addTask(6, new EntityAIMoveThroughVillage(this, 1.0D, false));
+         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[] {EntityPigZombie.class}));
+         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
++        if (this.world.spigotConfig.zombieAggressiveTowardsVillager) {
+         this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityVillager.class, false));
++        }
+         this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
+     }
+ 
+@@ -215,7 +221,13 @@
  
                  if (flag)
                  {
@@ -26,7 +36,7 @@
                  }
              }
          }
-@@ -270,8 +280,8 @@
+@@ -270,8 +282,8 @@
  
                          if (!this.world.isAnyPlayerWithinRangeAt((double)i1, (double)j1, (double)k1, 7.0D) && this.world.checkNoEntityCollision(entityzombie.getEntityBoundingBox(), entityzombie) && this.world.getCollisionBoxes(entityzombie, entityzombie.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(entityzombie.getEntityBoundingBox()))
                          {
@@ -37,7 +47,7 @@
                              entityzombie.onInitialSpawn(this.world.getDifficultyForLocation(new BlockPos(entityzombie)), (IEntityLivingData)null);
                              this.getEntityAttribute(SPAWN_REINFORCEMENTS_CHANCE).applyModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05000000074505806D, 0));
                              entityzombie.getEntityAttribute(SPAWN_REINFORCEMENTS_CHANCE).applyModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05000000074505806D, 0));
-@@ -299,7 +309,13 @@
+@@ -299,7 +311,13 @@
  
              if (this.getHeldItemMainhand().isEmpty() && this.isBurning() && this.rand.nextFloat() < f * 0.3F)
              {
@@ -52,7 +62,7 @@
              }
          }
  
-@@ -405,7 +421,7 @@
+@@ -405,7 +423,7 @@
              EntityZombieVillager entityzombievillager = new EntityZombieVillager(this.world);
              entityzombievillager.copyLocationAndAnglesFrom(entityvillager);
              this.world.removeEntity(entityvillager);
@@ -61,7 +71,7 @@
              entityzombievillager.setProfession(entityvillager.getProfession());
              entityzombievillager.setChild(entityvillager.isChild());
              entityzombievillager.setNoAI(entityvillager.isAIDisabled());
-@@ -416,7 +432,7 @@
+@@ -416,7 +434,7 @@
                  entityzombievillager.setAlwaysRenderNameTag(entityvillager.getAlwaysRenderNameTag());
              }
  
@@ -70,7 +80,7 @@
              this.world.playEvent((EntityPlayer)null, 1026, new BlockPos(this), 0);
          }
      }
-@@ -443,16 +459,16 @@
+@@ -443,16 +461,16 @@
      {
          livingdata = super.onInitialSpawn(difficulty, livingdata);
          float f = difficulty.getClampedAdditionalDifficulty();
@@ -91,7 +101,7 @@
  
              if (entityzombie$groupdata.isChild)
              {
-@@ -475,7 +491,7 @@
+@@ -475,7 +493,7 @@
                      entitychicken1.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
                      entitychicken1.onInitialSpawn(difficulty, (IEntityLivingData)null);
                      entitychicken1.setChickenJockey(true);
@@ -100,7 +110,7 @@
                      this.startRiding(entitychicken1);
                  }
              }
-@@ -543,7 +559,7 @@
+@@ -543,7 +561,7 @@
  
      public void onDeath(DamageSource cause)
      {
@@ -109,7 +119,7 @@
  
          if (cause.getTrueSource() instanceof EntityCreeper)
          {
-@@ -560,6 +576,7 @@
+@@ -560,6 +578,7 @@
                  }
              }
          }

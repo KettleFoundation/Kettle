@@ -1,15 +1,40 @@
 --- ../src-base/minecraft/net/minecraft/entity/EntityAgeable.java
 +++ ../src-work/minecraft/net/minecraft/entity/EntityAgeable.java
-@@ -22,6 +22,8 @@
+@@ -22,6 +22,33 @@
      private float ageWidth = -1.0F;
      private float ageHeight;
  
 +    public boolean ageLocked;
 +
++    // Spigot start
++    @Override
++    public void inactiveTick()
++    {
++        super.inactiveTick();
++        if ( this.world.isRemote || this.ageLocked )
++        { // CraftBukkit
++            this.setScaleForAge( this.isChild() );
++        } else
++        {
++            int i = this.getGrowingAge();
++
++            if ( i < 0 )
++            {
++                ++i;
++                this.setGrowingAge( i );
++            } else if ( i > 0 )
++            {
++                --i;
++                this.setGrowingAge( i );
++            }
++        }
++    }
++    // Spigot end
++
      public EntityAgeable(World worldIn)
      {
          super(worldIn);
-@@ -48,7 +50,7 @@
+@@ -48,7 +75,7 @@
                      {
                          entityageable.setGrowingAge(-24000);
                          entityageable.setLocationAndAngles(this.posX, this.posY, this.posZ, 0.0F, 0.0F);
@@ -18,7 +43,7 @@
  
                          if (itemstack.hasDisplayName())
                          {
-@@ -154,6 +156,7 @@
+@@ -154,6 +181,7 @@
          super.writeEntityToNBT(compound);
          compound.setInteger("Age", this.getGrowingAge());
          compound.setInteger("ForcedAge", this.forcedAge);
@@ -26,7 +51,7 @@
      }
  
      public void readEntityFromNBT(NBTTagCompound compound)
-@@ -161,6 +164,7 @@
+@@ -161,6 +189,7 @@
          super.readEntityFromNBT(compound);
          this.setGrowingAge(compound.getInteger("Age"));
          this.forcedAge = compound.getInteger("ForcedAge");
@@ -34,7 +59,7 @@
      }
  
      public void notifyDataManagerChange(DataParameter<?> key)
-@@ -177,7 +181,7 @@
+@@ -177,7 +206,7 @@
      {
          super.onLivingUpdate();
  

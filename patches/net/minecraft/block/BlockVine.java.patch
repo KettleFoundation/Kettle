@@ -8,6 +8,15 @@
  
  public class BlockVine extends Block implements net.minecraftforge.common.IShearable
  {
+@@ -185,7 +186,7 @@
+     {
+         if (!worldIn.isRemote)
+         {
+-            if (worldIn.rand.nextInt(4) == 0 && worldIn.isAreaLoaded(pos, 4)) // Forge: check area to prevent loading unloaded chunks
++            if (worldIn.rand.nextInt(Math.max(1, (int)(100.0f / worldIn.spigotConfig.vineModifier) * 4)) == 0 && worldIn.isAreaLoaded(pos, 4)) // Forge: check area to prevent loading unloaded chunks // Spigot
+             {
+                 int i = 4;
+                 int j = 5;
 @@ -233,7 +234,11 @@
  
                      if (((Boolean)iblockstate2.getValue(NORTH)).booleanValue() || ((Boolean)iblockstate2.getValue(EAST)).booleanValue() || ((Boolean)iblockstate2.getValue(SOUTH)).booleanValue() || ((Boolean)iblockstate2.getValue(WEST)).booleanValue())

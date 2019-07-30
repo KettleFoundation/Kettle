@@ -8,11 +8,45 @@
  import java.util.stream.Collectors;
  import java.util.stream.Stream;
  import javax.annotation.Nullable;
-@@ -211,6 +210,7 @@
+@@ -29,6 +28,7 @@
+ import net.minecraft.util.text.TextComponentTranslation;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.spigotmc.SpigotConfig;
+ 
+ public class PlayerAdvancements
+ {
+@@ -142,8 +142,12 @@
+ 
+                     if (advancement == null)
+                     {
++                        // CraftBukkit start
++                        if (entry.getKey().toString().equals("minecraft")) {
+                         LOGGER.warn("Ignored advancement '" + entry.getKey() + "' in progress file " + this.progressFile + " - it doesn't exist anymore?");
+                     }
++                        // CraftBukkit end
++                    }
+                     else
+                     {
+                         this.startProgress(advancement, entry.getValue());
+@@ -167,6 +171,12 @@
+ 
+     public void save()
+     {
++        // Spigot start
++        if (SpigotConfig.disableAdvancementSaving) {
++            return;
++        }
++        // Spigot end
++
+         Map<ResourceLocation, AdvancementProgress> map = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
+ 
+         for (Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet())
+@@ -211,6 +221,7 @@
  
              if (!flag1 && advancementprogress.isDone())
              {
-+                this.player.world.getServer().getPluginManager().callEvent(new org.bukkit.event.player.PlayerAdvancementDoneEvent(this.player.getBukkitEntity(), p_192750_1_.bukkit));
++                this.player.world.getServer().getPluginManager().callEvent(new org.bukkit.event.player.PlayerAdvancementDoneEvent(this.player.getBukkitEntity(), p_192750_1_.bukkit)); // CraftBukkit
                  p_192750_1_.getRewards().apply(this.player);
  
                  if (p_192750_1_.getDisplay() != null && p_192750_1_.getDisplay().shouldAnnounceToChat() && this.player.world.getGameRules().getBoolean("announceAdvancements"))

@@ -708,7 +708,7 @@
          if ("seed".equals(commandName) && !this.mcServer.isDedicatedServer())
          {
              return true;
-@@ -1308,6 +1575,15 @@
+@@ -1308,8 +1575,35 @@
          {
              return true;
          }
@@ -720,11 +720,31 @@
 +            return getBukkitEntity().isOp();
 +        }
 +        return getBukkitEntity().hasPermission("minecraft.command." + commandName);
++
 +        // CraftBukkit end
      }
  
++    public boolean canUseCommand(int permLevel, String commandName, String perm)
++    {
++        if ("@".equals(commandName)) {
++            return getBukkitEntity().hasPermission("minecraft.command.selector");
++        }
++        if ("".equals(commandName)) {
++            return getBukkitEntity().isOp();
++        }
++        if (!perm.equals("minecraft"))
++        {
++        	return getBukkitEntity().hasPermission(perm);
++        }
++        return getBukkitEntity().hasPermission("minecraft.command." + commandName);
++
++        // CraftBukkit end
++    }
++
      public String getPlayerIP()
-@@ -1320,6 +1596,17 @@
+     {
+         String s = this.connection.netManager.getRemoteAddress().toString();
+@@ -1320,6 +1614,17 @@
  
      public void handleClientSettings(CPacketClientSettings packetIn)
      {
@@ -742,7 +762,7 @@
          this.language = packetIn.getLang();
          this.chatVisibility = packetIn.getChatVisibility();
          this.chatColours = packetIn.isColorsEnabled();
-@@ -1327,7 +1614,7 @@
+@@ -1327,7 +1632,7 @@
          this.getDataManager().set(MAIN_HAND, Byte.valueOf((byte)(packetIn.getMainHand() == EnumHandSide.LEFT ? 0 : 1)));
      }
  
@@ -751,7 +771,7 @@
      {
          return this.chatVisibility;
      }
-@@ -1402,7 +1689,7 @@
+@@ -1402,7 +1707,7 @@
          if (entity != this.spectatingEntity)
          {
              this.connection.sendPacket(new SPacketCamera(this.spectatingEntity));
@@ -760,7 +780,7 @@
          }
      }
  
-@@ -1434,7 +1721,8 @@
+@@ -1434,7 +1739,8 @@
      @Nullable
      public ITextComponent getTabListDisplayName()
      {
@@ -770,7 +790,7 @@
      }
  
      public void swingArm(EnumHand hand)
-@@ -1455,13 +1743,20 @@
+@@ -1455,13 +1761,20 @@
  
      public void setElytraFlying()
      {
@@ -794,7 +814,7 @@
      }
  
      public PlayerAdvancements getAdvancements()
-@@ -1474,4 +1769,145 @@
+@@ -1474,4 +1787,145 @@
      {
          return this.enteredNetherPosition;
      }

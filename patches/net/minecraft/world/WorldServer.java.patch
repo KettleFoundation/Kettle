@@ -61,7 +61,13 @@
  import net.minecraft.util.EnumParticleTypes;
  import net.minecraft.util.IProgressUpdate;
  import net.minecraft.util.IThreadListener;
-@@ -81,12 +102,14 @@
+@@ -77,16 +98,20 @@
+ import net.minecraft.world.storage.WorldInfo;
+ import net.minecraft.world.storage.WorldSavedDataCallableSave;
+ import net.minecraft.world.storage.loot.LootTableManager;
++import net.minecraftforge.common.DimensionManager;
++import net.minecraftforge.common.WorldSpecificSaveHandler;
+ import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -77,7 +83,7 @@
      private final PlayerChunkMap playerChunkMap;
      private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.<NextTickListEntry>newHashSet();
      private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<NextTickListEntry>();
-@@ -97,7 +120,7 @@
+@@ -97,7 +122,7 @@
      private final Teleporter worldTeleporter;
      private final WorldEntitySpawner entitySpawner = new WorldEntitySpawner();
      protected final VillageSiege villageSiege = new VillageSiege(this);
@@ -86,7 +92,7 @@
      private int blockEventCacheIndex;
      private final List<NextTickListEntry> pendingTickListEntriesThisTick = Lists.<NextTickListEntry>newArrayList();
  
-@@ -105,18 +128,42 @@
+@@ -105,22 +130,64 @@
      protected Set<ChunkPos> doneChunks = new java.util.HashSet<ChunkPos>();
      public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
  
@@ -110,6 +116,15 @@
 +        this.calculateInitialSkylight();
 +        this.calculateInitialWeather();
 +        this.getWorldBorder().setSize(server.getMaxWorldSize());
++        WorldServer overworld = DimensionManager.getWorld(0);
++        if (overworld != null) {
++            this.mapStorage = overworld.mapStorage;
++            this.perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, overworld.saveHandler));
++        }
++        else {
++            this.mapStorage = new MapStorage(saveHandlerIn);
++            this.perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, this.saveHandler));
++        }
 +        net.minecraftforge.common.DimensionManager.setWorld(dimensionId, this, mcServer);
 +    }
 +
@@ -130,7 +145,20 @@
          this.worldTeleporter = new Teleporter(this);
          this.calculateInitialSkylight();
          this.calculateInitialWeather();
-@@ -141,6 +188,7 @@
+         this.getWorldBorder().setSize(server.getMaxWorldSize());
++        WorldServer overworld = DimensionManager.getWorld(0);
++        if (overworld != null) {
++            this.mapStorage = overworld.mapStorage;
++            this.perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, overworld.saveHandler));
++        }
++        else {
++            this.mapStorage = new MapStorage(saveHandlerIn);
++            this.perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, this.saveHandler));
++        }
+         net.minecraftforge.common.DimensionManager.setWorld(dimensionId, this, mcServer);
+     }
+ 
+@@ -141,6 +208,7 @@
              this.villageCollection.setWorldsForAll(this);
          }
  
@@ -138,7 +166,7 @@
          this.worldScoreboard = new ServerScoreboard(this.mcServer);
          ScoreboardSaveData scoreboardsavedata = (ScoreboardSaveData)this.mapStorage.getOrLoadData(ScoreboardSaveData.class, "scoreboard");
  
-@@ -152,8 +200,19 @@
+@@ -152,8 +220,19 @@
  
          scoreboardsavedata.setScoreboard(this.worldScoreboard);
          ((ServerScoreboard)this.worldScoreboard).addDirtyRunnable(new WorldSavedDataCallableSave(scoreboardsavedata));
@@ -159,7 +187,7 @@
          this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
          this.getWorldBorder().setCenter(this.worldInfo.getBorderCenterX(), this.worldInfo.getBorderCenterZ());
          this.getWorldBorder().setDamageAmount(this.worldInfo.getBorderDamagePerBlock());
-@@ -171,9 +230,141 @@
+@@ -171,9 +250,141 @@
          }
  
          this.initCapabilities();
@@ -301,7 +329,7 @@
      public void tick()
      {
          super.tick();
-@@ -198,11 +389,17 @@
+@@ -198,11 +409,17 @@
  
          this.profiler.startSection("mobSpawner");
  
@@ -321,7 +349,7 @@
          this.profiler.endStartSection("chunkSource");
          this.chunkProvider.tick();
          int j = this.calculateSkylightSubtracted(1.0F);
-@@ -219,23 +416,39 @@
+@@ -219,23 +436,39 @@
              this.setWorldTime(this.getWorldTime() + 1L);
          }
  
@@ -361,7 +389,7 @@
      }
  
      @Nullable
-@@ -268,7 +481,7 @@
+@@ -268,7 +501,7 @@
                  {
                      ++i;
                  }
@@ -370,7 +398,7 @@
                  {
                      ++j;
                  }
-@@ -298,19 +511,26 @@
+@@ -298,19 +531,26 @@
          this.provider.resetRainAndThunder();
      }
  
@@ -399,7 +427,7 @@
          }
          else
          {
-@@ -346,7 +566,7 @@
+@@ -346,7 +586,7 @@
          this.worldInfo.setSpawnZ(j);
      }
  
@@ -408,15 +436,31 @@
      {
          return this.getChunkProvider().chunkExists(x, z);
      }
-@@ -398,6 +618,7 @@
+@@ -355,7 +595,7 @@
+     {
+         this.profiler.startSection("playerCheckLight");
+ 
+-        if (!this.playerEntities.isEmpty())
++        if (spigotConfig.randomLightUpdates && !this.playerEntities.isEmpty()) // Spigot
+         {
+             int i = this.rand.nextInt(this.playerEntities.size());
+             EntityPlayer entityplayer = this.playerEntities.get(i);
+@@ -392,12 +632,14 @@
+             {
+                 this.profiler.startSection("getChunk");
+                 Chunk chunk = iterator.next();
++                try {
+                 int j = chunk.x * 16;
+                 int k = chunk.z * 16;
+                 this.profiler.endStartSection("checkNextLight");
                  chunk.enqueueRelightChecks();
                  this.profiler.endStartSection("tickChunk");
                  chunk.onTick(false);
-+//                if (!chunk.areNeighborsLoaded(1)) continue; // Spigot - Kettle TODO: Probs let forge sort out chunks loading
++                    if (!chunk.areNeighborsLoaded(1)) continue; // Spigot
                  this.profiler.endStartSection("thunder");
  
                  if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
-@@ -416,7 +637,7 @@
+@@ -416,7 +658,7 @@
                              entityskeletonhorse.setTrap(true);
                              entityskeletonhorse.setGrowingAge(0);
                              entityskeletonhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
@@ -425,7 +469,7 @@
                              this.addWeatherEffect(new EntityLightningBolt(this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
                          }
                          else
-@@ -438,12 +659,14 @@
+@@ -438,12 +680,14 @@
                      if (this.isAreaLoaded(blockpos2, 1)) // Forge: check area to avoid loading neighbors in unloaded chunks
                      if (this.canBlockFreezeNoWater(blockpos2))
                      {
@@ -442,7 +486,32 @@
                      }
  
                      if (flag && this.getBiome(blockpos2).canRain())
-@@ -694,7 +917,14 @@
+@@ -481,8 +725,15 @@
+                         }
+                     }
+                 }
++                } catch (Exception e) {
++                    try {
++                        this.getChunkProvider().unloadChunk(chunk, true);
++                    } catch (Exception e2) {
++                        e.printStackTrace();
++                    }
++                    e.printStackTrace();
+             }
+-
++            }
+             this.profiler.endSection();
+         }
+     }
+@@ -611,6 +862,7 @@
+ 
+         this.provider.onWorldUpdateEntities();
+         super.updateEntities();
++        spigotConfig.currentPrimedTnt = 0; // Spigot
+     }
+ 
+     protected void tickPlayers()
+@@ -694,7 +946,14 @@
              {
                  if (i > 65536)
                  {
@@ -458,7 +527,7 @@
                  }
  
                  this.profiler.startSection("cleaning");
-@@ -817,6 +1047,7 @@
+@@ -817,6 +1076,7 @@
          return list;
      }
  
@@ -466,7 +535,7 @@
      public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate)
      {
          if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob))
-@@ -831,6 +1062,7 @@
+@@ -831,6 +1091,7 @@
  
          super.updateEntityWithOptionalForce(entityIn, forceUpdate);
      }
@@ -474,7 +543,7 @@
  
      private boolean canSpawnNPCs()
      {
-@@ -845,9 +1077,62 @@
+@@ -845,9 +1106,62 @@
      protected IChunkProvider createChunkProvider()
      {
          IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
@@ -538,7 +607,7 @@
      public boolean isBlockModifiable(EntityPlayer player, BlockPos pos)
      {
          return super.isBlockModifiable(player, pos);
-@@ -929,6 +1214,23 @@
+@@ -929,6 +1243,23 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 8;
  
@@ -562,7 +631,7 @@
              if (blockpos != null)
              {
                  i = blockpos.getX();
-@@ -941,7 +1243,7 @@
+@@ -941,7 +1272,7 @@
  
              int l = 0;
  
@@ -571,7 +640,7 @@
              {
                  i += random.nextInt(64) - random.nextInt(64);
                  k += random.nextInt(64) - random.nextInt(64);
-@@ -992,6 +1294,7 @@
+@@ -992,6 +1323,7 @@
  
          if (chunkproviderserver.canSave())
          {
@@ -579,7 +648,7 @@
              if (progressCallback != null)
              {
                  progressCallback.displaySavingString("Saving level");
-@@ -1039,6 +1342,12 @@
+@@ -1039,6 +1371,12 @@
              }
          }
  
@@ -592,7 +661,7 @@
          this.worldInfo.setBorderSize(this.getWorldBorder().getDiameter());
          this.worldInfo.getBorderCenterX(this.getWorldBorder().getCenterX());
          this.worldInfo.getBorderCenterZ(this.getWorldBorder().getCenterZ());
-@@ -1058,6 +1367,12 @@
+@@ -1058,6 +1396,12 @@
          return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn) : false;
      }
  
@@ -605,7 +674,7 @@
      public void loadEntities(Collection<Entity> entityCollection)
      {
          for (Entity entity : Lists.newArrayList(entityCollection))
-@@ -1074,7 +1389,7 @@
+@@ -1074,7 +1418,7 @@
      {
          if (entityIn.isDead)
          {
@@ -614,7 +683,7 @@
              return false;
          }
          else
-@@ -1093,7 +1408,7 @@
+@@ -1093,7 +1437,7 @@
                  {
                      if (!(entityIn instanceof EntityPlayer))
                      {
@@ -623,7 +692,7 @@
                          return false;
                      }
  
-@@ -1141,9 +1456,15 @@
+@@ -1141,9 +1485,15 @@
  
      public boolean addWeatherEffect(Entity entityIn)
      {
@@ -640,7 +709,7 @@
              return true;
          }
          else
-@@ -1164,11 +1485,18 @@
+@@ -1164,11 +1514,18 @@
  
      public Explosion newExplosion(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking)
      {
@@ -661,7 +730,7 @@
          if (!isSmoking)
          {
              explosion.clearAffectedBlockPositions();
-@@ -1211,7 +1539,8 @@
+@@ -1211,7 +1568,8 @@
              {
                  if (this.fireBlockEvent(blockeventdata))
                  {
@@ -671,7 +740,7 @@
                  }
              }
  
-@@ -1298,11 +1627,18 @@
+@@ -1298,11 +1656,18 @@
  
      public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
      {
@@ -690,7 +759,7 @@
              this.sendPacketWithinDistance(entityplayermp, longDistance, xCoord, yCoord, zCoord, spacketparticles);
          }
      }
-@@ -1356,7 +1692,7 @@
+@@ -1356,7 +1721,7 @@
          return this.functionManager;
      }
  

@@ -17,6 +17,15 @@
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.server.dedicated.DedicatedServer;
  import net.minecraft.server.dedicated.PropertyManager;
+@@ -49,7 +50,7 @@
+             }
+         }), String.class);
+ 
+-        if (server.isServerInOnlineMode())
++        if (server.isServerInOnlineMode() || org.spigotmc.SpigotConfig.bungee) // Spigot: bungee = online mode, for now.
+         {
+             server.getGameProfileRepository().findProfilesByNames(astring, Agent.MINECRAFT, callback);
+         }
 @@ -135,9 +136,10 @@
                  {
                      userlistbans.readSavedFile();

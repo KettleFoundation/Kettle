@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/passive/EntityVillager.java
 +++ ../src-work/minecraft/net/minecraft/entity/passive/EntityVillager.java
-@@ -92,6 +92,12 @@
+@@ -92,6 +92,13 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -8,12 +8,13 @@
 +import org.bukkit.craftbukkit.entity.CraftVillager;
 +import org.bukkit.craftbukkit.inventory.CraftMerchantRecipe;
 +import org.bukkit.entity.Villager;
++import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 +import org.bukkit.event.entity.VillagerAcquireTradeEvent;
 +import org.bukkit.event.entity.VillagerReplenishTradeEvent;
  
  public class EntityVillager extends EntityAgeable implements INpc, IMerchant
  {
-@@ -104,18 +110,18 @@
+@@ -104,18 +111,18 @@
      @Nullable
      private EntityPlayer buyingPlayer;
      @Nullable
@@ -37,7 +38,7 @@
  
      public EntityVillager(World worldIn)
      {
-@@ -125,11 +131,11 @@
+@@ -125,11 +132,11 @@
      public EntityVillager(World worldIn, int professionId)
      {
          super(worldIn);
@@ -51,7 +52,30 @@
      }
  
      protected void initEntityAI()
-@@ -224,7 +230,14 @@
+@@ -186,6 +193,22 @@
+         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+     }
+ 
++    // Spigot Start
++    @Override
++    public void inactiveTick() {
++        // SPIGOT-3874
++        if (world.spigotConfig.tickInactiveVillagers) {
++            // SPIGOT-3894
++            net.minecraft.world.chunk.Chunk startingChunk = this.world.getChunkIfLoaded(MathHelper.floor(this.posX) >> 4, MathHelper.floor(this.posZ) >> 4);
++            if (!(startingChunk != null && startingChunk.areNeighborsLoaded(1))) {
++                return;
++            }
++            this.updateAITasks(); // SPIGOT-3846
++        }
++        super.inactiveTick();
++    }
++    // Spigot End
++
+     protected void updateAITasks()
+     {
+         if (--this.randomTickDivider <= 0)
+@@ -224,7 +247,14 @@
                      {
                          if (merchantrecipe.isRecipeDisabled())
                          {
@@ -67,7 +91,7 @@
                          }
                      }
  
-@@ -388,11 +401,11 @@
+@@ -388,11 +418,11 @@
              }
          }
  
@@ -81,7 +105,7 @@
      {
          return false;
      }
-@@ -654,7 +667,7 @@
+@@ -654,7 +684,7 @@
          return net.minecraftforge.event.ForgeEventFactory.listTradeOffers(this, player, buyingList);
      }
  
@@ -90,7 +114,7 @@
      {
          if (this.careerId != 0 && this.careerLevel != 0)
          {
-@@ -679,7 +692,20 @@
+@@ -679,7 +709,20 @@
          {
              for (EntityVillager.ITradeList entityvillager$itradelist : trades)
              {
@@ -112,7 +136,7 @@
              }
          }
      }
-@@ -880,7 +906,7 @@
+@@ -880,7 +923,7 @@
          return false;
      }
  
@@ -121,3 +145,12 @@
      {
          if (!this.world.isRemote && !this.isDead)
          {
+@@ -895,7 +938,7 @@
+                 entitywitch.setAlwaysRenderNameTag(this.getAlwaysRenderNameTag());
+             }
+ 
+-            this.world.spawnEntity(entitywitch);
++            this.world.spawnEntity(entitywitch, SpawnReason.LIGHTNING);
+             this.setDead();
+         }
+     }

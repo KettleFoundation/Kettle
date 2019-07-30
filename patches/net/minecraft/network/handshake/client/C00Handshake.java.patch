@@ -16,7 +16,7 @@
      {
          this.protocolVersion = buf.readVarInt();
 -        this.ip = buf.readString(255);
-+        this.ip = buf.readString(Short.MAX_VALUE);
++        this.ip = buf.readString(Short.MAX_VALUE); // Spigot
          this.port = buf.readUnsignedShort();
          this.requestedState = EnumConnectionState.getById(buf.readVarInt());
          this.hasFMLMarker = this.ip.contains("\0FML\0");

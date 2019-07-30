@@ -70,6 +70,15 @@
      }
  
      public void update()
+@@ -144,7 +178,7 @@
+ 
+                 if (flag)
+                 {
+-                    this.setTransferCooldown(8);
++                    this.setTransferCooldown(world.spigotConfig.hopperTransfer); // Spigot
+                     this.markDirty();
+                     return true;
+                 }
 @@ -213,11 +247,36 @@
                      if (!this.getStackInSlot(i).isEmpty())
                      {
@@ -109,14 +118,14 @@
                              return true;
                          }
  
-@@ -358,11 +417,43 @@
+@@ -358,14 +417,47 @@
          if (!itemstack.isEmpty() && canExtractItemFromSlot(inventoryIn, itemstack, index, direction))
          {
              ItemStack itemstack1 = itemstack.copy();
 -            ItemStack itemstack2 = putStackInInventoryAllSlots(inventoryIn, hopper, inventoryIn.decrStackSize(index, 1), (EnumFacing)null);
 +            // ItemStack itemstack2 = putStackInInventoryAllSlots(inventoryIn, hopper, inventoryIn.decrStackSize(index, 1), (EnumFacing)null);
 +            // CraftBukkit start - Call event on collection of items from inventories into the hopper
-+            CraftItemStack oitemstack = CraftItemStack.asCraftMirror(inventoryIn.decrStackSize(index, 1));
++            CraftItemStack oitemstack = CraftItemStack.asCraftMirror(inventoryIn.decrStackSize(index, hopper.getWorld().spigotConfig.hopperAmount));
  
 +            Inventory sourceInventory;
 +            // Have to special case large chests as they work oddly
@@ -133,13 +142,14 @@
 +                inventoryIn.setInventorySlotContents(index, itemstack1);
 +
 +                if (hopper instanceof TileEntityHopper) {
-+                    ((TileEntityHopper) hopper).setTransferCooldown(8); // Delay hopper checks
++                    ((TileEntityHopper) hopper).setTransferCooldown(hopper.getWorld().spigotConfig.hopperTransfer); // Delay hopper checks
 +                } else if (hopper instanceof EntityMinecartHopper) {
-+                    ((EntityMinecartHopper) hopper).setTransferTicker(4); // Delay hopper minecart checks
++                    ((EntityMinecartHopper) hopper).setTransferTicker(hopper.getWorld().spigotConfig.hopperTransfer / 2); // Delay hopper minecart checks
 +                }
 +
 +                return false;
 +            }
++			 int origCount = event.getItem().getAmount(); // Spigot
 +            ItemStack itemstack2 = putStackInInventoryAllSlots(inventoryIn, hopper, CraftItemStack.asNMSCopy(event.getItem()), null);
 +
              if (itemstack2.isEmpty())
@@ -154,8 +164,12 @@
 +                // CraftBukkit end
                  return true;
              }
+-
++			itemstack1.shrink(origCount - itemstack2.getCount());
+             inventoryIn.setInventorySlotContents(index, itemstack1);
+         }
  
-@@ -382,6 +473,11 @@
+@@ -382,6 +474,11 @@
          }
          else
          {
@@ -166,4 +180,21 @@
 +            }
              ItemStack itemstack = entity.getItem().copy();
              ItemStack itemstack1 = putStackInInventoryAllSlots(source, destination, itemstack, (EnumFacing)null);
+ 
+@@ -491,7 +588,7 @@
+                             }
+                         }
+ 
+-                        tileentityhopper1.setTransferCooldown(8 - k);
++                        tileentityhopper1.setTransferCooldown(tileentityhopper1.world.spigotConfig.hopperTransfer - k); // Spigot
+                     }
+                 }
+ 
+@@ -525,6 +622,7 @@
+         int j = MathHelper.floor(y);
+         int k = MathHelper.floor(z);
+         BlockPos blockpos = new BlockPos(i, j, k);
++		if (!worldIn.isBlockLoaded(blockpos)) return null; // Spigot
+         net.minecraft.block.state.IBlockState state = worldIn.getBlockState(blockpos);
+         Block block = state.getBlock();
  

@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/passive/EntitySquid.java
++++ ../src-work/minecraft/net/minecraft/entity/passive/EntitySquid.java
+@@ -191,7 +191,7 @@
+ 
+     public boolean getCanSpawnHere()
+     {
+-        return this.posY > 45.0D && this.posY < (double)this.world.getSeaLevel() && super.getCanSpawnHere();
++        return this.posY > this.world.spigotConfig.squidSpawnRangeMin && this.posY < (double)this.world.getSeaLevel() && super.getCanSpawnHere();
+     }
+ 
+     @SideOnly(Side.CLIENT)

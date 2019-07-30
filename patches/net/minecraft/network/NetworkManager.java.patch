@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
-@@ -74,10 +74,14 @@
+@@ -74,10 +74,15 @@
          }
      };
      private final EnumPacketDirection direction;
@@ -14,10 +14,19 @@
 +    public java.util.UUID spoofedUUID;
 +    public com.mojang.authlib.properties.Property[] spoofedProfile;
 +    // Spigot End
++    public boolean preparing = true; // Spigot
      private INetHandler packetListener;
      private ITextComponent terminationReason;
      private boolean isEncrypted;
-@@ -173,7 +177,7 @@
+@@ -98,6 +103,7 @@
+         super.channelActive(p_channelActive_1_);
+         this.channel = p_channelActive_1_.channel();
+         this.socketAddress = this.channel.remoteAddress();
++        this.preparing = false; // Spigot
+ 
+         try
+         {
+@@ -173,7 +179,7 @@
  
              try
              {
@@ -26,7 +35,7 @@
              }
              finally
              {
-@@ -195,7 +199,7 @@
+@@ -195,7 +201,7 @@
  
              try
              {
@@ -35,7 +44,7 @@
              }
              finally
              {
-@@ -265,7 +269,7 @@
+@@ -265,7 +271,7 @@
              {
                  while (!this.outboundPacketsQueue.isEmpty())
                  {
@@ -44,8 +53,11 @@
                      this.dispatchPacket(networkmanager$inboundhandlertuplepacketlistener.packet, networkmanager$inboundhandlertuplepacketlistener.futureListeners);
                  }
              }
-@@ -300,7 +304,9 @@
+@@ -298,9 +304,12 @@
+ 
+     public void closeChannel(ITextComponent message)
      {
++        this.preparing = false; // Spigot
          if (this.channel.isOpen())
          {
 -            this.channel.close().awaitUninterruptibly();
@@ -55,7 +67,7 @@
              this.terminationReason = message;
          }
      }
-@@ -476,4 +482,12 @@
+@@ -476,4 +485,12 @@
                  this.futureListeners = inFutureListeners;
              }
          }

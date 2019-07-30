@@ -9,6 +9,15 @@
  
  public class BlockPortal extends BlockBreakable
  {
+@@ -62,7 +64,7 @@
+     {
+         super.updateTick(worldIn, pos, state, rand);
+ 
+-        if (worldIn.provider.isSurfaceWorld() && worldIn.getGameRules().getBoolean("doMobSpawning") && rand.nextInt(2000) < worldIn.getDifficulty().getDifficultyId())
++        if (worldIn.spigotConfig.enableZombiePigmenPortalSpawns && worldIn.provider.isSurfaceWorld() && worldIn.getGameRules().getBoolean("doMobSpawning") && rand.nextInt(2000) < worldIn.getDifficulty().getDifficultyId()) // Spigot
+         {
+             int i = pos.getY();
+             BlockPos blockpos;
 @@ -74,7 +76,7 @@
  
              if (i > 0 && !worldIn.getBlockState(blockpos.up()).isNormalCube())

@@ -13,6 +13,15 @@
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.ChunkPos;
+@@ -52,7 +55,7 @@
+     public PlayerChunkMap(WorldServer serverWorld)
+     {
+         this.world = serverWorld;
+-        this.setPlayerViewRadius(serverWorld.getMinecraftServer().getPlayerList().getViewDistance());
++        this.setPlayerViewRadius(serverWorld.spigotConfig.viewDistance); // Spigot
+     }
+ 
+     public WorldServer getWorldServer()
 @@ -183,6 +186,9 @@
                              break;
                          }

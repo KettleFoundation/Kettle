@@ -20,9 +20,9 @@
 -    private int maxNearbyEntities = 6;
 -    private int activatingRangeFromPlayer = 16;
 -    private int spawnRange = 4;
-+    public int maxNearbyEntities = 6;
-+    public int activatingRangeFromPlayer = 16;
-+    public int spawnRange = 4;
++    public int maxNearbyEntities = 6; // CraftBukkit private -> public
++    public int activatingRangeFromPlayer = 16; // CraftBukkit private -> public
++    public int spawnRange = 4; // CraftBukkit private -> public
  
      @Nullable
 -    private ResourceLocation getEntityId()
@@ -38,15 +38,17 @@
          }
      }
  
-@@ -131,8 +132,11 @@
-                             if (!net.minecraftforge.event.ForgeEventFactory.doSpecialSpawn(entityliving, this.getSpawnerWorld(), (float)entity.posX, (float)entity.posY, (float)entity.posZ, this))
+@@ -132,7 +133,13 @@
                              ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entity)), (IEntityLivingData)null);
                          }
+ 
+-                        AnvilChunkLoader.spawnEntity(entity, world);
++						            if (entity.world.spigotConfig.nerfSpawnerMobs) entity.fromMobSpawner = true; // Spigot Start
++
 +                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callSpawnerSpawnEvent(entity, blockpos).isCancelled()) {
 +                            continue;
 +                        }
- 
--                        AnvilChunkLoader.spawnEntity(entity, world);
++
 +                        AnvilChunkLoader.spawnEntity(entity, world, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER);
                          world.playEvent(2004, blockpos, 0);
  

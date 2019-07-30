@@ -295,15 +295,14 @@
          }
  
          if (this.capabilities != null)
-@@ -291,7 +479,28 @@
+@@ -291,6 +479,26 @@
  
      public void setItemDamage(int meta)
      {
--        getItem().setDamage(this, meta);
 +        // CraftBukkit start - Filter out data for items that shouldn't have it
 +        // The crafting system uses this value for a special purpose so we have to allow it
 +        if (meta == 32767) {
-+            this.itemDamage = meta;
++            getItem().setDamage(this, meta);
 +            return;
 +        }
 +
@@ -319,13 +318,11 @@
 +        if (CraftMagicNumbers.getBlock(CraftMagicNumbers.getId(this.getItem())) == Blocks.DOUBLE_PLANT && (meta > 5 || meta < 0)) {
 +            meta = 0;
 +        }
-+        // getItem().setDamage(this, meta);
-+        this.itemDamage = meta;
 +        // CraftBukkit end
+         getItem().setDamage(this, meta);
      }
  
-     public int getMaxDamage()
-@@ -322,6 +531,19 @@
+@@ -322,6 +530,19 @@
  
                  amount -= j;
  
@@ -345,7 +342,7 @@
                  if (amount <= 0)
                  {
                      return false;
-@@ -347,6 +569,11 @@
+@@ -347,6 +568,11 @@
                  if (this.attemptDamageItem(amount, entityIn.getRNG(), entityIn instanceof EntityPlayerMP ? (EntityPlayerMP)entityIn : null))
                  {
                      entityIn.renderBrokenItemStack(this);
@@ -357,7 +354,7 @@
                      this.shrink(1);
  
                      if (entityIn instanceof EntityPlayer)
-@@ -393,7 +620,8 @@
+@@ -393,7 +619,8 @@
  
      public ItemStack copy()
      {
@@ -367,7 +364,22 @@
          itemstack.setAnimationsToGo(this.getAnimationsToGo());
  
          if (this.stackTagCompound != null)
-@@ -1043,6 +1271,14 @@
+@@ -983,6 +1210,14 @@
+ 
+     public void setRepairCost(int cost)
+     {
++        // CraftBukkit start - remove RepairCost tag when 0 (SPIGOT-3945)
++        if (cost == 0) {
++            if (this.hasTagCompound()) {
++                this.stackTagCompound.removeTag("RepairCost");
++            }
++            return;
++        }
++        // CraftBukkit end
+         if (!this.hasTagCompound())
+         {
+             this.stackTagCompound = new NBTTagCompound();
+@@ -1043,6 +1278,14 @@
          nbttaglist.appendTag(nbttagcompound);
      }
  
@@ -382,3 +394,20 @@
      public ITextComponent getTextComponent()
      {
          TextComponentString textcomponentstring = new TextComponentString(this.getDisplayName());
+@@ -1280,4 +1523,16 @@
+     {
+         return this.isEmpty() || this.getItem().doesSneakBypassUse(this, world, pos, player);
+     }
++
++    // Spigot start
++    public static boolean fastMatches(ItemStack itemstack, ItemStack itemstack1) {
++        if (itemstack == null && itemstack1 == null) {
++            return true;
++        }
++        if (itemstack != null && itemstack1 != null) {
++            return itemstack.stackSize == itemstack1.stackSize && itemstack.item == itemstack1.item && itemstack.itemDamage == itemstack1.itemDamage;
++        }
++        return false;
++    }
++    // Spigot end
+ }

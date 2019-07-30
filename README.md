@@ -1,11 +1,13 @@
 **:warning: Kettle is still __very raw__ and you may encounter issues in using it with your server. You have been warned!**
 
-
 ![Kettle](https://i.imgur.com/gkmTKvR.png)
 
 # Kettle
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
+
+![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge) [![](https://img.shields.io/jenkins/build/https/ci.hexeption.co.uk/job/Kettle?label=CI&style=for-the-badge)](https://ci.hexeption.co.uk)
+
 ### What's Kettle?
+
 Kettle is the next link in the hybrid server chain:
 **Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: KCauldron :arrow_right: Cauldron :arrow_right: MCPC+
 
@@ -17,20 +19,33 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ## Deployment
 
-
 ### Installation
-1. Download the universal server & bundled libraries from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
-2. Download the minecraft server via the link in the release
-3. Make a new folder for the server
-4. Move the server to the folder and rename it to `kettle.jar`
-5. Extract the `libraries` folder to the same folder as `kettle.jar`
-6. Make a [launch script](https://gist.github.com/aolko/3b7a93107d162b21730c92e5236e3239)
+
+1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
+2. Make a new folder for the server
+3. Move the server to the folder and rename it to `kettle.jar`
+4. Make a [launch script](https://gist.github.com/aolko/3b7a93107d162b21730c92e5236e3239)
 
 ### Building the sources
-Coming soon.
+
+All builds are available in `build/distributions`
+
+- Clone the Project
+  - You can use GitHub Desktop/GitKraken or clone using the terminal 
+    - `git clone https://github.com/KettleFoundation/Kettle` 
+  - Next you are gonna want to clone the submodule
+    - `git submodule update --init --recursive` 
+- Building
+  - First you want to setup the project
+    - `./gradlew setup`
+  - After you have setup the project you are going to want to run the build
+    - `./gradlew build`
+  - Now go and get a drink this may take some time
 
 ## Chat
+
 You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM).
 
 ## Unstable/Test builds
+
 For unstable/test builds you can check __this repository__ (how handy)

@@ -215,7 +215,20 @@
                  {
                      this.setDead();
                  }
-@@ -1190,14 +1234,14 @@
+@@ -753,6 +797,12 @@
+         this.world.profiler.startSection("checkDespawn");
+         this.despawnEntity();
+         this.world.profiler.endSection();
++        // Spigot Start
++        if (this.fromMobSpawner)
++        {
++            return;
++        }
++        // Spigot End
+         this.world.profiler.startSection("sensing");
+         this.senses.clearSensingCache();
+         this.world.profiler.endSection();
+@@ -1190,14 +1240,14 @@
          }
      }
  
@@ -234,7 +247,7 @@
      }
  
      public boolean isNoDespawnRequired()
-@@ -1209,6 +1253,10 @@
+@@ -1209,6 +1259,10 @@
      {
          if (this.getLeashed() && this.getLeashHolder() == player)
          {
@@ -245,7 +258,7 @@
              this.clearLeashed(true, !player.capabilities.isCreativeMode);
              return true;
          }
-@@ -1218,6 +1266,10 @@
+@@ -1218,6 +1272,10 @@
  
              if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player))
              {
@@ -256,7 +269,7 @@
                  this.setLeashHolder(player, true);
                  itemstack.shrink(1);
                  return true;
-@@ -1245,11 +1297,13 @@
+@@ -1245,11 +1303,13 @@
          {
              if (!this.isEntityAlive())
              {
@@ -270,7 +283,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1348,6 +1402,7 @@
+@@ -1348,6 +1408,7 @@
              }
              else
              {
