@@ -68,8 +68,11 @@ public class PermissibleBase implements Permissible {
 
         String name = inName.toLowerCase(java.util.Locale.ENGLISH);
 
-        if (isPermissionSet(name)) {
-            return permissions.get(name).getValue();
+        // Paper start
+        PermissionAttachmentInfo info = permissions.get(name);
+        if (info != null) {
+            return info.getValue();
+            // Paper end
         } else {
             Permission perm = Bukkit.getServer().getPluginManager().getPermission(name);
 
@@ -88,9 +91,12 @@ public class PermissibleBase implements Permissible {
 
         String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
 
-        if (isPermissionSet(name)) {
-            return permissions.get(name).getValue();
+        // Paper start
+        PermissionAttachmentInfo info = permissions.get(name);
+        if (info != null) {
+                return info.getValue();
         }
+        // Paper end
         return perm.getDefault().getValue(isOp());
     }
 

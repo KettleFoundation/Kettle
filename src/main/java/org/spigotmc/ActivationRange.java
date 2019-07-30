@@ -278,7 +278,7 @@ public class ActivationRange
         int z = MathHelper.floor( entity.posZ );
         // Make sure not on edge of unloaded chunk
         Chunk chunk = entity.world.getChunkIfLoaded( x >> 4, z >> 4 );
-        if ( isActive && !( chunk != null && chunk.areNeighborsLoaded( 1 ) ) )
+        if ( isActive && !( chunk != null ) )
         {
             isActive = false;
         }

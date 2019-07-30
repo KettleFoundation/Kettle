@@ -91,7 +91,7 @@
      }
  
      protected void initEntityAI()
-@@ -171,8 +168,40 @@
+@@ -171,8 +168,37 @@
      {
          this.attackTarget = entitylivingbaseIn;
          net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(this, entitylivingbaseIn);
@@ -104,9 +104,6 @@
 +        if (fireEvent) {
 +            if (reason == EntityTargetEvent.TargetReason.UNKNOWN && getAttackTarget() != null && entityliving == null) {
 +                reason = getAttackTarget().isEntityAlive() ? EntityTargetEvent.TargetReason.FORGOT_TARGET : EntityTargetEvent.TargetReason.TARGET_DIED;
-+            }
-+            if (reason == EntityTargetEvent.TargetReason.UNKNOWN) {
-+                world.getServer().getLogger().log(java.util.logging.Level.WARNING, "Unknown target reason, please report on the issue tracker", new Exception());
 +            }
 +            CraftLivingEntity ctarget = null;
 +            if (entityliving != null) {
@@ -132,7 +129,7 @@
      public boolean canAttackClass(Class <? extends EntityLivingBase > cls)
      {
          return cls != EntityGhast.class;
-@@ -355,7 +384,7 @@
+@@ -355,7 +381,7 @@
      public void writeEntityToNBT(NBTTagCompound compound)
      {
          super.writeEntityToNBT(compound);
@@ -141,7 +138,7 @@
          compound.setBoolean("PersistenceRequired", this.persistenceRequired);
          NBTTagList nbttaglist = new NBTTagList();
  
-@@ -447,12 +476,21 @@
+@@ -447,12 +473,21 @@
      {
          super.readEntityFromNBT(compound);
  
@@ -165,7 +162,7 @@
  
          if (compound.hasKey("ArmorItems", 9))
          {
-@@ -577,7 +615,7 @@
+@@ -577,7 +612,7 @@
          super.onLivingUpdate();
          this.world.profiler.startSection("looting");
  
@@ -174,7 +171,7 @@
          {
              for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(1.0D, 0.0D, 1.0D)))
              {
-@@ -653,8 +691,14 @@
+@@ -653,8 +688,14 @@
              }
          }
  
@@ -191,7 +188,7 @@
              double d0;
  
              switch (entityequipmentslot.getSlotType())
-@@ -696,7 +740,7 @@
+@@ -696,7 +737,7 @@
          return true;
      }
  
@@ -200,7 +197,7 @@
      {
          return true;
      }
-@@ -730,12 +774,12 @@
+@@ -730,12 +771,12 @@
                  double d2 = entity.posZ - this.posZ;
                  double d3 = d0 * d0 + d1 * d1 + d2 * d2;
  
@@ -215,7 +212,7 @@
                  {
                      this.setDead();
                  }
-@@ -753,6 +797,12 @@
+@@ -753,6 +794,12 @@
          this.world.profiler.startSection("checkDespawn");
          this.despawnEntity();
          this.world.profiler.endSection();
@@ -228,7 +225,7 @@
          this.world.profiler.startSection("sensing");
          this.senses.clearSensingCache();
          this.world.profiler.endSection();
-@@ -1190,14 +1240,14 @@
+@@ -1190,14 +1237,14 @@
          }
      }
  
@@ -247,7 +244,7 @@
      }
  
      public boolean isNoDespawnRequired()
-@@ -1209,6 +1259,10 @@
+@@ -1209,6 +1256,10 @@
      {
          if (this.getLeashed() && this.getLeashHolder() == player)
          {
@@ -258,7 +255,7 @@
              this.clearLeashed(true, !player.capabilities.isCreativeMode);
              return true;
          }
-@@ -1218,6 +1272,10 @@
+@@ -1218,6 +1269,10 @@
  
              if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player))
              {
@@ -269,7 +266,7 @@
                  this.setLeashHolder(player, true);
                  itemstack.shrink(1);
                  return true;
-@@ -1245,11 +1303,13 @@
+@@ -1245,11 +1300,13 @@
          {
              if (!this.isEntityAlive())
              {
@@ -283,7 +280,7 @@
                  this.clearLeashed(true, true);
              }
          }
-@@ -1348,6 +1408,7 @@
+@@ -1348,6 +1405,7 @@
              }
              else
              {

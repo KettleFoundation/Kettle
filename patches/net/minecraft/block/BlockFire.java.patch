@@ -70,7 +70,15 @@
  
                  for (int k = -1; k <= 1; ++k)
                  {
-@@ -230,7 +234,26 @@
+@@ -210,6 +214,7 @@
+                                 }
+ 
+                                 BlockPos blockpos = pos.add(k, i1, l);
++                                if (!worldIn.isBlockLoaded(blockpos)) continue; // Paper
+                                 int k1 = this.getNeighborEncouragement(worldIn, blockpos);
+ 
+                                 if (k1 > 0)
+@@ -230,7 +235,26 @@
                                              i2 = 15;
                                          }
  
@@ -98,18 +106,19 @@
                                      }
                                  }
                              }
-@@ -302,6 +325,47 @@
+@@ -302,6 +326,48 @@
          }
      }
  
 +    // Atom: Create a new method, instead of the method modification above for sanity
 +    private void tryCatchFire(World worldIn, BlockPos pos, int chance, Random random, int age, EnumFacing face, BlockPos sourcePos)
 +    {
++        final IBlockState iblockstate = worldIn.getBlockState(pos);
++        if (iblockstate == null) return;
 +        int i = worldIn.getBlockState(pos).getBlock().getFlammability(worldIn, pos, face);
 +
 +        if (random.nextInt(chance) < i)
 +        {
-+            IBlockState iblockstate = worldIn.getBlockState(pos);
 +            org.bukkit.block.Block theBlock = worldIn.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
 +            org.bukkit.block.Block sourceBlock = worldIn.getWorld().getBlockAt(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
 +
@@ -146,7 +155,7 @@
      private boolean canNeighborCatchFire(World worldIn, BlockPos pos)
      {
          for (EnumFacing enumfacing : EnumFacing.values())
-@@ -354,7 +418,7 @@
+@@ -354,7 +420,7 @@
      {
          if (!worldIn.getBlockState(pos.down()).isTopSolid() && !this.canNeighborCatchFire(worldIn, pos))
          {
@@ -155,7 +164,7 @@
          }
      }
  
-@@ -364,7 +428,7 @@
+@@ -364,7 +430,7 @@
          {
              if (!worldIn.getBlockState(pos.down()).isTopSolid() && !this.canNeighborCatchFire(worldIn, pos))
              {
@@ -164,7 +173,7 @@
              }
              else
              {
-@@ -495,4 +559,10 @@
+@@ -495,4 +561,10 @@
      {
          return BlockFaceShape.UNDEFINED;
      }

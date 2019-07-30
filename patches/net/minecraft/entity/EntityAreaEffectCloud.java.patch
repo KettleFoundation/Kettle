@@ -67,7 +67,40 @@
      public int getColor()
      {
          return ((Integer)this.getDataManager().get(COLOR)).intValue();
-@@ -326,6 +342,7 @@
+@@ -192,7 +208,12 @@
+         super.onUpdate();
+         boolean flag = this.shouldIgnoreRadius();
+         float f = this.getRadius();
+-
++        // Paper start - fix MC-114618
++        if (f < 0.5F) {
++            this.setDead();
++            return;
++        }
++        // Paper end
+         if (this.world.isRemote)
+         {
+             EnumParticleTypes enumparticletypes = this.getParticle();
+@@ -284,11 +305,13 @@
+             {
+                 f += this.radiusPerTick;
+ 
+-                if (f < 0.5F)
+-                {
+-                    this.setDead();
+-                    return;
+-                }
++                // Paper start - moved up - fix MC-114618
++                //if (f < 0.5F)
++                //{
++                //   this.setDead();
++                //  return;
++                //}
++                // Paper end
+ 
+                 this.setRadius(f);
+             }
+@@ -326,6 +349,7 @@
  
                      if (!list.isEmpty())
                      {
@@ -75,7 +108,7 @@
                          for (EntityLivingBase entitylivingbase : list)
                          {
                              if (!this.reapplicationDelayMap.containsKey(entitylivingbase) && entitylivingbase.canBeHitWithPotion())
-@@ -336,6 +353,15 @@
+@@ -336,6 +360,15 @@
  
                                  if (d2 <= (double)(f * f))
                                  {

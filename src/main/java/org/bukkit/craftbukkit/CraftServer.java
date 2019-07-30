@@ -20,8 +20,11 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 
+import jline.console.ConsoleReader;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.command.CommandBase;
@@ -65,6 +68,7 @@ import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -93,6 +97,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.craftbukkit.boss.CraftBossBar;
 import org.bukkit.craftbukkit.command.CraftSimpleCommandMap;
+import org.bukkit.craftbukkit.command.UnknownCommandEvent;
 import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.generator.CraftChunkData;
@@ -216,10 +221,6 @@ public final class CraftServer implements Server {
     private final List<CraftPlayer> playerView;
     public int reloadCount;
 
-    public CraftSimpleCommandMap getCraftCommandMap() {
-        return this.craftCommandMap;
-    }
-
     private final class BooleanWrapper {
         private boolean value = true;
     }
@@ -302,6 +303,7 @@ public final class CraftServer implements Server {
         ambientSpawn = configuration.getInt("spawn-limits.ambient");
         console.autosavePeriod = configuration.getInt("ticks-per.autosave");
         warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
+        loadIcon(); // Fixed server ping stalling.
         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
@@ -364,13 +366,13 @@ public final class CraftServer implements Server {
         } else {
             pluginFolder.mkdir();
         }
-        // lavaPluginManager = new LavaPluginManager(Thread.currentThread().getContextClassLoader());
     }
 
     public void enablePlugins(PluginLoadOrder type) {
         if (type == PluginLoadOrder.STARTUP) {
             helpMap.clear();
             helpMap.initializeGeneralTopics();
+            loadCustomPermissions(); // Paper
         }
 
         Plugin[] plugins = pluginManager.getPlugins();
@@ -382,21 +384,30 @@ public final class CraftServer implements Server {
         }
 
         if (type == PluginLoadOrder.POSTWORLD) {
+            // Spigot start - Allow vanilla commands to be forced to be the main command
+            setVanillaCommands(true);
             commandMap.setFallbackCommands();
-            setVanillaCommands();
+            this.setVanillaCommands(false);
+            // Spigot end
             commandMap.registerServerAliases();
             loadCustomPermissions();
             DefaultPermissions.registerCorePermissions();
             CraftDefaultPermissions.registerCorePermissions();
             helpMap.initializeCommands();
         }
+
+    }
+
+    @Override
+    public boolean suggestPlayerNamesWhenNullTabCompletions() {
+        return true;
     }
 
     public void disablePlugins() {
         pluginManager.disablePlugins();
     }
 
-    private void setVanillaCommands() {
+    private void setVanillaCommands(boolean first) {
         Map<String, ICommand> commands = console.getCommandManager().getCommands();
         for (ICommand cmd : commands.values()) {
             commandMap.register("minecraft",
@@ -441,6 +452,11 @@ public final class CraftServer implements Server {
     }
 
     @Override
+    public Player[] _INVALID_getOnlinePlayers() {
+        return getOnlinePlayers().toArray(new Player[0]);
+    }
+
+    @Override
     public List<CraftPlayer> getOnlinePlayers() {
         return this.playerView;
     }
@@ -465,9 +481,10 @@ public final class CraftServer implements Server {
                     found = player;
                     delta = curDelta;
                 }
-                if (curDelta == 0)
+                if (curDelta == 0) {
                     break;
             }
+        }
         }
         return found;
     }
@@ -620,6 +637,7 @@ public final class CraftServer implements Server {
 
     @Override
     public long getConnectionThrottle() {
+        // Spigot Start - Automatically set connection throttle for bungee configurations
         if (org.spigotmc.SpigotConfig.bungee) {
             return -1;
         } else {
@@ -706,11 +724,14 @@ public final class CraftServer implements Server {
         if (craftCommandMap.dispatch(sender, commandLine)) {
             return true;
         }
-
-        if (sender instanceof Player) {
-            sender.sendMessage("Unknown command. Type \"/help\" for help.");
-        } else {
-            sender.sendMessage("Unknown command. Type \"help\" for help.");
+        if (!org.spigotmc.SpigotConfig.unknownCommandMessage.isEmpty()) {
+            // Paper start
+            UnknownCommandEvent event = new UnknownCommandEvent(sender, commandLine, org.spigotmc.SpigotConfig.unknownCommandMessage);
+            Bukkit.getServer().getPluginManager().callEvent(event);
+            if (StringUtils.isNotEmpty(event.getMessage())) {
+                sender.sendMessage(event.getMessage());
+            }
+            // Paper end
         }
 
         return false;
@@ -718,96 +739,6 @@ public final class CraftServer implements Server {
 
     @Override
     public void reload() {
-        reloadCount++;
-        configuration = YamlConfiguration.loadConfiguration(getConfigFile());
-        commandsConfiguration = YamlConfiguration.loadConfiguration(getCommandsConfigFile());
-        PropertyManager config = new PropertyManager(console.options);
-
-        ((DedicatedServer) console).settings = config;
-
-        boolean animals = config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals());
-        boolean monsters = config.getBooleanProperty("spawn-monsters",
-                console.worldServerList.get(0).getDifficulty() != EnumDifficulty.PEACEFUL);
-        EnumDifficulty difficulty = EnumDifficulty.getDifficultyEnum(
-                config.getIntProperty("difficulty", console.worldServerList.get(0).getDifficulty().ordinal()));
-
-        online.value = config.getBooleanProperty("online-mode", console.isServerInOnlineMode());
-        console.setCanSpawnAnimals(config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals()));
-        console.setAllowPvp(config.getBooleanProperty("pvp", console.isPVPEnabled()));
-        console.setAllowFlight(config.getBooleanProperty("allow-flight", console.isFlightAllowed()));
-        console.setMOTD(config.getStringProperty("motd", console.getMOTD()));
-        monsterSpawn = configuration.getInt("spawn-limits.monsters");
-        animalSpawn = configuration.getInt("spawn-limits.animals");
-        waterAnimalSpawn = configuration.getInt("spawn-limits.water-animals");
-        ambientSpawn = configuration.getInt("spawn-limits.ambient");
-        warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
-        printSaveWarning = false;
-        console.autosavePeriod = configuration.getInt("ticks-per.autosave");
-        chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
-        chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
-        loadIcon();
-
-        try {
-            playerList.getBannedIPs().readSavedFile();
-        } catch (IOException ex) {
-            logger.log(Level.WARNING, "Failed to load banned-ips.json, " + ex.getMessage());
-        }
-        try {
-            playerList.getBannedPlayers().readSavedFile();
-        } catch (IOException ex) {
-            logger.log(Level.WARNING, "Failed to load banned-players.json, " + ex.getMessage());
-        }
-
-        org.spigotmc.SpigotConfig.init((File) console.options.valueOf("spigot-settings")); // Spigot
-        for (WorldServer world : console.worlds) {
-            world.worldInfo.setDifficulty(difficulty);
-            world.setAllowedSpawnTypes(monsters, animals);
-            if (this.getTicksPerAnimalSpawns() < 0) {
-                world.ticksPerAnimalSpawns = 400;
-            } else {
-                world.ticksPerAnimalSpawns = this.getTicksPerAnimalSpawns();
-            }
-
-            if (this.getTicksPerMonsterSpawns() < 0) {
-                world.ticksPerMonsterSpawns = 1;
-            } else {
-                world.ticksPerMonsterSpawns = this.getTicksPerMonsterSpawns();
-            }
-            world.spigotConfig.init(); // Spigot
-        }
-
-        pluginManager.clearPlugins();
-        commandMap.clearCommands();
-        resetRecipes();
-        reloadData();
-        org.spigotmc.SpigotConfig.registerCommands(); // Spigot
-        overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
-
-        int pollCount = 0;
-
-        // Wait for at most 2.5 seconds for plugins to close their threads
-        while (pollCount < 50 && getScheduler().getActiveWorkers().size() > 0) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-            }
-            pollCount++;
-        }
-
-        List<BukkitWorker> overdueWorkers = getScheduler().getActiveWorkers();
-        for (BukkitWorker worker : overdueWorkers) {
-            Plugin plugin = worker.getOwner();
-            String author = "<NoAuthorGiven>";
-            if (plugin.getDescription().getAuthors().size() > 0) {
-                author = plugin.getDescription().getAuthors().get(0);
-            }
-            getLogger().log(Level.SEVERE, String.format("Nag author: '%s' of '%s' about the following: %s", author,
-                    plugin.getDescription().getName(),
-                    "This plugin is not properly shutting down its async tasks when it is being reloaded.  This may cause conflicts with the newly loaded version of the plugin"));
-        }
-        loadPlugins();
-        enablePlugins(PluginLoadOrder.STARTUP);
-        enablePlugins(PluginLoadOrder.POSTWORLD);
     }
 
     @Override
@@ -1043,11 +974,10 @@ public final class CraftServer implements Server {
         return logger;
     }
 
-    /*
     public ConsoleReader getReader() {
-        return console.reader;
+        return this.console.reader;
     }
-    */
+
     @Override
     public PluginCommand getPluginCommand(String name) {
         Command command = commandMap.getCommand(name);
@@ -1278,6 +1208,26 @@ public final class CraftServer implements Server {
         return recipients.size();
     }
 
+    // Paper start
+    @Override
+    @Nullable
+    public UUID getPlayerUniqueId(String name) {
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null) {
+                return player.getUniqueId();
+            }
+        GameProfile profile;
+        // Only fetch an online UUID in online mode
+        if (MinecraftServer.getServerCB().isServerInOnlineMode() || (org.spigotmc.SpigotConfig.bungee)) {
+            profile = console.getPlayerProfileCache().getGameProfileForUsername( name );
+        } else {
+            // Make an OfflinePlayer using an offline mode UUID since the name has no profile
+            profile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(Charsets.UTF_8)), name);
+        }
+        return profile != null ? profile.getId() : null;
+    }
+    // Paper end
+
     @Override
     @Deprecated
     public OfflinePlayer getOfflinePlayer(String name) {
@@ -1436,9 +1386,11 @@ public final class CraftServer implements Server {
 
     @Override
     public File getWorldContainer() {
+        // Cauldron start - return the proper container
         if (DimensionManager.getWorld(0) != null) {
             return ((SaveHandler)DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
         }
+        // Cauldron end
         if (this.getServer().anvilFile != null) {
             return this.getServer().anvilFile;
         }
@@ -1527,9 +1479,16 @@ public final class CraftServer implements Server {
         return helpMap;
     }
 
+    @Override // Paper - add override
     public SimpleCommandMap getCommandMap() {
         return commandMap;
     }
+
+    // Cauldron start
+    public CraftSimpleCommandMap getCraftCommandMap() {
+        return craftCommandMap;
+    }
+    // Cauldron end
 
     @Override
     public int getMonsterSpawnLimit() {
@@ -1566,7 +1525,12 @@ public final class CraftServer implements Server {
         return warningState;
     }
 
-    public List<String> tabComplete(ICommandSender sender, String message, BlockPos pos, boolean forceCommand) {
+    public List<String> tabComplete(net.minecraft.command.ICommandSender sender, String message, BlockPos pos, boolean forceCommand) {
+        // Spigot Start
+        if ((org.spigotmc.SpigotConfig.tabComplete < 0 || message.length() <= org.spigotmc.SpigotConfig.tabComplete) && !message.contains(" ")) {
+            return ImmutableList.of();
+        }
+        // Spigot End
         if (!(sender instanceof EntityPlayerMP)) {
             return ImmutableList.of();
         }
@@ -1739,13 +1703,60 @@ public final class CraftServer implements Server {
         return CraftMagicNumbers.INSTANCE;
     }
 
-    private final Spigot spigot=new Spigot(){@Override public YamlConfiguration getConfig(){return org.spigotmc.SpigotConfig.config;}
+    // Paper - Add getTPS API - Further improve tick loop
+    @Override
+    public double[] getTPS() {
+        return new double[] {
+                MinecraftServer.getServerCB().tps1.getAverage(),
+                MinecraftServer.getServerCB().tps5.getAverage(),
+                MinecraftServer.getServerCB().tps15.getAverage()
+        };
+    }
+    // Paper end
 
-    @Override public void broadcast(BaseComponent component){for(Player player:getOnlinePlayers()){player.spigot().sendMessage(component);}}
+    private final Spigot spigot = new Spigot()
+    {
 
-    @Override public void broadcast(BaseComponent...components){for(Player player:getOnlinePlayers()){player.spigot().sendMessage(components);}}};
+        @Override
+        public YamlConfiguration getConfig()
+        {
+            return org.spigotmc.SpigotConfig.config;
+        }
 
+        @Override
+        public void broadcast(BaseComponent component) {
+            for (Player player : getOnlinePlayers()) {
+                player.spigot().sendMessage(component);
+            }
+        }
+
+        @Override
+        public void broadcast(BaseComponent... components) {
+            for (Player player : getOnlinePlayers()) {
+                player.spigot().sendMessage(components);
+            }
+        }
+    };
+
+    @Override
     public Spigot spigot() {
         return spigot;
     }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid) {
+        return createProfile(uuid, null);
+    }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name) {
+        return createProfile(null, name);
+    }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name) {
+        Player player = uuid != null ? Bukkit.getPlayer(uuid) : (name != null ? Bukkit.getPlayerExact(name) : null);
+        if (player != null) {
+            return new com.destroystokyo.paper.profile.CraftPlayerProfile((CraftPlayer)player);
+        }
+        return new com.destroystokyo.paper.profile.CraftPlayerProfile(uuid, name);
+    }
+    // Paper end
 }

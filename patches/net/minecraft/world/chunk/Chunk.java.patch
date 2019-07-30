@@ -102,7 +102,27 @@
      public Chunk(World worldIn, ChunkPrimer primer, int x, int z)
      {
          this(worldIn, x, z);
-@@ -565,12 +605,12 @@
+@@ -271,6 +311,19 @@
+         this.isGapLightingUpdated = true;
+     }
+ 
++    /**
++     * PaperSpigot - Recheck gaps asynchronously.
++     */
++    public void recheckGapsAsync(boolean isStatic) {
++
++        world.lightingExecutor.submit(new Runnable() {
++            @Override
++            public void run() {
++                Chunk.this.recheckGaps(isStatic);
++            }
++        });
++    }
++
+     private void recheckGaps(boolean onlyOne)
+     {
+         this.world.profiler.startSection("recheckGaps");
+@@ -565,12 +618,12 @@
                  {
                      if (block1 != block) //Only fire block breaks when the block changes.
                      block1.breakBlock(this.world, pos, iblockstate);
@@ -117,7 +137,7 @@
                      if (te != null && te.shouldRefresh(this.world, pos, iblockstate, state))
                      this.world.removeTileEntity(pos);
                  }
-@@ -608,6 +648,7 @@
+@@ -608,6 +661,7 @@
                      }
                  }
  
@@ -125,7 +145,7 @@
                  // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
                  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
                  {
-@@ -616,7 +657,7 @@
+@@ -616,7 +670,7 @@
  
                  if (block.hasTileEntity(state))
                  {
@@ -134,7 +154,7 @@
  
                      if (tileentity1 == null)
                      {
-@@ -743,6 +784,20 @@
+@@ -743,6 +797,20 @@
          entityIn.chunkCoordZ = this.z;
          this.entityLists[k].add(entityIn);
          this.markDirty(); // Forge - ensure chunks are marked to save after an entity add
@@ -155,7 +175,7 @@
      }
  
      public void removeEntity(Entity entityIn)
-@@ -764,6 +819,22 @@
+@@ -764,6 +832,22 @@
  
          this.entityLists[index].remove(entityIn);
          this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
@@ -178,7 +198,7 @@
      }
  
      public boolean canSeeSky(BlockPos pos)
-@@ -783,9 +854,15 @@
+@@ -783,9 +867,12 @@
      }
  
      @Nullable
@@ -187,16 +207,13 @@
      {
 -        TileEntity tileentity = this.tileEntities.get(pos);
 +        TileEntity tileentity = null;
-+        if (world.captureBlockStates) {
-+            tileentity = world.capturedTileEntities.get(pos);
-+        }
 +        if (tileentity == null) {
 +            tileentity = this.tileEntities.get(pos);
 +        }
  
          if (tileentity != null && tileentity.isInvalid())
          {
-@@ -795,12 +872,12 @@
+@@ -795,12 +882,12 @@
  
          if (tileentity == null)
          {
@@ -211,7 +228,7 @@
              {
                  this.tileEntityPosQueue.add(pos.toImmutable());
              }
-@@ -834,6 +911,11 @@
+@@ -834,6 +921,11 @@
  
              tileEntityIn.validate();
              this.tileEntities.put(pos, tileEntityIn);
@@ -223,7 +240,7 @@
          }
      }
  
-@@ -864,7 +946,7 @@
+@@ -864,7 +956,7 @@
  
      public void onUnload()
      {
@@ -232,7 +249,7 @@
          this.loaded = false;
  
          for (TileEntity tileentity : this.tileEntities.values())
-@@ -874,7 +956,14 @@
+@@ -874,7 +966,14 @@
  
          for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
          {
@@ -248,7 +265,7 @@
          }
          net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
      }
-@@ -955,7 +1044,7 @@
+@@ -955,7 +1054,7 @@
              return true;
          }
  
@@ -257,13 +274,12 @@
      }
  
      public Random getRandomWithSeed(long seed)
-@@ -1001,6 +1090,65 @@
+@@ -1001,6 +1100,63 @@
          }
      }
  
 +    public void populateCB(IChunkProvider chunkProvider, IChunkGenerator chunkGenrator, boolean newChunk)
 +    {
-+        world.timings.syncChunkLoadPostTimer.startTiming(); // Spigot
 +        Server server = world.getServer();
 +        if (server != null) {
 +            /*
@@ -317,13 +333,12 @@
 +                chunk4.populate(chunkGenrator);
 +            }
 +        }
-+        world.timings.syncChunkLoadPostTimer.stopTiming(); // Spigot
 +    }
 +
      protected void populate(IChunkGenerator generator)
      {
          if (populating != null && net.minecraftforge.common.ForgeModContainer.logCascadingWorldGeneration) logCascadingWorldGeneration();
-@@ -1017,6 +1165,26 @@
+@@ -1017,6 +1173,26 @@
          {
              this.checkLight();
              generator.populate(this.x, this.z);
@@ -350,7 +365,16 @@
              net.minecraftforge.fml.common.registry.GameRegistry.generateWorld(this.x, this.z, this.world, generator, this.world.getChunkProvider());
              this.markDirty();
          }
-@@ -1075,7 +1243,7 @@
+@@ -1061,7 +1237,7 @@
+     {
+         if (this.isGapLightingUpdated && this.world.provider.hasSkyLight() && !skipRecheckGaps)
+         {
+-            this.recheckGaps(this.world.isRemote);
++            this.recheckGapsAsync(this.world.isRemote);
+         }
+ 
+         this.ticked = true;
+@@ -1075,7 +1251,7 @@
          {
              BlockPos blockpos = this.tileEntityPosQueue.poll();
  
@@ -359,7 +383,7 @@
              {
                  TileEntity tileentity = this.createNewTileEntity(blockpos);
                  this.world.setTileEntity(blockpos, tileentity);
-@@ -1086,7 +1254,7 @@
+@@ -1086,7 +1262,7 @@
  
      public boolean isPopulated()
      {
@@ -368,3 +392,12 @@
      }
  
      public boolean wasTicked()
+@@ -1336,7 +1512,7 @@
+             this.updateSkylightColumns[i] = true;
+         }
+ 
+-        this.recheckGaps(false);
++        this.recheckGapsAsync(false);
+     }
+ 
+     private void checkLightSide(EnumFacing facing)

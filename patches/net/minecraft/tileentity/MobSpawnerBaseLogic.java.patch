@@ -38,12 +38,14 @@
          }
      }
  
-@@ -132,7 +133,13 @@
+@@ -132,7 +133,15 @@
                              ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entity)), (IEntityLivingData)null);
                          }
  
 -                        AnvilChunkLoader.spawnEntity(entity, world);
 +						            if (entity.world.spigotConfig.nerfSpawnerMobs) entity.fromMobSpawner = true; // Spigot Start
++
++                        flag = true; // Paper
 +
 +                        if (org.bukkit.craftbukkit.event.CraftEventFactory.callSpawnerSpawnEvent(entity, blockpos).isCancelled()) {
 +                            continue;
@@ -53,3 +55,12 @@
                          world.playEvent(2004, blockpos, 0);
  
                          if (entityliving != null)
+@@ -140,7 +149,7 @@
+                             entityliving.spawnExplosionParticle();
+                         }
+ 
+-                        flag = true;
++                        /*flag = true;*/ // Paper - moved up above cancellable event
+                     }
+                 }
+ 

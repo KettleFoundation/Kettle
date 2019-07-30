@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.Warning.WarningState;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
@@ -139,6 +141,10 @@ public final class Bukkit {
      */
     public static Collection<? extends Player> getOnlinePlayers() {
         return server.getOnlinePlayers();
+    }
+
+    public static Player[] _INVALID_getOnlinePlayers() {
+        return server._INVALID_getOnlinePlayers();
     }
 
     /**
@@ -503,7 +509,7 @@ public final class Bukkit {
      * @return a map view if it exists, or null otherwise
      * @deprecated Magic value
      */
-    @Deprecated
+
     public static MapView getMap(short id) {
         return server.getMap(id);
     }
@@ -523,7 +529,6 @@ public final class Bukkit {
      */
     public static void reload() {
         server.reload();
-        org.spigotmc.CustomTimingsHandler.reload(); // Spigot
     }
 
     /**
@@ -1091,12 +1096,12 @@ public final class Bukkit {
 
     /**
      * Create a ChunkData for use in a generator.
-     * 
+     *
      * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
-     * 
+     *
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world
-     * 
+     *
      */
     public static ChunkGenerator.ChunkData createChunkData(World world) {
         return server.createChunkData(world);
@@ -1126,6 +1131,16 @@ public final class Bukkit {
         return server.getEntity(uuid);
     }
 
+    // Paper start
+	/**
+     * Gets the current server TPS
+     * @return current server TPS (1m, 5m, 15m in Paper-Server)
+     */
+    public static double[] getTPS() {
+        return server.getTPS();
+    }
+	// Paper end
+
     /**
      * Get the advancement specified by this key.
      *
@@ -1150,7 +1165,7 @@ public final class Bukkit {
      * @see UnsafeValues
      * @return the unsafe values instance
      */
-    @Deprecated
+
     public static UnsafeValues getUnsafe() {
         return server.getUnsafe();
     }
@@ -1159,4 +1174,46 @@ public final class Bukkit {
     {
         return server.spigot();
     }
+
+    /**
+     * Checks if player names should be suggested when a command returns {@code null} as
+     * their tab completion result.
+     *
+     * @return true if player names should be suggested
+     */
+    public static boolean suggestPlayerNamesWhenNullTabCompletions() {
+        return server.suggestPlayerNamesWhenNullTabCompletions();
+    }
+
+    /**
+     * Creates a PlayerProfile for the specified uuid, with name as null
+     * @param uuid UUID to create profile for
+     * @return A PlayerProfile object
+     */
+    public static com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid) {
+        return server.createProfile(uuid);
+    }
+
+    /**
+     * Creates a PlayerProfile for the specified name, with UUID as null
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    public static com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name) {
+        return server.createProfile(name);
+    }
+
+    /**
+     * Creates a PlayerProfile for the specified name/uuid
+     *
+     * Both UUID and Name can not be null at same time. One must be supplied.
+     *
+     * @param uuid UUID to create profile for
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    public static com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name) {
+        return server.createProfile(uuid, name);
+    }
+    // Paper end
 }

@@ -68,21 +68,33 @@
          }
  
          this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-@@ -218,15 +234,20 @@
+@@ -195,14 +211,14 @@
+     {
+         compound.setShort("Health", (short)this.xpOrbHealth);
+         compound.setShort("Age", (short)this.xpOrbAge);
+-        compound.setShort("Value", (short)this.xpValue);
++        compound.setInteger("Value", this.xpValue); // Paper - save as Integer
+     }
  
-                 if (!itemstack.isEmpty() && itemstack.isItemDamaged())
+     public void readEntityFromNBT(NBTTagCompound compound)
+     {
+         this.xpOrbHealth = compound.getShort("Health");
+         this.xpOrbAge = compound.getShort("Age");
+-        this.xpValue = compound.getShort("Value");
++        this.xpValue = compound.getInteger("Value"); // Paper - save as Integer
+     }
+ 
+     public void onCollideWithPlayer(EntityPlayer entityIn)
+@@ -220,13 +236,17 @@
                  {
--                    float ratio = itemstack.getItem().getXpRepairRatio(itemstack);
--                    int i = Math.min(roundAverage(this.xpValue * ratio), itemstack.getItemDamage());
+                     float ratio = itemstack.getItem().getXpRepairRatio(itemstack);
+                     int i = Math.min(roundAverage(this.xpValue * ratio), itemstack.getItemDamage());
 -                    this.xpValue -= roundAverage(i / ratio);
 -                    itemstack.setItemDamage(itemstack.getItemDamage() - i);
-+                    int i = Math.min(this.xpToDurability(this.xpValue), itemstack.getItemDamage());
-+//                    this.xpValue -= this.durabilityToXp(i);
-+//                    itemstack.setItemDamage(itemstack.getItemDamage() - i);
 +                    org.bukkit.event.player.PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(entityIn, this, itemstack, i);
 +                    i = event.getRepairAmount();
 +                    if (!event.isCancelled()) {
-+                        this.xpValue -= this.durabilityToXp(i);
++                        this.xpValue -= roundAverage(i / ratio);
 +                        itemstack.setItemDamage(itemstack.getItemDamage() - i);
 +                    }
                  }
@@ -94,7 +106,7 @@
                  }
  
                  this.setDead();
-@@ -296,6 +317,24 @@
+@@ -296,6 +316,24 @@
  
      public static int getXPSplit(int expValue)
      {
@@ -119,14 +131,3 @@
          if (expValue >= 2477)
          {
              return 2477;
-@@ -342,10 +381,4 @@
-     {
-         return false;
-     }
--
--    private static int roundAverage(float value)
--    {
--        double floor = Math.floor(value);
--        return (int) floor + (Math.random() < value - floor ? 1 : 0);
--    }
- }

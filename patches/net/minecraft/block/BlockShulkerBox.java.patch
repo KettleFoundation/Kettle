@@ -9,58 +9,22 @@
  
      public BlockShulkerBox(EnumDyeColor colorIn)
      {
-@@ -160,9 +160,32 @@
-         }
-     }
+@@ -162,7 +162,7 @@
  
--    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
--    {
-+    // CraftBukkit start - override to prevent duplication when dropping
-+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-+        TileEntity tileentity = worldIn.getTileEntity(pos);
-+
-+        if (tileentity instanceof TileEntityShulkerBox) {
-+            TileEntityShulkerBox tileentityshulkerbox = (TileEntityShulkerBox) tileentity;
-+
-+            if (!tileentityshulkerbox.isCleared() && tileentityshulkerbox.shouldDrop()) {
-+                ItemStack itemstack = new ItemStack(Item.getItemFromBlock(this));
-+                NBTTagCompound nbttagcompound = new NBTTagCompound();
-+                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-+
-+                nbttagcompound.setTag("BlockEntityTag", ((TileEntityShulkerBox) tileentity).saveToNbt(nbttagcompound1));
-+                itemstack.setTagCompound(nbttagcompound);
-+                if (tileentityshulkerbox.hasCustomName()) {
-+                    itemstack.setStackDisplayName(tileentityshulkerbox.getName());
-+                    tileentityshulkerbox.setCustomName("");
-+                }
-+
-+                spawnAsEntity(worldIn, pos, itemstack);
+     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+     {
+-    }
 +            }
-+
-+            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
-+        }
-     }
-+    // CraftBukkit end
  
      public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
      {
-@@ -181,7 +204,7 @@
-     {
-         TileEntity tileentity = worldIn.getTileEntity(pos);
+@@ -201,8 +201,8 @@
  
--        if (tileentity instanceof TileEntityShulkerBox)
-+        if (false && tileentity instanceof TileEntityShulkerBox) // CraftBukkit - moved up
-         {
-             TileEntityShulkerBox tileentityshulkerbox = (TileEntityShulkerBox)tileentity;
- 
-@@ -202,8 +225,9 @@
                  spawnAsEntity(worldIn, pos, itemstack);
              }
- 
--            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
-+//            worldIn.updateComparatorOutputLevel(pos, state.getBlock());
+-
+             worldIn.updateComparatorOutputLevel(pos, state.getBlock());
++            tileentityshulkerbox.clear(); // Paper - This was intended to be called in Vanilla (is checked in the if statement above if has been called) - Fixes dupe issues
          }
-+        worldIn.updateComparatorOutputLevel(pos, state.getBlock()); // CraftBukkit - moved down
  
          super.breakBlock(worldIn, pos, state);
-     }

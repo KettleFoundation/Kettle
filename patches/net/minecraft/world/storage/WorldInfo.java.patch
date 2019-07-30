@@ -37,7 +37,23 @@
      protected WorldInfo()
      {
      }
-@@ -511,6 +519,14 @@
+@@ -161,6 +169,7 @@
+         this.thunderTime = nbt.getInteger("thunderTime");
+         this.thundering = nbt.getBoolean("thundering");
+         this.hardcore = nbt.getBoolean("hardcore");
++        this.dimension = nbt.getInteger("dimension");
+ 
+         if (nbt.hasKey("initialized", 99))
+         {
+@@ -376,6 +385,7 @@
+ 
+         nbt.setBoolean("DifficultyLocked", this.difficultyLocked);
+         nbt.setTag("GameRules", this.gameRules.writeToNBT());
++        nbt.setInteger("dimension", this.dimension);
+         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+ 
+         for (Entry<Integer, NBTTagCompound> entry : this.dimensionData.entrySet())
+@@ -511,6 +521,14 @@
  
      public void setThundering(boolean thunderingIn)
      {
@@ -52,7 +68,7 @@
          this.thundering = thunderingIn;
      }
  
-@@ -531,6 +547,14 @@
+@@ -531,6 +549,14 @@
  
      public void setRaining(boolean isRaining)
      {
@@ -67,7 +83,7 @@
          this.raining = isRaining;
      }
  
-@@ -712,6 +736,10 @@
+@@ -712,6 +738,10 @@
      public void setDifficulty(EnumDifficulty newDifficulty)
      {
          net.minecraftforge.common.ForgeHooks.onDifficultyChange(newDifficulty, this.difficulty);
@@ -78,7 +94,7 @@
          this.difficulty = newDifficulty;
      }
  
-@@ -815,7 +843,7 @@
+@@ -815,7 +845,7 @@
       * Used by Forge to store the dimensions available to a world
       * @param additionalProperties
       */
@@ -87,7 +103,7 @@
      {
          // one time set for this
          if (this.additionalProperties == null)
-@@ -869,4 +897,21 @@
+@@ -869,4 +899,28 @@
      {
          return this.versionName;
      }
@@ -100,12 +116,19 @@
 +    }
 +    // CraftBukkit end
 +
-+
-+    public int getDimension() {
-+        return dimension;
++    /**
++     * Sets the Dimension.
++     */
++    public void setDimension(int dim)
++    {
++        this.dimension = dim;
 +    }
 +
-+    public void setDimension(int dimension) {
-+        this.dimension = dimension;
++    public int getDimension() {
++        return this.dimension;
++    }
++
++    public void tick() {
++        totalTime++;
 +    }
  }

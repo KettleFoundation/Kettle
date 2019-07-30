@@ -2,9 +2,11 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Map;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -139,7 +141,17 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         if (name == null) {
             profile = null;
         } else {
-            profile = new GameProfile(null, name);
+            // Paper start - Use Online Players Skull
+            GameProfile newProfile = null;
+            EntityPlayerMP player = MinecraftServer.getServerCB().getPlayerList().getPlayerByUsername(name);
+            if (player != null) {
+                newProfile = player.getGameProfile();
+            }
+            if (newProfile == null) {
+                newProfile = new GameProfile(null, name);
+            }
+            profile = newProfile;
+            // Paper end
         }
 
         return true;

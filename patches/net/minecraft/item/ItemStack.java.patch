@@ -26,7 +26,7 @@
  import net.minecraft.util.datafix.DataFixer;
  import net.minecraft.util.datafix.FixTypes;
  import net.minecraft.util.datafix.walkers.BlockEntityTag;
-@@ -49,6 +53,13 @@
+@@ -49,14 +53,21 @@
  import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -40,73 +40,18 @@
  
  public final class ItemStack implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
  {
-@@ -56,7 +67,7 @@
+     public static final ItemStack EMPTY = new ItemStack((Item)null);
      public static final DecimalFormat DECIMALFORMAT = new DecimalFormat("#.##");
-     private int stackSize;
+-    private int stackSize;
++    public int stackSize;
      private int animationsToGo;
 -    private final Item item;
-+    private Item item;
++    public Item item;
      private NBTTagCompound stackTagCompound;
      private boolean isEmpty;
      int itemDamage;
-@@ -95,7 +106,7 @@
-         this(itemIn, amount, 0);
-     }
+@@ -119,23 +130,33 @@
  
--    public ItemStack(Item itemIn, int amount, int meta){ this(itemIn, amount, meta, null); }
-+    public ItemStack(Item itemIn, int amount, int meta){ this(itemIn, amount, meta, true); }
-     public ItemStack(Item itemIn, int amount, int meta, @Nullable NBTTagCompound capNBT)
-     {
-         this.capNBT = capNBT;
-@@ -112,30 +123,80 @@
-         this.forgeInit();
-     }
- 
-+    public ItemStack(Item itemIn, int amount, int meta, boolean convert)
-+    {
-+        this.item = itemIn;
-+        this.itemDamage = meta;
-+        this.stackSize = amount;
-+
-+        // CraftBukkit start - Pass to setData to do filtering
-+        if (MinecraftServer.getServerCB() != null) {
-+            this.setItemDamage(meta);
-+        }
-+        // CraftBukkit end
-+
-+        if (this.itemDamage < 0)
-+        {
-+            // this.itemDamage = 0;
-+        }
-+
-+        this.updateEmptyState();
-+        this.forgeInit();
-+        if (convert)
-+            this.convertStack();
-+    }
-+
-     private void updateEmptyState()
-     {
-+        if (this.isEmpty && this == ItemStack.EMPTY) throw new AssertionError("TRAP");
-         this.isEmpty = this.isEmpty();
-     }
- 
-+    // Called to run this stack through the data converter to handle older storage methods and serialized items
-+    public void convertStack() {
-+        if (MinecraftServer.getServerCB() != null) {
-+            // Don't convert beds - both the old and new data values are valid
-+            // Conversion would make getting white beds (data value 0) impossible
-+            if (this.item == Items.BED) {
-+                return;
-+            }
-+
-+            NBTTagCompound savedStack = new NBTTagCompound();
-+            this.writeToNBT(savedStack);
-+            MinecraftServer.getServerCB().dataFixer.process(FixTypes.ITEM_INSTANCE, savedStack);
-+            this.load(savedStack);
-+        }
-+    }
-+
      public ItemStack(NBTTagCompound compound)
      {
 +        this.load(compound);
@@ -145,147 +90,29 @@
      }
  
      public boolean isEmpty()
-@@ -184,12 +245,138 @@
-     public EnumActionResult onItemUse(EntityPlayer playerIn, World worldIn, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+@@ -160,6 +181,7 @@
+             return true;
+         }
+     }
++    // Paper end
+ 
+     public static void registerFixes(DataFixer fixer)
+     {
+@@ -185,11 +207,10 @@
      {
          if (!worldIn.isRemote) return net.minecraftforge.common.ForgeHooks.onPlaceItemIntoWorld(this, playerIn, worldIn, pos, side, hitX, hitY, hitZ, hand);
-+        // CraftBukkit start - handle all block place event logic here
-+        int oldData = this.getItemDamage();
-+        int oldCount = this.getCount();
-+
-+        if (!(this.getItem() instanceof ItemBucket)) { // if not bucket
-+            worldIn.captureBlockStates = true;
-+            // special case bonemeal
-+            if (this.getItem() instanceof ItemDye && this.getItemDamage() == 15) {
-+                Block block = worldIn.getBlockState(pos).getBlock();
-+                if (block == Blocks.SAPLING || block instanceof BlockMushroom) {
-+                    worldIn.captureTreeGeneration = true;
-+                }
-+            }
-+        }
          EnumActionResult enumactionresult = this.getItem().onItemUse(playerIn, worldIn, pos, hand, side, hitX, hitY, hitZ);
-+        int newData = this.getItemDamage();
-+        int newCount = this.getCount();
-+        this.setCount(oldCount);
-+        this.setItemDamage(oldData);
-+        worldIn.captureBlockStates = false;
-+        if (enumactionresult == EnumActionResult.SUCCESS && worldIn.captureTreeGeneration && worldIn.capturedBlockStates.size() > 0) {
-+            worldIn.captureTreeGeneration = false;
-+            Location location = new Location(worldIn.getWorld(), pos.getX(), pos.getY(), pos.getZ());
-+            TreeType treeType = BlockSapling.treeType;
-+            BlockSapling.treeType = null;
-+            List<BlockState> blocks = (List<BlockState>) worldIn.capturedBlockStates.clone();
-+            worldIn.capturedBlockStates.clear();
-+            StructureGrowEvent event = null;
-+            if (treeType != null) {
-+                boolean isBonemeal = getItem() == Items.DYE && oldData == 15;
-+                event = new StructureGrowEvent(location, treeType, isBonemeal, (Player) playerIn.getBukkitEntity(), blocks);
-+                org.bukkit.Bukkit.getPluginManager().callEvent(event);
-+            }
-+            if (event == null || !event.isCancelled()) {
-+                // Change the stack to its new contents if it hasn't been tampered with.
-+                if (this.getCount() == oldCount && this.getItemDamage() == oldData) {
-+                    this.setItemDamage(newData);
-+                    this.setCount(newCount);
-+                }
-+                for (BlockState blockstate : blocks) {
-+                    blockstate.update(true);
-+                }
-+            }
- 
-+            return enumactionresult;
-+        }
-+        worldIn.captureTreeGeneration = false;
+-
          if (enumactionresult == EnumActionResult.SUCCESS)
          {
 -            playerIn.addStat(StatList.getObjectUseStats(this.item));
-+            // playerIn.addStat(StatList.getObjectUseStats(this.item));
-+            org.bukkit.event.block.BlockPlaceEvent placeEvent = null;
-+            List<BlockState> blocks = (List<BlockState>) worldIn.capturedBlockStates.clone();
-+            worldIn.capturedBlockStates.clear();
-+            if (blocks.size() > 1) {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockMultiPlaceEvent(worldIn, playerIn, hand, blocks, pos.getX(), pos.getY(), pos.getZ());
-+            } else if (blocks.size() == 1) {
-+                placeEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callBlockPlaceEvent(worldIn, playerIn, hand, blocks.get(0), pos.getX(), pos.getY(), pos.getZ());
-+            }
-+
-+            if (placeEvent != null && (placeEvent.isCancelled() || !placeEvent.canBuild())) {
-+                enumactionresult = EnumActionResult.FAIL; // cancel placement
-+                // TODO: Remove this when MC-99075 fixed
-+                placeEvent.getPlayer().updateInventory();
-+                // revert back all captured blocks
-+                for (BlockState blockstate : blocks) {
-+                    blockstate.update(true, false);
-+                }
-+            } else {
-+                // Change the stack to its new contents if it hasn't been tampered with.
-+                if (this.getCount() == oldCount && this.getItemDamage() == oldData) {
-+                    this.setItemDamage(newData);
-+                    this.setCount(newCount);
-+                }
-+
-+                for (Entry<BlockPos, TileEntity> e : worldIn.capturedTileEntities.entrySet()) {
-+                    worldIn.setTileEntity(e.getKey(), e.getValue());
-+                }
-+
-+                for (BlockState blockstate : blocks) {
-+                    int x = blockstate.getX();
-+                    int y = blockstate.getY();
-+                    int z = blockstate.getZ();
-+                    int updateFlag = ((CraftBlockState) blockstate).getFlag();
-+                    org.bukkit.Material mat = blockstate.getType();
-+                    Block oldBlock = CraftMagicNumbers.getBlock(mat);
-+                    BlockPos newblockposition = new BlockPos(x, y, z);
-+                    IBlockState block = worldIn.getBlockState(newblockposition);
-+
-+                    if (!(block.getBlock() instanceof BlockContainer)) { // Containers get placed automatically
-+                        block.getBlock().onBlockAdded(worldIn, newblockposition, block);
-+                    }
-+
-+                    worldIn.markAndNotifyBlock(newblockposition, null, oldBlock.getDefaultState(), block, updateFlag); // send null chunk as chunk.k() returns false by this point
-+                }
-+
-+                // Special case juke boxes as they update their tile entity. Copied from ItemRecord.
-+                // PAIL: checkme on updates.
-+                if (this.item instanceof ItemRecord) {
-+                    ((BlockJukebox) Blocks.JUKEBOX).insertRecord(worldIn, pos, worldIn.getBlockState(pos), this);
-+                    worldIn.playEvent(null, 1010, pos, Item.getIdFromItem(this.item));
-+                    this.shrink(1);
-+                    playerIn.addStat(StatList.CRAFTING_TABLE_INTERACTION);
-+                }
-+
-+                if (this.item == Items.SKULL) { // Special case skulls to allow wither spawns to be cancelled
-+                    BlockPos bp = pos;
-+                    if (!worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos)) {
-+                        if (!worldIn.getBlockState(pos).getMaterial().isSolid()) {
-+                            bp = null;
-+                        } else {
-+                            bp = bp.offset(side);
-+                        }
-+                    }
-+                    if (bp != null) {
-+                        TileEntity te = worldIn.getTileEntity(bp);
-+                        if (te instanceof TileEntitySkull) {
-+                            Blocks.SKULL.checkWitherSpawn(worldIn, bp, (TileEntitySkull) te);
-+                        }
-+                    }
-+                }
-+
-+                // SPIGOT-1288 - play sound stripped from ItemBlock
-+                if (this.item instanceof ItemBlock) {
-+                    SoundType soundeffecttype = ((ItemBlock) this.item).getBlock().getSoundType();
-+                    worldIn.playSound(playerIn, pos, soundeffecttype.getPlaceSound(), SoundCategory.BLOCKS, (soundeffecttype.getVolume() + 1.0F) / 2.0F, soundeffecttype.getPitch() * 0.8F);
-+                }
-+
+-        }
 +                playerIn.addStat(StatList.getObjectUseStats(this.item));
 +            }
-         }
-+        worldIn.capturedTileEntities.clear();
-+        worldIn.capturedBlockStates.clear();
  
          return enumactionresult;
      }
-@@ -231,7 +418,8 @@
+@@ -231,7 +252,8 @@
  
          if (this.stackTagCompound != null)
          {
@@ -295,7 +122,7 @@
          }
  
          if (this.capabilities != null)
-@@ -291,6 +479,26 @@
+@@ -291,6 +313,26 @@
  
      public void setItemDamage(int meta)
      {
@@ -322,7 +149,7 @@
          getItem().setDamage(this, meta);
      }
  
-@@ -322,6 +530,19 @@
+@@ -322,6 +364,19 @@
  
                  amount -= j;
  
@@ -342,7 +169,7 @@
                  if (amount <= 0)
                  {
                      return false;
-@@ -347,6 +568,11 @@
+@@ -347,6 +402,11 @@
                  if (this.attemptDamageItem(amount, entityIn.getRNG(), entityIn instanceof EntityPlayerMP ? (EntityPlayerMP)entityIn : null))
                  {
                      entityIn.renderBrokenItemStack(this);
@@ -354,17 +181,7 @@
                      this.shrink(1);
  
                      if (entityIn instanceof EntityPlayer)
-@@ -393,7 +619,8 @@
- 
-     public ItemStack copy()
-     {
--        ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage, this.capabilities != null ? this.capabilities.serializeNBT() : null);
-+        // ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage, this.capabilities != null ? this.capabilities.serializeNBT() : null);
-+        ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage, false);
-         itemstack.setAnimationsToGo(this.getAnimationsToGo());
- 
-         if (this.stackTagCompound != null)
-@@ -983,6 +1210,14 @@
+@@ -983,6 +1043,14 @@
  
      public void setRepairCost(int cost)
      {
@@ -379,7 +196,7 @@
          if (!this.hasTagCompound())
          {
              this.stackTagCompound = new NBTTagCompound();
-@@ -1043,6 +1278,14 @@
+@@ -1043,6 +1111,14 @@
          nbttaglist.appendTag(nbttagcompound);
      }
  
@@ -394,7 +211,7 @@
      public ITextComponent getTextComponent()
      {
          TextComponentString textcomponentstring = new TextComponentString(this.getDisplayName());
-@@ -1280,4 +1523,16 @@
+@@ -1280,4 +1356,16 @@
      {
          return this.isEmpty() || this.getItem().doesSneakBypassUse(this, world, pos, player);
      }

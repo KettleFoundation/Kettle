@@ -21,7 +21,16 @@ public interface Tameable extends Entity {
      *
      * @param tame true if tame
      */
-    public void setTamed(boolean tame);
+    void setTamed(boolean tame);
+
+    // Paper start
+    /**
+     * Gets the owners UUID
+     *
+     * @return the owners UUID, or null if not owned
+     */
+    java.util.UUID getOwnerUUID();
+    // Paper end
 
     /**
      * Gets the current owning AnimalTamer

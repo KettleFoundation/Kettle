@@ -63,7 +63,7 @@
 +        if (world.spigotConfig.tickInactiveVillagers) {
 +            // SPIGOT-3894
 +            net.minecraft.world.chunk.Chunk startingChunk = this.world.getChunkIfLoaded(MathHelper.floor(this.posX) >> 4, MathHelper.floor(this.posZ) >> 4);
-+            if (!(startingChunk != null && startingChunk.areNeighborsLoaded(1))) {
++            if (!(startingChunk != null )) {
 +                return;
 +            }
 +            this.updateAITasks(); // SPIGOT-3846

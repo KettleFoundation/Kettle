@@ -43,7 +43,6 @@ public class SpigotConfig
     static int version;
     static Map<String, Command> commands;
     /*========================================================================*/
-    private static Metrics metrics;
 
     public static void init(File configFile)
     {
@@ -74,19 +73,7 @@ public class SpigotConfig
     {
         for ( Map.Entry<String, Command> entry : commands.entrySet() )
         {
-            MinecraftServer.getServerInstance().server.getCommandMap().register( entry.getKey(), "Spigot", entry.getValue() );
-        }
-
-        if ( metrics == null )
-        {
-            try
-            {
-                metrics = new Metrics();
-                metrics.start();
-            } catch ( IOException ex )
-            {
-                Bukkit.getServer().getLogger().log( Level.SEVERE, "Could not start metrics service", ex );
-            }
+            MinecraftServer.getServerCB().server.getCommandMap().register( entry.getKey(), "Spigot", entry.getValue() );
         }
     }
 
@@ -267,8 +254,8 @@ public class SpigotConfig
     public static int playerSample;
     private static void playerSample()
     {
-        playerSample = getInt( "settings.sample-count", 12 );
-        System.out.println( "Server Ping Player Sample Count: " + playerSample );
+        playerSample = Math.max(getInt( "settings.sample-count", 12 ), 0); // Paper - Avoid negative counts
+        LogManager.getLogger("Spigot").info( "Server Ping Player Sample Count: " + playerSample );
     }
 
     public static int playerShuffle;
@@ -280,10 +267,7 @@ public class SpigotConfig
     public static List<String> spamExclusions;
     private static void spamExclusions()
     {
-        spamExclusions = getList( "commands.spam-exclusions", Arrays.asList( new String[]
-        {
-                "/skill"
-        } ) );
+        spamExclusions = getList( "commands.spam-exclusions", Arrays.asList("/skill") );
     }
 
     public static boolean silentCommandBlocks;
@@ -345,36 +329,12 @@ public class SpigotConfig
     public static double attackDamage = 2048;
     private static void attributeMaxes()
     {
-        // TODO: Add Patch
-//        maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );
-//        ( (RangedAttribute) SharedMonsterAttributes.MAX_HEALTH ).maximumValue = maxHealth;
-//        movementSpeed = getDouble( "settings.attribute.movementSpeed.max", movementSpeed );
-//        ( (RangedAttribute) SharedMonsterAttributes.MOVEMENT_SPEED ).maximumValue = movementSpeed;
-//        attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
-//        ( (RangedAttribute) SharedMonsterAttributes.ATTACK_DAMAGE ).maximumValue = attackDamage;
-    }
-
-    public static boolean debug;
-    private static void debug()
-    {
-        debug = getBoolean( "settings.debug", false );
-
-        if ( debug && !LogManager.getRootLogger().isTraceEnabled() )
-        {
-            // Enable debug logging
-            LoggerContext ctx = (LoggerContext) LogManager.getContext( false );
-            Configuration conf = ctx.getConfiguration();
-            conf.getLoggerConfig( LogManager.ROOT_LOGGER_NAME ).setLevel( org.apache.logging.log4j.Level.ALL );
-            ctx.updateLoggers( conf );
-        }
-
-        if ( LogManager.getRootLogger().isTraceEnabled() )
-        {
-            Bukkit.getLogger().info( "Debug logging is enabled" );
-        } else
-        {
-            Bukkit.getLogger().info( "Debug logging is disabled" );
-        }
+        maxHealth = getDouble( "settings.attribute.maxHealth.max", maxHealth );
+        ( (RangedAttribute) SharedMonsterAttributes.MAX_HEALTH ).maximumValue = maxHealth;
+        movementSpeed = getDouble( "settings.attribute.movementSpeed.max", movementSpeed );
+        ( (RangedAttribute) SharedMonsterAttributes.MOVEMENT_SPEED ).maximumValue = movementSpeed;
+        attackDamage = getDouble( "settings.attribute.attackDamage.max", attackDamage );
+        ( (RangedAttribute) SharedMonsterAttributes.ATTACK_DAMAGE ).maximumValue = attackDamage;
     }
 
     public static int itemDirtyTicks;
@@ -386,6 +346,6 @@ public class SpigotConfig
     public static List<String> disabledAdvancements;
     private static void disabledAdvancements() {
         disableAdvancementSaving = getBoolean("advancements.disable-saving", false);
-        disabledAdvancements = getList("advancements.disabled", Arrays.asList(new String[]{"minecraft:story/disabled"}));
+        disabledAdvancements = getList("advancements.disabled", Arrays.asList("minecraft:story/disabled"));
     }
 }

@@ -40,12 +40,9 @@ public final class CraftItemStack extends ItemStack {
             return net.minecraft.item.ItemStack.EMPTY;
         }
 
-        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, original.getAmount(), original.getDurability(), false);
+        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, original.getAmount(), original.getDurability());
         if (original.hasItemMeta()) {
             setItemMeta(stack, original.getItemMeta());
-        } else {
-            // Converted after setItemMeta
-            stack.convertStack();
         }
         return stack;
     }
@@ -433,7 +430,6 @@ public final class CraftItemStack extends ItemStack {
         item.setTagCompound(tag);
 
         ((CraftMetaItem) itemMeta).applyToItem(tag);
-        item.convertStack();
 
         return true;
     }

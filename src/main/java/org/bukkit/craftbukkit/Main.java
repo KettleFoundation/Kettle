@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jline.UnsupportedTerminal;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.fusesource.jansi.AnsiConsole;
 //import org.fusesource.jansi.AnsiConsole;
 
 public class Main {
@@ -117,6 +119,8 @@ public class Main {
 
                 acceptsAll(asList("demo"), "Demo mode");
 
+                acceptsAll(asList("mixin"), "This argument is needed for proper Mixin Framework work in the test env");
+
                 // Spigot Start
                 acceptsAll(asList("S", "spigot-settings"), "File for spigot settings")
                         .withRequiredArg()
@@ -125,7 +129,13 @@ public class Main {
                         .describedAs("Yml file");
                 // Spigot End
 
-                acceptsAll(asList("mixin"), "This argument is needed for proper Mixin Framework work in the test env");
+                // Paper start
+                acceptsAll(asList("server-name"), "Name of the server")
+                        .withRequiredArg()
+                        .ofType(String.class)
+                        .defaultsTo("Unknown Server")
+                        .describedAs("Name");
+                // Paper end
             }
         };
 
@@ -162,35 +172,17 @@ public class Main {
                     System.setProperty("user.language", "en");
                     useJline = false;
                 }
-
-                /*
-                if (useJline) {
+                if (Main.useJline) {
                     AnsiConsole.systemInstall();
-                } else {
-                    // This ensures the terminal literal will always match the jline implementation
-                    System.setProperty(jline.TerminalFactory.JLINE_TERMINAL, jline.UnsupportedTerminal.class.getName());
                 }
-                */
+                else {
+                    System.setProperty("jline.terminal", UnsupportedTerminal.class.getName());
+                }
+
 
                 if (options.has("noconsole")) {
                     useConsole = false;
                 }
-
-                if (Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
-                    Date buildDate = new SimpleDateFormat("yyyyMMdd-HHmm").parse(Main.class.getPackage().getImplementationVendor());
-
-                    Calendar deadline = Calendar.getInstance();
-                    deadline.add(Calendar.DAY_OF_YEAR, -14);
-                    if (buildDate.before(deadline.getTime())) {
-                        System.err.println("*** Error, this build is outdated ***");
-                        System.err.println("*** Please download a new build as per instructions from https://www.spigotmc.org/ ***");
-                        System.err.println("*** Server will start in 15 seconds ***");
-                        Thread.sleep(TimeUnit.SECONDS.toMillis(15));
-                    }
-                }
-
-                System.out.println("Loading libraries, please wait...");
-                // MinecraftServer.main(options);
             } catch (Throwable t) {
                 t.printStackTrace();
             }

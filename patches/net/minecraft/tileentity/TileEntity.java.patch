@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntity.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntity.java
-@@ -20,12 +20,17 @@
+@@ -20,12 +20,16 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -11,7 +11,6 @@
 +
  public abstract class TileEntity implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
  {
-+    public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.SpigotTimings.getTileEntityTimings(this); // Spigot
      private static final Logger LOGGER = LogManager.getLogger();
      private static final RegistryNamespaced < ResourceLocation, Class <? extends TileEntity >> REGISTRY = new RegistryNamespaced < ResourceLocation, Class <? extends TileEntity >> ();
 -    protected World world;
@@ -19,7 +18,7 @@
      protected BlockPos pos = BlockPos.ORIGIN;
      protected boolean tileEntityInvalid;
      private int blockMetadata = -1;
-@@ -315,7 +320,7 @@
+@@ -315,7 +319,7 @@
       * @param net The NetworkManager the packet originated from
       * @param pkt The data packet
       */
@@ -28,7 +27,7 @@
      {
      }
  
-@@ -531,4 +536,12 @@
+@@ -531,4 +535,12 @@
          register("shulker_box", TileEntityShulkerBox.class);
          register("bed", TileEntityBed.class);
      }

@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySign.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySign.java
-@@ -24,7 +24,7 @@
+@@ -24,9 +24,11 @@
  {
      public final ITextComponent[] signText = new ITextComponent[] {new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
      public int lineBeingEdited = -1;
@@ -8,19 +8,34 @@
 +    public boolean isEditable = true;
      private EntityPlayer player;
      private final CommandResultStats stats = new CommandResultStats();
++    private static final boolean CONVERT_LEGACY_SIGNS = Boolean.getBoolean("convertLegacySigns");
++    public java.util.UUID signEditor; // Paper
  
-@@ -38,6 +38,10 @@
+     public NBTTagCompound writeToNBT(NBTTagCompound compound)
+     {
+@@ -38,6 +40,10 @@
              compound.setString("Text" + (i + 1), s);
          }
  
-+        if (Boolean.getBoolean("convertLegacySigns")) {
++        if (CONVERT_LEGACY_SIGNS) { // Paper
 +            compound.setBoolean("Bukkit.isConverted", true);
 +        }
 +
          this.stats.writeStatsToNBT(compound);
          return compound;
      }
-@@ -79,19 +83,38 @@
+@@ -61,6 +67,10 @@
+             {
+                 return permLevel <= 2; //Forge: Fixes  MC-75630 - Exploit with signs and command blocks
+             }
++            public boolean canUseCommand(int permLevel, String commandName, String perm)
++            {
++                return permLevel <= 2; //Forge: Fixes  MC-75630 - Exploit with signs and command blocks
++            }
+             public BlockPos getPosition()
+             {
+                 return TileEntitySign.this.pos;
+@@ -79,19 +89,38 @@
              }
          };
  
@@ -65,7 +80,31 @@
          }
  
          this.stats.readStatsFromNBT(compound);
-@@ -201,7 +224,12 @@
+@@ -131,7 +160,10 @@
+ 
+     public void setPlayer(EntityPlayer playerIn)
+     {
+-        this.player = playerIn;
++        // Paper start
++        //this.player = playerIn;
++        signEditor = playerIn != null ? playerIn.getUniqueID() : null;
++        // Paper end
+     }
+ 
+     public EntityPlayer getPlayer()
+@@ -158,6 +190,11 @@
+             {
+                 return permLevel <= 2;
+             }
++
++            public boolean canUseCommand(int permLevel, String commandName, String perm)
++            {
++                return permLevel <= 2;
++            }
+             public BlockPos getPosition()
+             {
+                 return TileEntitySign.this.pos;
+@@ -201,7 +238,12 @@
  
                  if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND)
                  {

@@ -24,7 +24,7 @@
  
  public class EntityWither extends EntityMob implements IRangedAttackMob
  {
-@@ -255,15 +261,35 @@
+@@ -255,15 +261,41 @@
  
              if (j1 <= 0)
              {
@@ -37,21 +37,27 @@
 +                if (!event.isCancelled()) {
 +                    this.world.newExplosion(this, this.posX, this.posY + (double) this.getEyeHeight(), this.posZ, event.getRadius(), event.getFire(), net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this));
 +                }
-+                // this.world.playBroadcastSound(1023, new BlockPos(this), 0);
-+                int viewDistance = ((WorldServer) this.world).spigotConfig.viewDistance * 16; // Spigot
-+                for (EntityPlayerMP player : (List<EntityPlayerMP>) MinecraftServer.getServerCB().getPlayerList().getPlayers()) {
++                // CraftBukkit start - Use relative location for far away sounds
++                // Paper start
++                //int viewDistance = ((WorldServer) this.world).spigotConfig.viewDistance * 16; // Paper - updated to use worlds actual view distance incase we have to uncomment this due to removal of player view distance API
++                for (EntityPlayer player : world.playerEntities) {
++                    EntityPlayerMP playerMP = (EntityPlayerMP) player;
++                    int viewDistance = playerMP.getViewDistance();
++                    // Paper end
 +                    double deltaX = this.posX - player.posX;
 +                    double deltaZ = this.posZ - player.posZ;
 +                    double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
++                    if (world.spigotConfig.witherSpawnSoundRadius > 0 && distanceSquared > world.spigotConfig.witherSpawnSoundRadius * world.spigotConfig.witherSpawnSoundRadius) continue; // Spigot
 +                    if (distanceSquared > viewDistance * viewDistance) {
 +                        double deltaLength = Math.sqrt(distanceSquared);
 +                        double relativeX = player.posX + (deltaX / deltaLength) * viewDistance;
 +                        double relativeZ = player.posZ + (deltaZ / deltaLength) * viewDistance;
-+                        player.connection.sendPacket(new SPacketEffect(1023, new BlockPos((int) relativeX, (int) this.posY, (int) relativeZ), 0, true));
++                        playerMP.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int) relativeX, (int) this.posY, (int) relativeZ), 0, true));
 +                    } else {
-+                        player.connection.sendPacket(new SPacketEffect(1023, new BlockPos((int) this.posX, (int) this.posY, (int) this.posZ), 0, true));
++                        playerMP.connection.sendPacket(new SPacketEffect(1013, new BlockPos((int) this.posX, (int) this.posY, (int) this.posZ), 0, true));
 +                    }
 +                }
++                // CraftBukkit end
              }
  
              this.setInvulTime(j1);
@@ -63,7 +69,7 @@
              }
          }
          else
-@@ -384,6 +410,9 @@
+@@ -384,6 +416,9 @@
  
                                  if (!block.isAir(iblockstate, this.world, blockpos) && block.canEntityDestroy(iblockstate, world, blockpos, this) && net.minecraftforge.event.ForgeEventFactory.onEntityDestroyBlock(this, blockpos, iblockstate))
                                  {
@@ -73,7 +79,7 @@
                                      flag = this.world.destroyBlock(blockpos, true) || flag;
                                  }
                              }
-@@ -399,7 +428,7 @@
+@@ -399,7 +434,7 @@
  
              if (this.ticksExisted % 20 == 0)
              {

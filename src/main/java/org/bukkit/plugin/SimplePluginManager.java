@@ -185,6 +185,8 @@ public final class SimplePluginManager implements PluginManager {
             }
         }
 
+        loadedPlugins.addAll(ImmutableSet.of("Forge"));
+
         while (!plugins.isEmpty()) {
             boolean missingDependency = true;
             Iterator<Map.Entry<String, File>> pluginIterator = plugins.entrySet().iterator();
@@ -383,7 +385,8 @@ public final class SimplePluginManager implements PluginManager {
      * @param plugin Plugin to check
      * @return true if the plugin is enabled, otherwise false
      */
-    public boolean isPluginEnabled(Plugin plugin) {
+    @Override
+    public synchronized boolean isPluginEnabled(Plugin plugin) { // Paper - synchronize
         if ((plugin != null) && (plugins.contains(plugin))) {
             return plugin.isEnabled();
         } else {
@@ -391,7 +394,8 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
-    public void enablePlugin(final Plugin plugin) {
+    @Override
+    public synchronized void enablePlugin(final Plugin plugin) { // Paper - synchronize
         if (!plugin.isEnabled()) {
             List<Command> pluginCommands = PluginCommandYamlParser.parse(plugin);
 
@@ -409,17 +413,32 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
+    // Paper start - close Classloader on disable
+    @Override
     public void disablePlugins() {
-        Plugin[] plugins = getPlugins();
-        for (int i = plugins.length - 1; i >= 0; i--) {
-            disablePlugin(plugins[i]);
-        }
+        disablePlugins(false);
     }
 
-    public void disablePlugin(final Plugin plugin) {
+    public void disablePlugins(boolean closeClassloaders) {
+        // Paper end - close Classloader on disable
+        Plugin[] plugins = getPlugins();
+        for (int i = plugins.length - 1; i >= 0; i--) {
+            disablePlugin(plugins[i], closeClassloaders); // Paper - close Classloader on disable
+        }
+        }
+
+    // Paper start - close Classloader on disable
+    @Override
+    public void disablePlugin(Plugin plugin) {
+        disablePlugin(plugin, false);
+    }
+
+    @Override
+    public synchronized void disablePlugin(final Plugin plugin, boolean closeClassloader) { // Paper - synchronize
+        // Paper end - close Classloader on disable
         if (plugin.isEnabled()) {
             try {
-                plugin.getPluginLoader().disablePlugin(plugin);
+                plugin.getPluginLoader().disablePlugin(plugin, closeClassloader); // Paper - close Classloader on disable
             } catch (Throwable ex) {
                 server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
             }
@@ -453,7 +472,7 @@ public final class SimplePluginManager implements PluginManager {
 
     public void clearPlugins() {
         synchronized (this) {
-            disablePlugins();
+            disablePlugins(true); // Paper - close Classloader on disable
             plugins.clear();
             lookupNames.clear();
             HandlerList.unregisterAll();
@@ -464,6 +483,8 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
+    private void fireEvent(Event event) { callEvent(event); } // Paper - support old method incase plugin uses reflection
+
     /**
      * Calls an event with the given details.
      * <p>
@@ -471,23 +492,9 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param event Event details
      */
+    @Override
     public void callEvent(Event event) {
-        if (event.isAsynchronous()) {
-            if (Thread.holdsLock(this)) {
-                throw new IllegalStateException(event.getEventName() + " cannot be triggered asynchronously from inside synchronized code.");
-            }
-            if (server.isPrimaryThread()) {
-                throw new IllegalStateException(event.getEventName() + " cannot be triggered asynchronously from primary server thread.");
-            }
-            fireEvent(event);
-        } else {
-            synchronized (this) {
-                fireEvent(event);
-            }
-        }
-    }
-
-    private void fireEvent(Event event) {
+        // Paper - replace callEvent by merging to below method
         HandlerList handlers = event.getHandlers();
         RegisteredListener[] listeners = handlers.getRegisteredListeners();
 
@@ -594,7 +601,6 @@ public final class SimplePluginManager implements PluginManager {
         addPermission(perm, true);
     }
 
-    @Deprecated
     public void addPermission(Permission perm, boolean dirty) {
         String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
 
@@ -642,7 +648,7 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
-    @Deprecated
+
     public void dirtyPermissibles() {
         dirtyPermissibles(true);
         dirtyPermissibles(false);

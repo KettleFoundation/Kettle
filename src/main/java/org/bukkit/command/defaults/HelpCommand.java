@@ -29,8 +29,8 @@ public class HelpCommand extends BukkitCommand {
         super("help");
         this.description = "Shows the help menu";
         this.usageMessage = "/help <pageNumber>\n/help <topic>\n/help <topic> <pageNumber>";
-        this.setAliases(Arrays.asList(new String[] { "?" }));
         this.setPermission("bukkit.command.help");
+        this.setAliases(Arrays.asList("?"));
     }
 
     @Override

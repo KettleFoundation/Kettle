@@ -60,7 +60,8 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
     }
 
     // gets the wrapped TileEntity
-    public T getTileEntity() {
+    @Override
+    public T getTileEntity() { // Paper - protected -> public
         return tileEntity;
     }
 

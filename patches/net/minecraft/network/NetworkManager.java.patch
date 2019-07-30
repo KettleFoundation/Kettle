@@ -1,14 +1,15 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
-@@ -74,10 +74,15 @@
+@@ -74,15 +74,25 @@
          }
      };
      private final EnumPacketDirection direction;
 -    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
 +    private final Queue<InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
      private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-     private Channel channel;
+-    private Channel channel;
 -    private SocketAddress socketAddress;
++    public Channel channel;
 +    // Spigot Start // PAIL
 +    public SocketAddress socketAddress;
 +    public java.util.UUID spoofedUUID;
@@ -18,7 +19,17 @@
      private INetHandler packetListener;
      private ITextComponent terminationReason;
      private boolean isEncrypted;
-@@ -98,6 +103,7 @@
+     private boolean disconnected;
+ 
++    // Paper start - NetworkClient implementation
++    public int protocolVersion;
++    public java.net.InetSocketAddress virtualHost;
++    // Paper end
++
+     public NetworkManager(EnumPacketDirection packetDirection)
+     {
+         this.direction = packetDirection;
+@@ -98,6 +108,7 @@
          super.channelActive(p_channelActive_1_);
          this.channel = p_channelActive_1_.channel();
          this.socketAddress = this.channel.remoteAddress();
@@ -26,7 +37,7 @@
  
          try
          {
-@@ -173,7 +179,7 @@
+@@ -173,7 +184,7 @@
  
              try
              {
@@ -35,7 +46,7 @@
              }
              finally
              {
-@@ -195,7 +201,7 @@
+@@ -195,7 +206,7 @@
  
              try
              {
@@ -44,7 +55,7 @@
              }
              finally
              {
-@@ -265,7 +271,7 @@
+@@ -265,7 +276,7 @@
              {
                  while (!this.outboundPacketsQueue.isEmpty())
                  {
@@ -53,7 +64,7 @@
                      this.dispatchPacket(networkmanager$inboundhandlertuplepacketlistener.packet, networkmanager$inboundhandlertuplepacketlistener.futureListeners);
                  }
              }
-@@ -298,9 +304,12 @@
+@@ -298,9 +309,12 @@
  
      public void closeChannel(ITextComponent message)
      {
@@ -67,7 +78,16 @@
              this.terminationReason = message;
          }
      }
-@@ -476,4 +485,12 @@
+@@ -410,7 +424,7 @@
+             }
+             else
+             {
+-                this.channel.pipeline().addBefore("decoder", "decompress", new NettyCompressionDecoder(threshold));
++                this.channel.pipeline().addAfter("splitter", "decompress", new NettyCompressionDecoder(threshold));
+             }
+ 
+             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder)
+@@ -476,4 +490,12 @@
                  this.futureListeners = inFutureListeners;
              }
          }

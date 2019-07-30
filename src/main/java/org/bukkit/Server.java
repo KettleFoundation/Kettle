@@ -12,15 +12,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.Warning.WarningState;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.command.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -88,7 +87,9 @@ public interface Server extends PluginMessageRecipient {
      *
      * @return version of Bukkit
      */
-    public String getBukkitVersion();
+    String getBukkitVersion();
+
+    public Player[] _INVALID_getOnlinePlayers();
 
     /**
      * Gets a view of all currently logged in players. This {@linkplain
@@ -332,7 +333,10 @@ public interface Server extends PluginMessageRecipient {
      * @param id UUID of the player to retrieve
      * @return a player object if one was found, null otherwise
      */
-    public Player getPlayer(UUID id);
+    Player getPlayer(UUID id);
+
+    @Nullable
+    UUID getPlayerUniqueId(String playerName);
 
     /**
      * Gets the plugin manager for interfacing with plugins.
@@ -919,6 +923,22 @@ public interface Server extends PluginMessageRecipient {
      */
     Entity getEntity(UUID uuid);
 
+    // Paper start
+    /**
+      * Gets the current server TPS
+      *
+      * @return current server TPS (1m, 5m, 15m in Paper-Server)
+      */
+    double[] getTPS();
+
+    /**
+     * Gets the active {@link CommandMap}
+     *
+     * @return the active command map
+     */
+    CommandMap getCommandMap();
+    // Paper end
+
     /**
      * Get the advancement specified by this key.
      *
@@ -979,4 +999,39 @@ public interface Server extends PluginMessageRecipient {
 
     Spigot spigot();
     // Spigot end
+
+    // Paper start - allow preventing player name suggestions by default
+    /**
+     * Checks if player names should be suggested when a command returns {@code null} as
+     * their tab completion result.
+     *
+     * @return true if player names should be suggested
+     */
+    boolean suggestPlayerNamesWhenNullTabCompletions();
+
+    /**
+     * Creates a PlayerProfile for the specified uuid, with name as null
+     * @param uuid UUID to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid);
+
+    /**
+     * Creates a PlayerProfile for the specified name, with UUID as null
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name);
+
+    /**
+     * Creates a PlayerProfile for the specified name/uuid
+     *
+     * Both UUID and Name can not be null at same time. One must be supplied.
+     *
+     * @param uuid UUID to create profile for
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name);
+    // Paper end
 }

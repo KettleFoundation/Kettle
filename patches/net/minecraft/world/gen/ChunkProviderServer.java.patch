@@ -40,25 +40,16 @@
                  }
  
                  loadingChunks.remove(pos);
-@@ -136,6 +141,7 @@
- 
-         if (chunk == null)
-         {
-+            world.timings.syncChunkLoadTimer.startTiming(); // Spigot
-             long i = ChunkPos.asLong(x, z);
- 
-             try
-@@ -154,7 +160,8 @@
+@@ -154,7 +159,7 @@
  
              this.id2ChunkMap.put(i, chunk);
              chunk.onLoad();
 -            chunk.populate(this, this.chunkGenerator);
 +            chunk.populateCB(this, this.chunkGenerator, true);
-+            world.timings.syncChunkLoadTimer.stopTiming(); // Spigot
          }
  
          return chunk;
-@@ -266,17 +273,21 @@
+@@ -266,17 +271,21 @@
  
                      if (chunk != null && chunk.unloadQueued)
                      {
@@ -86,7 +77,7 @@
  
              this.chunkLoader.chunkTick();
          }
-@@ -284,6 +295,37 @@
+@@ -284,6 +293,37 @@
          return false;
      }
  

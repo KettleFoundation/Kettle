@@ -8,6 +8,15 @@
  
  public class BlockDragonEgg extends Block
  {
+@@ -68,7 +69,7 @@
+ 
+                 if (blockpos.getY() > 0)
+                 {
+-                    worldIn.setBlockState(blockpos, this.getDefaultState(), 2);
++                    worldIn.setBlockState(blockpos.up(), this.getDefaultState(), 2); // Paper MC-94186 Fix dragon egg falling in lazy chunks
+                 }
+             }
+         }
 @@ -97,6 +98,16 @@
  
                  if (worldIn.isAirBlock(blockpos))

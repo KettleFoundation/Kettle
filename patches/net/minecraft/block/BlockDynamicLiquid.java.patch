@@ -9,7 +9,16 @@
  
  public class BlockDynamicLiquid extends BlockLiquid
  {
-@@ -113,14 +115,23 @@
+@@ -82,7 +84,7 @@
+                 }
+             }
+ 
+-            if (this.blockMaterial == Material.LAVA && i < 8 && i1 < 8 && i1 > i && rand.nextInt(4) != 0)
++            if (this.blockMaterial == Material.LAVA && i < 8 && i1 < 8 && i1 > i && rand.nextInt(4) != 0) // Paper
+             {
+                 k *= 4;
+             }
+@@ -113,14 +115,22 @@
              this.placeStaticBlock(worldIn, pos, state);
          }
  
@@ -26,19 +35,20 @@
 +            }
              if (this.blockMaterial == Material.LAVA && worldIn.getBlockState(pos.down()).getMaterial() == Material.WATER)
              {
-                 worldIn.setBlockState(pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()));
+-                worldIn.setBlockState(pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()));
 -                this.triggerMixEffects(worldIn, pos.down());
-+                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(worldIn, pos.down(), Blocks.STONE.getDefaultState(), null)) {
++                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockFormEvent(worldIn, pos.down(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, pos.down(), pos, Blocks.STONE.getDefaultState()), null)) {
 +                    this.triggerMixEffects(worldIn, pos.down());
 +                }
                  return;
              }
  
-@@ -150,14 +161,19 @@
+@@ -150,14 +160,20 @@
  
              for (EnumFacing enumfacing1 : set)
              {
 -                this.tryFlowInto(worldIn, pos.offset(enumfacing1), worldIn.getBlockState(pos.offset(enumfacing1)), k1);
++                // CraftBukkit start
 +                BlockFromToEvent event = new BlockFromToEvent(source, org.bukkit.craftbukkit.block.CraftBlock.notchToBlockFace(enumfacing1));
 +                worldIn.getServer().getPluginManager().callEvent(event);
 +

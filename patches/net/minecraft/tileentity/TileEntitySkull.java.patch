@@ -206,7 +206,7 @@
          {
 -            return input;
 -        }
-+        return com.google.common.util.concurrent.Futures.getUnchecked(updateGameprofile(input, com.google.common.base.Predicates.alwaysTrue(), true)); // Mohist
++        return com.google.common.util.concurrent.Futures.getUnchecked(updateGameprofile(input, com.google.common.base.Predicates.alwaysTrue(), true)); // Kettle
      }
  
      public int getSkullType()

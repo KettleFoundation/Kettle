@@ -1,6 +1,14 @@
 --- ../src-base/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
 +++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
-@@ -29,10 +29,14 @@
+@@ -1,5 +1,7 @@
+ package net.minecraft.server.network;
+ 
++import com.destroystokyo.paper.profile.CraftPlayerProfile;
++import com.destroystokyo.paper.profile.PlayerProfile;
+ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+ import io.netty.channel.ChannelFuture;
+@@ -29,10 +31,15 @@
  import net.minecraft.util.CryptManager;
  import net.minecraft.util.ITickable;
  import net.minecraft.util.text.ITextComponent;
@@ -9,13 +17,14 @@
  import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
++import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.util.Waitable;
 +import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 +import org.bukkit.event.player.PlayerPreLoginEvent;
  
  public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
  {
-@@ -42,13 +46,15 @@
+@@ -42,13 +49,15 @@
      private final byte[] verifyToken = new byte[4];
      private final MinecraftServer server;
      public final NetworkManager networkManager;
@@ -32,16 +41,20 @@
      public NetHandlerLoginServer(MinecraftServer serverIn, NetworkManager networkManagerIn)
      {
          this.server = serverIn;
-@@ -58,17 +64,17 @@
+@@ -58,17 +67,21 @@
  
      public void update()
      {
 -        if (this.currentLoginState == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT)
 +        if (this.currentLoginState == LoginState.READY_TO_ACCEPT)
          {
++            // Paper start - prevent logins to be processed even though disconnect was called
++            if (networkManager.isChannelOpen()) {
              this.tryAcceptPlayer();
          }
 -        else if (this.currentLoginState == NetHandlerLoginServer.LoginState.DELAY_ACCEPT)
++            // Paper end
++        }
 +        else if (this.currentLoginState == LoginState.DELAY_ACCEPT)
          {
              EntityPlayerMP entityplayermp = this.server.getPlayerList().getPlayerByUUID(this.loginGameProfile.getId());
@@ -53,29 +66,36 @@
                  net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.fmlServerHandshake(this.server.getPlayerList(), this.networkManager, this.player);
                  this.player = null;
              }
-@@ -80,6 +86,20 @@
+@@ -94,22 +107,54 @@
          }
      }
  
-+    // CraftBukkit start
-+    @Deprecated
-+    public void disconnect(String s) {
-+        try {
-+            ITextComponent ichatbasecomponent = new TextComponentTranslation(s);
-+            NetHandlerLoginServer.LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), s);
-+            this.networkManager.sendPacket(new SPacketDisconnect(ichatbasecomponent));
-+            this.networkManager.closeChannel(ichatbasecomponent);
-+        } catch (Exception exception) {
-+            NetHandlerLoginServer.LOGGER.error("Error whilst disconnecting player", exception);
++    // Spigot start
++    public void initUUID()
++    {
++        UUID uuid;
++        if ( networkManager.spoofedUUID != null )
++        {
++            uuid = networkManager.spoofedUUID;
++        } else
++        {
++            uuid = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + this.loginGameProfile.getName() ).getBytes( StandardCharsets.UTF_8 ) );
 +        }
-+    }
-+    // CraftBukkit end
 +
-     public void disconnect(ITextComponent reason)
-     {
-         try
-@@ -96,20 +116,26 @@
- 
++        this.loginGameProfile = new GameProfile( uuid, this.loginGameProfile.getName() );
++
++        if (networkManager.spoofedProfile != null)
++        {
++            for ( com.mojang.authlib.properties.Property property : networkManager.spoofedProfile )
++            {
++                this.loginGameProfile.getProperties().put( property.getName(), property );
++            }
++        }
++
++        this.loginGameProfile = new GameProfile( uuid, this.loginGameProfile.getName() );
++    }
++    // Spigot end
++
      public void tryAcceptPlayer()
      {
 +        // Spigot start - Moved to initUUID
@@ -105,7 +125,7 @@
  
              if (this.server.getNetworkCompressionThreshold() >= 0 && !this.networkManager.isLocalChannel())
              {
-@@ -127,12 +153,12 @@
+@@ -127,12 +172,12 @@
  
              if (entityplayermp != null)
              {
@@ -121,7 +141,7 @@
              }
          }
      }
-@@ -149,23 +175,42 @@
+@@ -149,23 +194,42 @@
  
      public void processLoginStart(CPacketLoginStart packetIn)
      {
@@ -168,7 +188,7 @@
          PrivateKey privatekey = this.server.getKeyPair().getPrivate();
  
          if (!Arrays.equals(this.verifyToken, packetIn.getVerifyToken(privatekey)))
-@@ -175,7 +220,7 @@
+@@ -175,7 +239,7 @@
          else
          {
              this.secretKey = packetIn.getSecretKey(privatekey);
@@ -177,7 +197,7 @@
              this.networkManager.enableEncryption(this.secretKey);
              (new Thread(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER, "User Authenticator #" + AUTHENTICATOR_THREAD_ID.incrementAndGet())
              {
-@@ -190,14 +235,18 @@
+@@ -190,14 +254,18 @@
  
                          if (NetHandlerLoginServer.this.loginGameProfile != null)
                          {
@@ -199,7 +219,7 @@
                          }
                          else
                          {
-@@ -211,13 +260,19 @@
+@@ -211,13 +279,19 @@
                          {
                              NetHandlerLoginServer.LOGGER.warn("Authentication servers are down but will let them in anyway!");
                              NetHandlerLoginServer.this.loginGameProfile = NetHandlerLoginServer.this.getOfflineProfile(gameprofile);
@@ -220,7 +240,7 @@
                      }
                  }
                  @Nullable
-@@ -230,12 +285,75 @@
+@@ -230,6 +304,54 @@
          }
      }
  
@@ -228,11 +248,21 @@
 +    public class LoginHandler {
 +        public void fireEvents() throws Exception {
 +            String playerName = loginGameProfile.getName();
-+            InetAddress address = ((InetSocketAddress) networkManager.getRemoteAddress()).getAddress();
-+            UUID uniqueId = loginGameProfile.getId();
++            java.net.InetAddress address = ((java.net.InetSocketAddress) networkManager.getRemoteAddress()).getAddress();
++            java.util.UUID uniqueId = loginGameProfile.getId();
 +            final org.bukkit.craftbukkit.CraftServer server = NetHandlerLoginServer.this.server.server;
-+            AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, uniqueId);
++
++            // Paper start
++            PlayerProfile profile = Bukkit.createProfile(uniqueId, playerName);
++            AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, uniqueId, profile);
 +            server.getPluginManager().callEvent(asyncEvent);
++            profile = asyncEvent.getPlayerProfile();
++            profile.complete();
++            loginGameProfile = CraftPlayerProfile.asAuthlibCopy(profile);
++            playerName = loginGameProfile.getName();
++            uniqueId = loginGameProfile.getId();
++            // Paper end
++
 +            if (PlayerPreLoginEvent.getHandlerList().getRegisteredListeners().length != 0) {
 +                final PlayerPreLoginEvent event = new PlayerPreLoginEvent(playerName, address, uniqueId);
 +                if (asyncEvent.getResult() != PlayerPreLoginEvent.Result.ALLOWED) {
@@ -265,34 +295,3 @@
      protected GameProfile getOfflineProfile(GameProfile original)
      {
          UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + original.getName()).getBytes(StandardCharsets.UTF_8));
-         return new GameProfile(uuid, original.getName());
-     }
- 
-+    // Spigot start
-+    public void initUUID()
-+    {
-+        UUID uuid;
-+        if ( networkManager.spoofedUUID != null )
-+        {
-+            uuid = networkManager.spoofedUUID;
-+        } else
-+        {
-+            uuid = UUID.nameUUIDFromBytes( ( "OfflinePlayer:" + this.loginGameProfile.getName() ).getBytes( StandardCharsets.UTF_8 ) );
-+        }
-+
-+        this.loginGameProfile = new GameProfile( uuid, this.loginGameProfile.getName() );
-+
-+        if (networkManager.spoofedProfile != null)
-+        {
-+            for ( com.mojang.authlib.properties.Property property : networkManager.spoofedProfile )
-+            {
-+                this.loginGameProfile.getProperties().put( property.getName(), property );
-+            }
-+        }
-+    }
-+    // Spigot end
-+
-+
-     static enum LoginState
-     {
-         HELLO,
