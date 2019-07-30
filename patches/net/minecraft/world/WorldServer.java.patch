@@ -412,7 +412,7 @@
                  chunk.enqueueRelightChecks();
                  this.profiler.endStartSection("tickChunk");
                  chunk.onTick(false);
-+                if (!chunk.areNeighborsLoaded(1)) continue; // Spigot
++//                if (!chunk.areNeighborsLoaded(1)) continue; // Spigot - Kettle TODO: Probs let forge sort out chunks loading
                  this.profiler.endStartSection("thunder");
  
                  if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
