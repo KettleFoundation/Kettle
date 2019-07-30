@@ -1,6 +1,5 @@
 package org.spigotmc;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import net.minecraft.entity.*;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.effect.EntityWeatherEffect;
