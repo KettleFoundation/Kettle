@@ -4,7 +4,7 @@
 
 # Kettle
 
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge) [![](https://img.shields.io/jenkins/build/https/ci.hexeption.co.uk/job/Kettle?label=CI&style=for-the-badge)](https://ci.hexeption.co.uk)
+![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
 
 ### What's Kettle?
 
