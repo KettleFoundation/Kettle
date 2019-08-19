@@ -1,8 +1,6 @@
 **:warning: Kettle is still __very raw__ and you may encounter issues in using it with your server. You have been warned!**
 
-**:warning::warning: Experimental branch. Expect everything to be broken.**
-
-![Kettle](https://i.imgur.com/kHmTLzI.png)
+![Kettle](https://i.imgur.com/onGk0dK.png)
 
 # Kettle
 
