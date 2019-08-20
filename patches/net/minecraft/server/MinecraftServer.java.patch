@@ -10,7 +10,7 @@
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -17,91 +19,98 @@
+@@ -17,91 +19,97 @@
  import java.awt.image.BufferedImage;
  import java.io.File;
  import java.io.IOException;
@@ -112,7 +112,6 @@
 +import org.bukkit.entity.EntityType;
 +import org.bukkit.potion.PotionEffectType;
 +import org.kettlemc.configuration.KettleConfig;
-+import org.kettlemc.configuration.MagmaConfig;
 +import org.spigotmc.SlackActivityAccountant;
  
 -public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo
@@ -139,7 +138,7 @@
      @SideOnly(Side.SERVER)
      private String hostname;
      private int serverPort = -1;
-@@ -128,7 +137,6 @@
+@@ -128,7 +136,6 @@
      private KeyPair serverKeyPair;
      private String serverOwner;
      private String folderName;
@@ -147,7 +146,7 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,178 +152,267 @@
+@@ -144,178 +151,267 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
@@ -512,7 +511,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +420,52 @@
+@@ -323,45 +419,52 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -592,7 +591,7 @@
          }
      }
  
-@@ -379,73 +483,79 @@
+@@ -379,73 +482,79 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -704,7 +703,7 @@
              {
                  if (worldserver1 != null)
                  {
-@@ -453,159 +563,213 @@
+@@ -453,159 +562,213 @@
                      worldserver1.flush();
                  }
              }
@@ -992,7 +991,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +777,42 @@
+@@ -613,52 +776,42 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -1055,7 +1054,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +821,15 @@
+@@ -667,16 +820,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -1077,7 +1076,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +837,7 @@
+@@ -684,7 +836,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -1086,7 +1085,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,95 +850,100 @@
+@@ -697,95 +849,100 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1235,7 +1234,7 @@
          this.profiler.endStartSection("connection");
          this.getNetworkSystem().networkTick();
          this.profiler.endStartSection("players");
-@@ -794,33 +952,30 @@
+@@ -794,33 +951,30 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1277,7 +1276,7 @@
          LOGGER.warn(msg);
      }
  
-@@ -835,53 +990,51 @@
+@@ -835,53 +989,51 @@
          return ret;
      }
  
@@ -1355,7 +1354,7 @@
                  }
              });
          }
-@@ -889,145 +1042,115 @@
+@@ -889,145 +1041,115 @@
          return report;
      }
  
@@ -1545,7 +1544,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1158,75 @@
+@@ -1035,80 +1157,75 @@
          }
      }
  
@@ -1655,7 +1654,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1235,186 @@
+@@ -1117,228 +1234,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1932,7 +1931,7 @@
                      return entity;
                  }
              }
-@@ -1347,316 +1423,212 @@
+@@ -1347,316 +1422,212 @@
          return null;
      }
  
