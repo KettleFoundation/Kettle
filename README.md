@@ -6,43 +6,35 @@
 
 # Kettle
 
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
+![](https://img.shields.io/badge/Kettle%20Red-Pre--alpha-red.svg?style=for-the-badge)
 
-### What's Kettle?
+## What is KettleRed?
 
-Kettle is the next link in the hybrid server chain:
-**Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: KCauldron :arrow_right: Cauldron :arrow_right: MCPC+
+*<font size="1">(heads up: some of the features described may not be available from the start)</font>*
 
-Kettle was initially concieved as a fork of Contigo, but after a few iterations got rid of Contigo's dependencies and can no longer be concidered it's fork, but a standalone hybrid server.
+![](https://i.imgur.com/PJn696Y.png)
 
-Kettle is dependent on custom Forge and Paper builds, meaning it can run both Craftbukkit/spigot-based plugins and forge-based mods.
+**KettleRed** is a new experimental branch of Kettle built with JRuby and utilizing Java classes and bindings.
+**KettleRed**, like **KettleJava**, still relies on Forge and Paper, and yet, introduces a new Scripting Engine (which is a part of the core).
 
-We hope to eliminate all issues with craftbukkit forge servers. In the end, we envision a seamless, low lag Kettle experience with support for new 1.12+ versions of Minecraft.
+![](https://i.imgur.com/bvOywvh.png)
+
+Scripting Engine runs scripts and packages, rather than plain plugins or mods.
+
+Scripting Engine runs with Forge and Paper and uses their APIs to allow creation of scripts and packages utilizing features from both Forge and Paper.
+
+*Heads up: Scripting Enigne requires a ScriptLoader forge mod on the client for Forge api scripts/packages to work.*
+
+### How it works
+
+*Heads up: stub image*
+![](https://cdn.discordapp.com/attachments/545889689245319188/606597256321302722/unknown.png)
+
+Scripting engine loads up scripts and packages on the server, while client connects to the server Scripting Engine checks for the ScriptLoader and if it's enabled/installed lets client in, all scripts utilizing the forge api are loaded and executed via ScriptLoader on joining.
 
 ## Deployment
 
-### Installation
-
-1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
-2. Make a new folder for the server
-3. Move the server to the folder and rename it to `kettle.jar`
-4. Make a [launch script](https://gist.github.com/aolko/3b7a93107d162b21730c92e5236e3239)
-
-### Building the sources
-
-All builds are available in `build/distributions`
-
-- Clone the Project
-  - You can use GitHub Desktop/GitKraken or clone using the terminal 
-    - `git clone https://github.com/KettleFoundation/Kettle` 
-  - Next you are gonna want to clone the submodule
-    - `git submodule update --init --recursive` 
-- Building
-  - First you want to setup the project
-    - `./gradlew setup`
-  - After you have setup the project you are going to want to run the build
-    - `./gradlew build`
-  - Now go and get a drink this may take some time
+### We'll update this section later
 
 ## Chat
 
@@ -50,4 +42,4 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 
 ## Unstable/Test builds
 
-For unstable/test builds you can check __this repository__ (how handy)
+For unstable/test builds you can check **releases** section for the KettleRed releases.
