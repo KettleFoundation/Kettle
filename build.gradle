@@ -33,7 +33,7 @@ apply plugin: 'net.nemerosa.versioning'
 apply plugin: "com.github.breadmoirai.github-release"
 
 group 'org.kettlemc'
-version 'git-' +  versioning.info.branch + "-" + versioning.info.build
+version 'git-Kettle-' + versioning.info.build
 
 repositories {
     clear()
