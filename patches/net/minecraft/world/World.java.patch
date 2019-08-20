@@ -704,15 +704,7 @@
              }
          }
  
-@@ -2449,6 +2782,7 @@
-                         }
-                     }
- 
-+                    tileEntityIn.setWorld(this); // Spigot - No null worlds
-                     this.addedTileEntityList.add(tileEntityIn);
-                 }
-                 else
-@@ -2657,6 +2991,13 @@
+@@ -2657,6 +2990,13 @@
                  }
  
                  this.rainingStrength = MathHelper.clamp(this.rainingStrength, 0.0F, 1.0F);
@@ -726,37 +718,23 @@
              }
          }
      }
-@@ -2844,10 +3185,14 @@
+@@ -2844,10 +3184,11 @@
          }
      }
  
 -    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos)
-+    public boolean checkLightFor(EnumSkyBlock lightType, int x, int y, int z)
-     {
+-    {
 -        if (!this.isAreaLoaded(pos, 16, false))
+-        {
++    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
 +        // CraftBukkit start - Use neighbor cache instead of looking up
-+        BlockPos pos = new BlockPos(x, y, z);
-+        Chunk chunk = this.getChunkIfLoaded(x >> 4, z >> 4);
-+        if (chunk == null || !this.isAreaLoaded(pos, 16, false))
-         {
++        Chunk chunk = this.getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
++        if (chunk == null || !this.isAreaLoaded(pos, 16, false)) {
 +            // CraftBukkit end
              return false;
          }
          else
-@@ -2858,9 +3203,9 @@
-             this.profiler.startSection("getBrightness");
-             int l2 = this.getLightFor(lightType, pos);
-             int i3 = this.getRawLight(pos, lightType);
--            int j3 = pos.getX();
--            int k3 = pos.getY();
--            int l3 = pos.getZ();
-+            int j3 = x;
-+            int k3 = y;
-+            int l3 = z;
- 
-             if (i3 > l2)
-             {
-@@ -3137,7 +3482,16 @@
+@@ -3137,7 +3478,16 @@
  
          for (Entity entity4 : this.loadedEntityList)
          {
@@ -774,7 +752,7 @@
              {
                  ++j2;
              }
-@@ -3152,6 +3506,9 @@
+@@ -3152,6 +3502,9 @@
          {
              if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity4, this)))
              {
@@ -784,7 +762,7 @@
                  loadedEntityList.add(entity4);
                  this.onEntityAdded(entity4);
              }
-@@ -3168,19 +3525,26 @@
+@@ -3168,19 +3521,26 @@
          IBlockState iblockstate1 = this.getBlockState(pos);
          AxisAlignedBB axisalignedbb = skipCollisionCheck ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
  
@@ -814,7 +792,7 @@
      }
  
      public int getSeaLevel()
-@@ -3345,6 +3709,12 @@
+@@ -3345,6 +3705,12 @@
          {
              EntityPlayer entityplayer1 = this.playerEntities.get(j2);
  
@@ -827,7 +805,7 @@
              if (p_190525_9_.apply(entityplayer1))
              {
                  double d1 = entityplayer1.getDistanceSq(x, y, z);
-@@ -3592,6 +3962,16 @@
+@@ -3592,6 +3958,16 @@
      {
      }
  
@@ -844,7 +822,7 @@
      public float getThunderStrength(float delta)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * delta) * this.getRainStrength(delta);
-@@ -3880,7 +4260,7 @@
+@@ -3880,7 +4256,7 @@
          int j2 = x * 16 + 8 - blockpos1.getX();
          int k2 = z * 16 + 8 - blockpos1.getZ();
          int l2 = 128;
@@ -853,52 +831,3 @@
      }
  
      /* ======================================== FORGE START =====================================*/
-@@ -4016,4 +4396,48 @@
-     {
-         return null;
-     }
-+
-+    public ImmutableSetMultimap<ChunkPos, ForgeChunkManager.Ticket> getForcedChunks() {
-+        return forcedChunks;
-+    }
-+
-+    public void setForcedChunks(ImmutableSetMultimap<ChunkPos, ForgeChunkManager.Ticket> forcedChunks) {
-+        this.forcedChunks = forcedChunks;
-+    }
-+
-+    public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
-+
-+    /**
-+     * PaperSpigot - Asynchronous lighting updates
-+     */
-+    public boolean checkLightFor(EnumSkyBlock enumskyblock, BlockPos pos) {
-+        Chunk chunk = this.getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
-+        if (chunk == null || !chunk.areNeighborsLoaded(1)) {
-+            return false;
-+        }
-+
-+        List<Chunk> neighbors = new ArrayList<Chunk>();
-+        for (int cx = (pos.getX() >> 4) - 1; cx <= (pos.getX() >> 4) + 1; ++cx) {
-+            for (int cz = (pos.getZ() >> 4) - 1; cz <= (pos.getZ() >> 4) + 1; ++cz) {
-+                if (cx != pos.getX() >> 4 && cz != pos.getZ() >> 4) {
-+                    Chunk neighbor = this.getChunkIfLoaded(cx, cz);
-+                    if (neighbor != null) {
-+                        neighbors.add(neighbor);
-+                    }
-+                }
-+            }
-+        }
-+
-+        if (!Bukkit.isPrimaryThread()) {
-+            return this.checkLightFor(enumskyblock, pos.getX(), pos.getY(), pos.getZ());
-+        }
-+
-+        lightingExecutor.submit(new Runnable() {
-+            @Override
-+            public void run() {
-+                World.this.checkLightFor(enumskyblock, pos.getX(), pos.getY(), pos.getZ());
-+            }
-+        });
-+        return true;
-+    }
- }

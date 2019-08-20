@@ -17,24 +17,6 @@
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.nbt.NBTTagList;
  import net.minecraft.tileentity.TileEntity;
-@@ -79,14 +76,14 @@
- 
-         if (nbttagcompound == null)
-         {
--            DataInputStream datainputstream = RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z);
-+            NBTTagCompound nbtTagCompound = RegionFileCache.getChunkInputStreamCB(this.chunkSaveLocation, x, z);
- 
--            if (datainputstream == null)
-+            if (nbtTagCompound == null)
-             {
-                 return null;
-             }
- 
--            nbttagcompound = this.fixer.process(FixTypes.CHUNK, CompressedStreamTools.read(datainputstream));
-+            nbttagcompound = this.fixer.process(FixTypes.CHUNK, nbtTagCompound);
-         }
- 
-         return this.checkedReadChunkFromNBT__Async(worldIn, x, z, nbttagcompound);
 @@ -237,9 +234,10 @@
  
      private void writeChunkData(ChunkPos pos, NBTTagCompound compound) throws IOException

@@ -102,27 +102,15 @@
      public Chunk(World worldIn, ChunkPrimer primer, int x, int z)
      {
          this(worldIn, x, z);
-@@ -271,6 +311,19 @@
+@@ -271,6 +311,7 @@
          this.isGapLightingUpdated = true;
      }
  
-+    /**
-+     * PaperSpigot - Recheck gaps asynchronously.
-+     */
-+    public void recheckGapsAsync(boolean isStatic) {
-+
-+        world.lightingExecutor.submit(new Runnable() {
-+            @Override
-+            public void run() {
-+                Chunk.this.recheckGaps(isStatic);
-+            }
-+        });
-+    }
 +
      private void recheckGaps(boolean onlyOne)
      {
          this.world.profiler.startSection("recheckGaps");
-@@ -565,12 +618,12 @@
+@@ -565,12 +606,12 @@
                  {
                      if (block1 != block) //Only fire block breaks when the block changes.
                      block1.breakBlock(this.world, pos, iblockstate);
@@ -137,7 +125,7 @@
                      if (te != null && te.shouldRefresh(this.world, pos, iblockstate, state))
                      this.world.removeTileEntity(pos);
                  }
-@@ -608,6 +661,7 @@
+@@ -608,6 +649,7 @@
                      }
                  }
  
@@ -145,7 +133,7 @@
                  // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
                  if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state)))
                  {
-@@ -616,7 +670,7 @@
+@@ -616,7 +658,7 @@
  
                  if (block.hasTileEntity(state))
                  {
@@ -154,7 +142,7 @@
  
                      if (tileentity1 == null)
                      {
-@@ -743,6 +797,20 @@
+@@ -743,6 +785,20 @@
          entityIn.chunkCoordZ = this.z;
          this.entityLists[k].add(entityIn);
          this.markDirty(); // Forge - ensure chunks are marked to save after an entity add
@@ -175,7 +163,7 @@
      }
  
      public void removeEntity(Entity entityIn)
-@@ -764,6 +832,22 @@
+@@ -764,6 +820,22 @@
  
          this.entityLists[index].remove(entityIn);
          this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
@@ -198,7 +186,7 @@
      }
  
      public boolean canSeeSky(BlockPos pos)
-@@ -783,9 +867,12 @@
+@@ -783,9 +855,12 @@
      }
  
      @Nullable
@@ -213,7 +201,7 @@
  
          if (tileentity != null && tileentity.isInvalid())
          {
-@@ -795,12 +882,12 @@
+@@ -795,12 +870,12 @@
  
          if (tileentity == null)
          {
@@ -228,7 +216,7 @@
              {
                  this.tileEntityPosQueue.add(pos.toImmutable());
              }
-@@ -834,6 +921,11 @@
+@@ -834,6 +909,11 @@
  
              tileEntityIn.validate();
              this.tileEntities.put(pos, tileEntityIn);
@@ -240,7 +228,7 @@
          }
      }
  
-@@ -864,7 +956,7 @@
+@@ -864,7 +944,7 @@
  
      public void onUnload()
      {
@@ -249,7 +237,7 @@
          this.loaded = false;
  
          for (TileEntity tileentity : this.tileEntities.values())
-@@ -874,7 +966,14 @@
+@@ -874,7 +954,14 @@
  
          for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
          {
@@ -265,7 +253,7 @@
          }
          net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
      }
-@@ -955,7 +1054,7 @@
+@@ -955,7 +1042,7 @@
              return true;
          }
  
@@ -274,7 +262,7 @@
      }
  
      public Random getRandomWithSeed(long seed)
-@@ -1001,6 +1100,63 @@
+@@ -1001,6 +1088,63 @@
          }
      }
  
@@ -338,7 +326,7 @@
      protected void populate(IChunkGenerator generator)
      {
          if (populating != null && net.minecraftforge.common.ForgeModContainer.logCascadingWorldGeneration) logCascadingWorldGeneration();
-@@ -1017,6 +1173,26 @@
+@@ -1017,6 +1161,26 @@
          {
              this.checkLight();
              generator.populate(this.x, this.z);
@@ -365,16 +353,7 @@
              net.minecraftforge.fml.common.registry.GameRegistry.generateWorld(this.x, this.z, this.world, generator, this.world.getChunkProvider());
              this.markDirty();
          }
-@@ -1061,7 +1237,7 @@
-     {
-         if (this.isGapLightingUpdated && this.world.provider.hasSkyLight() && !skipRecheckGaps)
-         {
--            this.recheckGaps(this.world.isRemote);
-+            this.recheckGapsAsync(this.world.isRemote);
-         }
- 
-         this.ticked = true;
-@@ -1075,7 +1251,7 @@
+@@ -1075,7 +1239,7 @@
          {
              BlockPos blockpos = this.tileEntityPosQueue.poll();
  
@@ -383,7 +362,7 @@
              {
                  TileEntity tileentity = this.createNewTileEntity(blockpos);
                  this.world.setTileEntity(blockpos, tileentity);
-@@ -1086,7 +1262,7 @@
+@@ -1086,7 +1250,7 @@
  
      public boolean isPopulated()
      {
@@ -392,12 +371,3 @@
      }
  
      public boolean wasTicked()
-@@ -1336,7 +1512,7 @@
-             this.updateSkylightColumns[i] = true;
-         }
- 
--        this.recheckGaps(false);
-+        this.recheckGapsAsync(false);
-     }
- 
-     private void checkLightSide(EnumFacing facing)

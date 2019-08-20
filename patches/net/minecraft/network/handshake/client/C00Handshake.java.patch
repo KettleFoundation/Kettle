@@ -11,7 +11,7 @@
      private EnumConnectionState requestedState;
      private boolean hasFMLMarker = false;
  
-@@ -38,11 +38,10 @@
+@@ -38,11 +38,15 @@
      public void readPacketData(PacketBuffer buf) throws IOException
      {
          this.protocolVersion = buf.readVarInt();
@@ -21,6 +21,11 @@
          this.requestedState = EnumConnectionState.getById(buf.readVarInt());
          this.hasFMLMarker = this.ip.contains("\0FML\0");
 -        this.ip = this.ip.split("\0")[0];
++        if(this.hasFMLMarker){
++            this.ip = this.ip.replace("\0FML\0", "");
++        }else if(this.ip.split("\0").length > 2){
++            this.hasFMLMarker = true; // Kettle - Bungee Support
++        }
      }
  
      public void writePacketData(PacketBuffer buf) throws IOException

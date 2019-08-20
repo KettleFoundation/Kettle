@@ -428,7 +428,7 @@ public class CraftEventFactory {
         Bukkit.getServer().getPluginManager().callEvent(event);
 
         victim.expToDrop = event.getDroppedExp();
-        //Kettle start - clear captured drops to allow plugins make changes to them
+        // Kettle start - clear captured drops to allow plugins make changes to them
         victim.capturedDrops.clear();
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
             if (stack == null || stack.getType() == Material.AIR || stack.getAmount() == 0) continue;
@@ -436,7 +436,7 @@ public class CraftEventFactory {
             // world.dropItemNaturally(entity.getLocation(), stack); we don't want this, spawn items in EntityLivingBase.onDeath() (cauldron stuff)
             victim.capturedDrops.add(entityitem);
         }
-        //Kettle end
+        // Kettle end
         return event;
     }
 

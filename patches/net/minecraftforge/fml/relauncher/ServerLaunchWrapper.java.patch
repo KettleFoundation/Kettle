@@ -1,10 +1,12 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/relauncher/ServerLaunchWrapper.java
-@@ -20,18 +20,21 @@
+@@ -19,18 +19,21 @@
+ 
  package net.minecraftforge.fml.relauncher;
  
++import org.kettlemc.utils.DownloadServerFiles;
++
  import java.lang.reflect.Method;
-+import kettlefoundation.kettle.downloads.DownloadServerFiles;
  
 -import org.apache.logging.log4j.LogManager;
 -import org.apache.logging.log4j.core.LoggerContext;
@@ -16,16 +18,15 @@
      /**
       * @param args
       */
-     public static void main(String[] args)
-     {
--        new ServerLaunchWrapper().run(args);
-+      System.out.println("Starting Kettle");
-+      DownloadServerFiles.downloadMinecraftServer();
-+      DownloadServerFiles.downloadServerLibraries();
-+      new ServerLaunchWrapper().run(args);
+-    public static void main(String[] args)
+-    {
++    public static void main(String[] args) {
++        System.out.println("Starting Kettle");
++        DownloadServerFiles.downloadMinecraftServer();
++        DownloadServerFiles.downloadServerLibraries();
+         new ServerLaunchWrapper().run(args);
      }
  
-     private ServerLaunchWrapper()
 @@ -56,9 +59,9 @@
          {
              System.err.printf("We appear to be missing one or more essential library files.\n" +
