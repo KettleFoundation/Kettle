@@ -21,26 +21,34 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ### Installation
 
-1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
+1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases) or our [**Build Server**](https://ci.openprocesses.ml/job/Kettle/)
 2. Make a new folder for the server
 3. Move the server to the folder and rename it to `kettle.jar`
 4. Make a [launch script](https://gist.github.com/aolko/3b7a93107d162b21730c92e5236e3239)
 
-### Building the sources
+## Build Instructions
+- Clone Project
+    - You can use an IDE or clone from a terminal
+      - `git clone https://github.com/KettleFoundation/Kettle.git`
+- Setup
+    - `git submodule update --init --recursive`
+- Build
+    - Linux / Git Bash / MacOS
+      - `./gradlew launch4j`
+    - Windows
+      - `.\gradlew.bat launch4j`
 
 All builds are available in `build/distributions`
 
-- Clone the Project
-  - You can use GitHub Desktop/GitKraken or clone using the terminal 
-    - `git clone https://github.com/KettleFoundation/Kettle` 
-  - Next you are gonna want to clone the submodule
-    - `git submodule update --init --recursive` 
-- Building
-  - First you want to setup the project
-    - `./gradlew setup`
-  - After you have setup the project you are going to want to run the build
-    - `./gradlew build`
-  - Now go and get a drink this may take some time
+## Updating local repository
+
+- Pull from source
+    - `git pull origin`
+- Reapply patches & build bianaries
+    - Linux / Git Bash / MacOS
+      - `./gradlew clean launch4j`
+    - Windows
+      - `.\gradlew.bat clean launch4j`
 
 ## Chat
 
@@ -48,4 +56,4 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 
 ## Unstable/Test builds
 
-For unstable/test builds you can check __this repository__ (how handy)
+For unstable/test builds you can check __this repository__, or our build server: https://ci.openprocesses.ml/job/Kettle
