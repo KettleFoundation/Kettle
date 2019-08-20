@@ -1,0 +1,30 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/Loader.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/Loader.java
+@@ -95,6 +95,7 @@
+ import com.google.gson.JsonElement;
+ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParser;
++import org.kettlemc.api.ServerAPI;
+ 
+ import javax.annotation.Nullable;
+ 
+@@ -752,6 +753,7 @@
+         modController.distributeStateMessage(LoaderState.AVAILABLE);
+         GameData.freezeData();
+         FMLLog.log.info("Forge Mod Loader has successfully loaded {} mod{}", mods.size(), mods.size() == 1 ? "" : "s");
++        ServerAPI.mods.put("mods", mods.size());
+         progressBar.step("Completing Minecraft initialization");
+     }
+ 
+@@ -896,8 +898,10 @@
+             }
+         }
+ 
+-        if (difference.size() > 0)
++        if (difference.size() > 0){
++            ServerAPI.modList.addAll(difference);
+             FMLLog.log.info("Attempting connection with missing mods {} at {}", difference, side);
++        }
+         return true;
+     }
+ 

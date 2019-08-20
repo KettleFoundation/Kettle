@@ -1,0 +1,21 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/handshake/FMLHandshakeServerState.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/handshake/FMLHandshakeServerState.java
+@@ -36,6 +36,7 @@
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.registries.ForgeRegistry;
+ import net.minecraftforge.registries.RegistryManager;
++import org.kettlemc.api.PlayerAPI;
+ 
+ enum FMLHandshakeServerState implements IHandshakeState<FMLHandshakeServerState>
+ {
+@@ -67,6 +68,10 @@
+             NetworkDispatcher dispatcher = ctx.channel().attr(NetworkDispatcher.FML_DISPATCHER).get();
+             dispatcher.setModList(client.modList());
+             FMLLog.log.info("Client attempting to join with {} mods : {}", client.modListSize(), client.modListAsString());
++            if(client.modListSize() > 0) {
++                PlayerAPI.mods.put(dispatcher.player, client.modListSize());
++                PlayerAPI.modList.put(dispatcher.player, client.modListAsString());
++            }
+             String modRejections = FMLNetworkHandler.checkModList(client, Side.CLIENT);
+             if (modRejections != null)
+             {
