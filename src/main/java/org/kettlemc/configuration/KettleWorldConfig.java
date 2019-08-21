@@ -3,6 +3,8 @@ package org.kettlemc.configuration;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.util.List;
+
 public class KettleWorldConfig {
     private final String worldName;
     private final YamlConfiguration config;
@@ -42,17 +44,17 @@ public class KettleWorldConfig {
     }
 
     private int getInt(String path, int def) {
-        +config.addDefault("world-settings.default." + path, def);
+        config.addDefault("world-settings.default." + path, def);
         return config.getInt("world-settings." + worldName + "." + path, config.getInt("world-settings.default." + path));
     }
 
     private float getFloat(String path, float def) {
-        return (float) getDouble(path, (double) def);
+        return (float) getDouble(path, def);
     }
 
     private <T> List getList(String path, T def) {
         config.addDefault("world-settings.default." + path, def);
-        return (List<T>) config.getList("world-settings." + worldName + "." + path, config.getList("world-settings.default." + path));
+        return config.getList("world-settings." + worldName + "." + path, config.getList("world-settings.default." + path));
     }
 
     private String getString(String path, String def) {
