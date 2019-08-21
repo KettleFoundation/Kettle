@@ -136,6 +136,14 @@ public class Main {
                         .defaultsTo("Unknown Server")
                         .describedAs("Name");
                 // Paper end
+
+                // Kettle start
+                acceptsAll(asList("kettle", "kettle-settings"), "File for kettle settings")
+                        .withRequiredArg()
+                        .ofType(File.class)
+                        .defaultsTo(new File("kettle.yml"))
+                        .describedAs("Yml file");
+                // Kettle end
             }
         };
 

@@ -175,7 +175,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
-//import jline.console.ConsoleReader;
+import jline.console.ConsoleReader;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.event.server.TabCompleteEvent;
@@ -246,10 +246,12 @@ public final class CraftServer implements Server {
         Bukkit.setServer(this);
 
         // Register all the Enchantments and PotionTypes now so we can stop new registration immediately after
-        Enchantments.SHARPNESS.getClass();
+        Enchantments.DAMAGE_ALL.getClass();
+        org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations();
 
         Potion.setPotionBrewer(new CraftPotionBrewer());
         MobEffects.BLINDNESS.getClass();
+        PotionEffectType.stopAcceptingRegistrations();
         // Ugly hack :(
 
         if (!Main.useConsole) {
@@ -294,6 +296,8 @@ public final class CraftServer implements Server {
         }
 
         saveCommandsConfig();
+        org.spigotmc.SpigotConfig.registerCommands(); // Spigot
+        org.kettlemc.configuration.KettleConfig.registerCommands(); // Kettle
         overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
         unrestrictedAdvancements = commandsConfiguration.getBoolean("unrestricted-advancements");
         pluginManager.useTimings(configuration.getBoolean("settings.plugin-profiling"));
