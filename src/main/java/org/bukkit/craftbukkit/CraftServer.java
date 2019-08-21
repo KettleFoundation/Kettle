@@ -296,8 +296,6 @@ public final class CraftServer implements Server {
         }
 
         saveCommandsConfig();
-        org.spigotmc.SpigotConfig.registerCommands(); // Spigot
-        org.kettlemc.configuration.KettleConfig.registerCommands(); // Kettle
         overrideAllCommandBlockCommands = commandsConfiguration.getStringList("command-block-overrides").contains("*");
         unrestrictedAdvancements = commandsConfiguration.getBoolean("unrestricted-advancements");
         pluginManager.useTimings(configuration.getBoolean("settings.plugin-profiling"));
