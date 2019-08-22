@@ -54,6 +54,10 @@ repositories {
         name 'maven'
         url 'https://mvnrepository.com/artifact/'
     }
+    maven {
+    	name 'kettle'
+    	url 'https://repo.openprocesses.ml/repository/kettle/'
+    }
     flatDir {
         dirs 'src/main/resources'
     }
@@ -111,7 +115,7 @@ dependencies {
     compile 'org.yaml:snakeyaml:1.21'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
     compile 'commons-lang:commons-lang:2.6' // Is needed for plugin compatibility
-    compile 'net.md-5:SpecialSource:1.8.5'
+    compile 'net.md-5:SpecialSource:1.8.6-SNAPSHOT'
     compile 'org.scala-lang.modules:scala-parser-combinators_2.11:1.0.1'
     compile 'org.xerial:sqlite-jdbc:3.21.0.1'
     compile 'mysql:mysql-connector-java:5.1.45'
