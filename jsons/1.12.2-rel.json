@@ -181,7 +181,7 @@
       "serverreq":true
     },
     {
-      "name": "net.md-5:SpecialSource:1.8.5",
+      "name": "net.md-5:SpecialSource:1.8.6-SNAPSHOT",
       "url" : "https://hub.spigotmc.org/nexus/content/groups/public/",
       "clientreq":true,
       "serverreq":true
