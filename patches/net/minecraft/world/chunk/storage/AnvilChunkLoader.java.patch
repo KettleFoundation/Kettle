@@ -10,7 +10,7 @@
  import java.io.File;
  import java.io.IOException;
  import java.util.Collections;
-@@ -237,9 +237,10 @@
+@@ -238,9 +238,10 @@
  
      private void writeChunkData(ChunkPos pos, NBTTagCompound compound) throws IOException
      {
@@ -24,7 +24,7 @@
      }
  
      public void saveExtraChunkData(World worldIn, Chunk chunkIn) throws IOException
-@@ -608,8 +609,11 @@
+@@ -609,8 +610,11 @@
  
      public static void spawnEntity(Entity entityIn, World worldIn)
      {

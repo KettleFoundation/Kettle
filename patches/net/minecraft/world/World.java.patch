@@ -707,7 +707,7 @@
              }
          }
  
-@@ -2657,6 +2993,13 @@
+@@ -2659,6 +2995,13 @@
                  }
  
                  this.rainingStrength = MathHelper.clamp(this.rainingStrength, 0.0F, 1.0F);
@@ -721,7 +721,7 @@
              }
          }
      }
-@@ -2844,10 +3187,11 @@
+@@ -2846,10 +3189,11 @@
          }
      }
  
@@ -737,7 +737,7 @@
              return false;
          }
          else
-@@ -3137,7 +3481,16 @@
+@@ -3139,7 +3483,16 @@
  
          for (Entity entity4 : this.loadedEntityList)
          {
@@ -755,7 +755,7 @@
              {
                  ++j2;
              }
-@@ -3152,6 +3505,9 @@
+@@ -3154,6 +3507,9 @@
          {
              if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity4, this)))
              {
@@ -765,7 +765,7 @@
                  loadedEntityList.add(entity4);
                  this.onEntityAdded(entity4);
              }
-@@ -3168,19 +3524,26 @@
+@@ -3170,19 +3526,26 @@
          IBlockState iblockstate1 = this.getBlockState(pos);
          AxisAlignedBB axisalignedbb = skipCollisionCheck ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
  
@@ -795,7 +795,7 @@
      }
  
      public int getSeaLevel()
-@@ -3345,6 +3708,12 @@
+@@ -3347,6 +3710,12 @@
          {
              EntityPlayer entityplayer1 = this.playerEntities.get(j2);
  
@@ -808,7 +808,7 @@
              if (p_190525_9_.apply(entityplayer1))
              {
                  double d1 = entityplayer1.getDistanceSq(x, y, z);
-@@ -3592,6 +3961,16 @@
+@@ -3594,6 +3963,16 @@
      {
      }
  
@@ -825,7 +825,7 @@
      public float getThunderStrength(float delta)
      {
          return (this.prevThunderingStrength + (this.thunderingStrength - this.prevThunderingStrength) * delta) * this.getRainStrength(delta);
-@@ -3880,7 +4259,7 @@
+@@ -3882,7 +4261,7 @@
          int j2 = x * 16 + 8 - blockpos1.getX();
          int k2 = z * 16 + 8 - blockpos1.getZ();
          int l2 = 128;

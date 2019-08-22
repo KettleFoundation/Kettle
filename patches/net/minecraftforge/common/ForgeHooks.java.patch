@@ -18,7 +18,7 @@
                  }
  
                  LOGGER.warn("Picking on: [{}] {} gave null item", new Object[] {this.objectMouseOver.typeOfHit, s});
-@@ -993,7 +993,7 @@
+@@ -992,7 +992,7 @@
      }
  
      /**
