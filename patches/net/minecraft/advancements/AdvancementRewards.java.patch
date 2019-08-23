@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/advancements/AdvancementRewards.java
 +++ ../src-work/minecraft/net/minecraft/advancements/AdvancementRewards.java
-@@ -89,56 +89,67 @@
+@@ -89,56 +89,72 @@
  
          if (functionobject != null)
          {
@@ -76,6 +76,11 @@
 +        }
 +
 +        public void sendMessage(ITextComponent component) {
++        }
++
++        public boolean canUseCommand(int permLevel, String commandName)
++        {
++            return permLevel <= 2;
 +        }
 +
 +        public boolean canUseCommand(int permLevel, String commandName, String perm) {
