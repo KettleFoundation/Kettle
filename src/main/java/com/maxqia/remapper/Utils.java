@@ -5,7 +5,6 @@ import org.objectweb.asm.Type;
 import java.util.Map;
 
 public class Utils {
-
     public static String reverseMapExternal(Class<?> name) {
         return reverseMap(name).replace('$', '.').replace('/', '.');
     }
@@ -46,7 +45,6 @@ public class Utils {
             }
         }
 
-        // return superMethodName
         Class interfaces = inst.getSuperclass();
         if (interfaces != null) {
             String superMethodName = mapMethodInternal(interfaces, name, parameterTypes);

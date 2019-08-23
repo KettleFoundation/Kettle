@@ -2,12 +2,11 @@ package org.bukkit.craftbukkit.inventory;
 
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.world.ILockableContainer;
+import org.bukkit.Location;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import org.bukkit.Location;
 
 public class CraftInventoryDoubleChest extends CraftInventory implements DoubleChestInventory {
     private final CraftInventory left;

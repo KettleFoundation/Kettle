@@ -1,12 +1,12 @@
 package org.bukkit.event.block;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.HandlerList;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Called when a piston extends
@@ -35,7 +35,7 @@ public class BlockPistonExtendEvent extends BlockPistonEvent {
      *
      * @return the amount of moving blocks
      * @deprecated slime blocks make the value of this method
-     *          inaccurate due to blocks being pushed at the side
+     * inaccurate due to blocks being pushed at the side
      */
     @Deprecated
     public int getLength() {

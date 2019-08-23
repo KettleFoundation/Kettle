@@ -21,7 +21,7 @@ public abstract class MapRenderer {
      * Initialize the map renderer base with the given contextual status.
      *
      * @param contextual Whether the renderer is contextual. See {@link
-     *     #isContextual()}.
+     *                   #isContextual()}.
      */
     public MapRenderer(boolean contextual) {
         this.contextual = contextual;
@@ -42,12 +42,13 @@ public abstract class MapRenderer {
      *
      * @param map The MapView being initialized.
      */
-    public void initialize(MapView map) {}
+    public void initialize(MapView map) {
+    }
 
     /**
      * Render to the given map.
      *
-     * @param map The MapView being rendered to.
+     * @param map    The MapView being rendered to.
      * @param canvas The canvas to use for rendering.
      * @param player The player who triggered the rendering.
      */

@@ -75,53 +75,53 @@ public class CraftInventoryView extends InventoryView {
     public static SlotType getSlotType(InventoryView inventory, int slot) {
         SlotType type = SlotType.CONTAINER;
         if (slot >= 0 && slot < inventory.getTopInventory().getSize()) {
-            switch(inventory.getType()) {
-            case FURNACE:
-                if (slot == 2) {
-                    type = SlotType.RESULT;
-                } else if(slot == 1) {
-                    type = SlotType.FUEL;
-                } else {
+            switch (inventory.getType()) {
+                case FURNACE:
+                    if (slot == 2) {
+                        type = SlotType.RESULT;
+                    } else if (slot == 1) {
+                        type = SlotType.FUEL;
+                    } else {
+                        type = SlotType.CRAFTING;
+                    }
+                    break;
+                case BREWING:
+                    if (slot == 3) {
+                        type = SlotType.FUEL;
+                    } else {
+                        type = SlotType.CRAFTING;
+                    }
+                    break;
+                case ENCHANTING:
                     type = SlotType.CRAFTING;
-                }
-                break;
-            case BREWING:
-                if (slot == 3) {
-                    type = SlotType.FUEL;
-                } else {
+                    break;
+                case WORKBENCH:
+                case CRAFTING:
+                    if (slot == 0) {
+                        type = SlotType.RESULT;
+                    } else {
+                        type = SlotType.CRAFTING;
+                    }
+                    break;
+                case MERCHANT:
+                    if (slot == 2) {
+                        type = SlotType.RESULT;
+                    } else {
+                        type = SlotType.CRAFTING;
+                    }
+                    break;
+                case BEACON:
                     type = SlotType.CRAFTING;
-                }
-                break;
-            case ENCHANTING:
-                type = SlotType.CRAFTING;
-                break;
-            case WORKBENCH:
-            case CRAFTING:
-                if (slot == 0) {
-                    type = SlotType.RESULT;
-                } else {
-                    type = SlotType.CRAFTING;
-                }
-                break;
-            case MERCHANT:
-                if (slot == 2) {
-                    type = SlotType.RESULT;
-                } else {
-                    type = SlotType.CRAFTING;
-                }
-                break;
-            case BEACON:
-                type = SlotType.CRAFTING;
-                break;
-            case ANVIL:
-                if (slot == 2) {
-                    type = SlotType.RESULT;
-                } else {
-                    type = SlotType.CRAFTING;
-                }
-                break;
-            default:
-                // Nothing to do, it's a CONTAINER slot
+                    break;
+                case ANVIL:
+                    if (slot == 2) {
+                        type = SlotType.RESULT;
+                    } else {
+                        type = SlotType.CRAFTING;
+                    }
+                    break;
+                default:
+                    // Nothing to do, it's a CONTAINER slot
             }
         } else {
             if (slot == -999 || slot == -1) {

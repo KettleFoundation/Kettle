@@ -24,6 +24,7 @@ public interface Tameable extends Entity {
     void setTamed(boolean tame);
 
     // Paper start
+
     /**
      * Gets the owners UUID
      *

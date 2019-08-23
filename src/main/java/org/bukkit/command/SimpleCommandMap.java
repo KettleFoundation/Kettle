@@ -1,21 +1,14 @@
 package org.bukkit.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.defaults.*;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
+
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class SimpleCommandMap implements CommandMap {
     private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
@@ -85,11 +78,11 @@ public class SimpleCommandMap implements CommandMap {
      * Registers a command with the given name is possible. Also uses
      * fallbackPrefix to create a unique name.
      *
-     * @param label the name of the command, without the '/'-prefix.
-     * @param command the command to register
-     * @param isAlias whether the command is an alias
+     * @param label          the name of the command, without the '/'-prefix.
+     * @param command        the command to register
+     * @param isAlias        whether the command is an alias
      * @param fallbackPrefix a prefix which is prepended to the command for a
-     *     unique address
+     *                       unique address
      * @return true if command was registered, false otherwise.
      */
     private synchronized boolean register(String label, Command command, boolean isAlias, String fallbackPrefix) {

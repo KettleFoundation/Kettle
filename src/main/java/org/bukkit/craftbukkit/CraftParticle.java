@@ -31,7 +31,7 @@ public class CraftParticle {
                 return new int[]{0};
             }
             MaterialData data = (MaterialData) obj;
-            return new int[]{data.getItemTypeId() + ((int)(data.getData()) << 12)};
+            return new int[]{data.getItemTypeId() + ((int) (data.getData()) << 12)};
         }
         throw new IllegalArgumentException(particle.getDataType().toString());
     }

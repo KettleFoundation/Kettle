@@ -5,4 +5,5 @@ import org.bukkit.Nameable;
 /**
  * Represents a captured state of an enchanting table.
  */
-public interface EnchantingTable extends BlockState, Nameable { }
+public interface EnchantingTable extends BlockState, Nameable {
+}

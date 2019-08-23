@@ -1,11 +1,12 @@
 package org.bukkit.block.banner;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import org.bukkit.DyeColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @SerializableAs("Pattern")
 public class Pattern implements ConfigurationSerializable {
@@ -49,8 +50,8 @@ public class Pattern implements ConfigurationSerializable {
     @Override
     public Map<String, Object> serialize() {
         return ImmutableMap.<String, Object>of(
-            COLOR, color.toString(),
-            PATTERN, pattern.getIdentifier()
+                COLOR, color.toString(),
+                PATTERN, pattern.getIdentifier()
         );
     }
 

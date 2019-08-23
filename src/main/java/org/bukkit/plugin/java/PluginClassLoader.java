@@ -1,18 +1,5 @@
 package org.bukkit.plugin.java;
 
-import java.io.*;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.CodeSigner;
-import java.security.CodeSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
 import com.maxqia.remapper.ClassInheritanceProvider;
 import com.maxqia.remapper.Transformer;
 import net.md_5.specialsource.JarMapping;
@@ -28,12 +15,25 @@ import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.kettlemc.remapper.KettleRemapper;
 
+import java.io.*;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.CodeSigner;
+import java.security.CodeSource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
  */
 final class PluginClassLoader extends URLClassLoader {
     private final JavaPluginLoader loader;
-    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
+    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<>(); // Spigot
     private final PluginDescriptionFile description;
     private final File dataFolder;
     private final File file;
@@ -48,31 +48,26 @@ final class PluginClassLoader extends URLClassLoader {
     private JarMapping jarMapping;
 
     // Spigot Start
-    static
-    {
-        try
-        {
-            java.lang.reflect.Method method = ClassLoader.class.getDeclaredMethod( "registerAsParallelCapable" );
-            if ( method != null )
-            {
+    static {
+        try {
+            java.lang.reflect.Method method = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable");
+            if (method != null) {
                 boolean oldAccessible = method.isAccessible();
-                method.setAccessible( true );
-                method.invoke( null );
-                method.setAccessible( oldAccessible );
-                org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.INFO, "Set PluginClassLoader as parallel capable" );
+                method.setAccessible(true);
+                method.invoke(null);
+                method.setAccessible(oldAccessible);
+                org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.INFO, "Set PluginClassLoader as parallel capable");
             }
-        } catch ( NoSuchMethodException ex )
-        {
+        } catch (NoSuchMethodException ex) {
             // Ignore
-        } catch ( Exception ex )
-        {
-            org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.WARNING, "Error setting PluginClassLoader as parallel capable", ex );
+        } catch (Exception ex) {
+            org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING, "Error setting PluginClassLoader as parallel capable", ex);
         }
     }
     // Spigot End
 
     PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws IOException, InvalidPluginException, MalformedURLException {
-        super(new URL[] {file.toURI().toURL()}, parent);
+        super(new URL[]{file.toURI().toURL()}, parent);
         Validate.notNull(loader, "Loader cannot be null");
 
         this.loader = loader;
@@ -85,7 +80,7 @@ final class PluginClassLoader extends URLClassLoader {
 
         jarMapping = new JarMapping();
 
-        try{
+        try {
             jarMapping.packages.put("org/bukkit/craftbukkit/libs/it/unimi/dsi/fastutil", "it/unimi/dsi/fastutil");
             jarMapping.packages.put("org/bukkit/craftbukkit/libs/jline", "jline");
             jarMapping.packages.put("org/bukkit/craftbukkit/libs/joptsimple", "joptsimple");
@@ -94,7 +89,7 @@ final class PluginClassLoader extends URLClassLoader {
             relocations.put("net.minecraft.server", "net.minecraft.server.v1_12_R1");
 
             jarMapping.loadMappings(new BufferedReader(new InputStreamReader(PluginClassLoader.class.getResourceAsStream("mappings/NMSMappings.srg"))), new MavenShade(relocations), null, false);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -103,7 +98,6 @@ final class PluginClassLoader extends URLClassLoader {
         provider.add(new ClassLoaderProvider(this));
         this.jarMapping.setFallbackInheritanceProvider(provider);
         remapper = new KettleRemapper(jarMapping);
-        Transformer.init(jarMapping, remapper);
 
         try {
             Class<?> jarClass;
@@ -134,34 +128,34 @@ final class PluginClassLoader extends URLClassLoader {
     }
 
     Class<?> findClass(String name, boolean checkGlobal) throws ClassNotFoundException {
-        if(name.startsWith("net.minecraft.server.v1_12_R1")) {
+        if (name.startsWith("net.minecraft.server.v1_12_R1")) {
             String remappedClass = jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
             return ((LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
         }
 
-        if(name.startsWith("org.bukkit.")){
-            throw  new ClassNotFoundException(name);
+        if (name.startsWith("org.bukkit.")) {
+            throw new ClassNotFoundException(name);
         }
 
         Class<?> result = classes.get(name);
 
-        synchronized (name.intern()){
+        synchronized (name.intern()) {
             if (result == null) {
                 if (checkGlobal) {
                     result = loader.getClassByName(name);
                 }
 
                 if (result == null) {
-                        result = remappedFindClass(name);
+                    result = remappedFindClass(name);
 
                     if (result != null) {
                         loader.setClass(name, result);
                     }
                 }
 
-                    if (result == null) {
-                        throw new ClassNotFoundException(name);
-                    }
+                if (result == null) {
+                    throw new ClassNotFoundException(name);
+                }
 
                 classes.put(name, result);
             }

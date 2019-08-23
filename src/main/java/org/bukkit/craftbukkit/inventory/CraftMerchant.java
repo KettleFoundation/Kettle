@@ -1,15 +1,15 @@
 package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.Lists;
-import java.util.Collections;
-import java.util.List;
-
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantRecipe;
+
+import java.util.Collections;
+import java.util.List;
 
 public class CraftMerchant implements Merchant {
 

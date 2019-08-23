@@ -1,20 +1,18 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityList;
-import net.minecraft.item.Item;
-
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatList;
-import net.minecraft.util.ResourceLocation;
-import org.bukkit.Statistic;
-import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
-
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.block.Block;
+import net.minecraft.entity.EntityList;
+import net.minecraft.item.Item;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.ResourceLocation;
+import org.bukkit.Material;
+import org.bukkit.Statistic;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.entity.EntityType;
 
 public class CraftStatistic {
     private static final BiMap<String, Statistic> statistics;
@@ -32,7 +30,8 @@ public class CraftStatistic {
         statistics = statisticBuilder.build();
     }
 
-    private CraftStatistic() {}
+    private CraftStatistic() {
+    }
 
     public static Statistic getBukkitStatistic(StatBase statistic) {
         return getBukkitStatisticByName(statistic.statId);

@@ -109,7 +109,7 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
         if (getScoreboard().board.getObjective(objective.getName()) == null) {
             throw new IllegalStateException("Unregistered scoreboard component");
         }
-        
+
         return getScoreboard();
     }
 

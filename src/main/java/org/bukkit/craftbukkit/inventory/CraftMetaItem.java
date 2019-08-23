@@ -1,23 +1,11 @@
 package org.bukkit.craftbukkit.inventory;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import net.minecraft.nbt.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -31,19 +19,18 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * Children must include the following:
@@ -80,6 +67,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
                 NBT,
                 ;
             }
+
             To value();
         }
 
@@ -449,7 +437,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
         if (hasDisplayName()) {
             setDisplayTag(itemTag, NAME.NBT, new NBTTagString(displayName));
         }
-        if (hasLocalizedName()){
+        if (hasLocalizedName()) {
             setDisplayTag(itemTag, LOCNAME.NBT, new NBTTagString(locName));
         }
 
@@ -701,7 +689,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
     @Overridden
     boolean equalsCommon(CraftMetaItem that) {
         return ((this.hasDisplayName() ? that.hasDisplayName() && this.displayName.equals(that.displayName) : !that.hasDisplayName()))
-                && (this.hasLocalizedName()? that.hasLocalizedName()&& this.locName.equals(that.locName) : !that.hasLocalizedName())
+                && (this.hasLocalizedName() ? that.hasLocalizedName() && this.locName.equals(that.locName) : !that.hasLocalizedName())
                 && (this.hasEnchants() ? that.hasEnchants() && this.enchantments.equals(that.enchantments) : !that.hasEnchants())
                 && (this.hasLore() ? that.hasLore() && this.lore.equals(that.lore) : !that.hasLore())
                 && (this.hasRepairCost() ? that.hasRepairCost() && this.repairCost == that.repairCost : !that.hasRepairCost())
@@ -729,7 +717,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
     int applyHash() {
         int hash = 3;
         hash = 61 * hash + (hasDisplayName() ? this.displayName.hashCode() : 0);
-        hash = 61 * hash + (hasLocalizedName()? this.locName.hashCode() : 0);
+        hash = 61 * hash + (hasLocalizedName() ? this.locName.hashCode() : 0);
         hash = 61 * hash + (hasLore() ? this.lore.hashCode() : 0);
         hash = 61 * hash + (hasEnchants() ? this.enchantments.hashCode() : 0);
         hash = 61 * hash + (hasRepairCost() ? this.repairCost : 0);
@@ -907,24 +895,20 @@ class CraftMetaItem implements ItemMeta, Repairable {
     }
 
     // Spigot start
-    private final Spigot spigot = new Spigot()
-    {
+    private final Spigot spigot = new Spigot() {
         @Override
-        public void setUnbreakable(boolean setUnbreakable)
-        {
+        public void setUnbreakable(boolean setUnbreakable) {
             CraftMetaItem.this.setUnbreakable(setUnbreakable);
         }
 
         @Override
-        public boolean isUnbreakable()
-        {
+        public boolean isUnbreakable() {
             return CraftMetaItem.this.unbreakable;
         }
     };
 
     @Override
-    public Spigot spigot()
-    {
+    public Spigot spigot() {
         return spigot;
     }
     // Spigot end

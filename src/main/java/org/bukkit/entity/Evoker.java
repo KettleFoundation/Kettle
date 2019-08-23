@@ -46,7 +46,6 @@ public interface Evoker extends Spellcaster {
      * @return the current spell
      * @deprecated future versions of Minecraft have additional spell casting
      * entities.
-     *
      */
     @Deprecated
     Spell getCurrentSpell();

@@ -124,7 +124,7 @@ public class CraftEntityEquipment implements EntityEquipment {
 
     @Override
     public float getItemInMainHandDropChance() {
-       return getDropChance(EntityEquipmentSlot.MAINHAND);
+        return getDropChance(EntityEquipmentSlot.MAINHAND);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class ClassInheritanceProvider implements InheritanceProvider {
 
         try {
             Collection<String> parents = new HashSet<>();
-            Class<?> reference = Class.forName(className.replace('/', '.').replace('$', '.'), false, this.getClass().getClassLoader()/*RemappedMethods.loader*/);
+            Class<?> reference = Class.forName(className.replace('/', '.').replace('$', '.'), false, this.getClass().getClassLoader());
             Class<?> extend = reference.getSuperclass();
             if (extend != null) {
                 parents.add(Utils.reverseMap(extend));
@@ -26,10 +26,8 @@ public class ClassInheritanceProvider implements InheritanceProvider {
             }
 
             return parents;
-        } catch (Exception e) {
-            // Empty catch block
+        } catch (Exception ignored) {
         }
         return null;
     }
-
 }

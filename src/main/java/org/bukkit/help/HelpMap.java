@@ -7,7 +7,7 @@ import java.util.List;
  * The HelpMap tracks all help topics registered in a Bukkit server. When the
  * server starts up or is reloaded, help is processed and topics are added in
  * the following order:
- * 
+ *
  * <ol>
  * <li>General topics are loaded from the help.yml
  * <li>Plugins load and optionally call {@code addTopic()}
@@ -22,7 +22,7 @@ public interface HelpMap {
      *
      * @param topicName The help topic name to look up.
      * @return A {@link HelpTopic} object matching the topic name or null if
-     *     none can be found.
+     * none can be found.
      */
     public HelpTopic getHelpTopic(String topicName);
 
@@ -32,7 +32,7 @@ public interface HelpMap {
      * @return All the registered help topics.
      */
     public Collection<HelpTopic> getHelpTopics();
-    
+
     /**
      * Adds a topic to the server's help index.
      *
@@ -56,12 +56,12 @@ public interface HelpMap {
      * commandClass} base class.
      *
      * @param commandClass The class for which the custom HelpTopicFactory
-     *     applies. Must derive from either {@link org.bukkit.command.Command}
-     *     or {@link org.bukkit.command.CommandExecutor}.
-     * @param factory The {@link HelpTopicFactory} implementation to associate
-     *     with the {@code commandClass}.
+     *                     applies. Must derive from either {@link org.bukkit.command.Command}
+     *                     or {@link org.bukkit.command.CommandExecutor}.
+     * @param factory      The {@link HelpTopicFactory} implementation to associate
+     *                     with the {@code commandClass}.
      * @throws IllegalArgumentException Thrown if {@code commandClass} does
-     *     not derive from a legal base class.
+     *                                  not derive from a legal base class.
      */
     public void registerHelpTopicFactory(Class<?> commandClass, HelpTopicFactory<?> factory);
 

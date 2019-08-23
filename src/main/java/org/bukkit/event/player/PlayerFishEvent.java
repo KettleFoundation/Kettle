@@ -1,9 +1,9 @@
 package org.bukkit.event.player;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -31,7 +31,7 @@ public class PlayerFishEvent extends PlayerEvent implements Cancellable {
      * org.bukkit.entity.Item}.
      *
      * @return Entity caught by the player, Entity if fishing, and null if
-     *     bobber has gotten stuck in the ground or nothing has been caught
+     * bobber has gotten stuck in the ground or nothing has been caught
      */
     public Entity getCaught() {
         return entity;

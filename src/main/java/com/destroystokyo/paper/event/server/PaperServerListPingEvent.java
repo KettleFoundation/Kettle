@@ -11,11 +11,7 @@ import org.bukkit.util.CachedServerIcon;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
@@ -25,16 +21,20 @@ import static java.util.Objects.requireNonNull;
  */
 public class PaperServerListPingEvent extends ServerListPingEvent implements Cancellable {
 
-    @Nonnull private final StatusClient client;
+    @Nonnull
+    private final StatusClient client;
 
     private int numPlayers;
     private boolean hidePlayers;
-    @Nonnull private final List<PlayerProfile> playerSample = new ArrayList<>();
+    @Nonnull
+    private final List<PlayerProfile> playerSample = new ArrayList<>();
 
-    @Nonnull private String version;
+    @Nonnull
+    private String version;
     private int protocolVersion;
 
-    @Nullable private CachedServerIcon favicon;
+    @Nullable
+    private CachedServerIcon favicon;
 
     private boolean cancelled;
 
@@ -42,7 +42,7 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
     private Object[] players;
 
     public PaperServerListPingEvent(@Nonnull StatusClient client, String motd, int numPlayers, int maxPlayers,
-            @Nonnull String version, int protocolVersion, @Nullable CachedServerIcon favicon) {
+                                    @Nonnull String version, int protocolVersion, @Nullable CachedServerIcon favicon) {
         super(client.getAddress().getAddress(), motd, numPlayers, maxPlayers);
         this.client = client;
         this.numPlayers = numPlayers;
@@ -270,7 +270,8 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
 
         private int next;
         private int current;
-        @Nullable private Player player;
+        @Nullable
+        private Player player;
 
         @Override
         public boolean hasNext() {

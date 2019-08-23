@@ -9,14 +9,14 @@ public interface Boat extends Vehicle {
 
     /**
      * Gets the wood type of the boat.
-     * 
+     *
      * @return the wood type
      */
     TreeSpecies getWoodType();
 
     /**
      * Sets the wood type of the boat.
-     * 
+     *
      * @param species the new wood type
      */
     void setWoodType(TreeSpecies species);

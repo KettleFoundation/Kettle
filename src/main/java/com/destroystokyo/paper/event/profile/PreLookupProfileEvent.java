@@ -17,11 +17,11 @@ import java.util.UUID;
 
 /**
  * Allows a plugin to intercept a Profile Lookup for a Profile by name
- *
+ * <p>
  * At the point of event fire, the UUID and properties are unset.
- *
+ * <p>
  * If a plugin sets the UUID, and optionally the properties, the API call to look up the profile may be skipped.
- *
+ * <p>
  * No guarantees are made about thread execution context for this event. If you need to know, check
  * event.isAsync()
  */
@@ -59,7 +59,7 @@ public class PreLookupProfileEvent extends Event {
 
     /**
      * Sets the UUID for this player name. This will skip the initial API call to find the players UUID.
-     *
+     * <p>
      * However, if Profile Properties are needed by the server, you must also set them or else an API call might still be made.
      *
      * @param uuid the UUID to set for the profile or null to reset
@@ -87,6 +87,7 @@ public class PreLookupProfileEvent extends Event {
 
     /**
      * Completely replaces all Properties with the new provided properties
+     *
      * @param properties the properties to set on the new profile
      * @deprecated will be removed with 1.13 Use {@link #setProfileProperties(Set)}
      */
@@ -100,6 +101,7 @@ public class PreLookupProfileEvent extends Event {
 
     /**
      * Adds additional properties, without removing the original properties
+     *
      * @param properties the properties to add to the existing properties
      * @deprecated will be removed with 1.13 use {@link #addProfileProperties(Set)}
      */
@@ -121,6 +123,7 @@ public class PreLookupProfileEvent extends Event {
     /**
      * Clears any existing prepopulated properties and uses the supplied properties
      * Any property in this Set will be automatically prefilled on this Profile
+     *
      * @param properties The properties to add
      */
     public void setProfileProperties(Set<ProfileProperty> properties) {
@@ -131,6 +134,7 @@ public class PreLookupProfileEvent extends Event {
     /**
      * Adds any properties currently missing to the prepopulated properties set, replacing any that already were set.
      * Any property in this Set will be automatically prefilled on this Profile
+     *
      * @param properties The properties to add
      */
     public void addProfileProperties(Set<ProfileProperty> properties) {
