@@ -78,7 +78,7 @@
 +        public void sendMessage(ITextComponent component) {
 +        }
 +
-+        public boolean canUseCommand(int permLevel, String commandName) {
++        public boolean canUseCommand(int permLevel, String commandName, String perm) {
 +            return permLevel <= 2;
 +        }
 +

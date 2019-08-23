@@ -22,11 +22,17 @@
  
  public class Explosion
  {
-@@ -37,12 +43,14 @@
-     private final double x;
-     private final double y;
-     private final double z;
+@@ -34,15 +40,17 @@
+     private final boolean damagesTerrain;
+     private final Random random;
+     private final World world;
+-    private final double x;
+-    private final double y;
+-    private final double z;
 -    private final Entity exploder;
++    public final double x;
++    public final double y;
++    public final double z;
 +    public final Entity exploder;
      private final float size;
      private final List<BlockPos> affectedBlockPositions;

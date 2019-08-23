@@ -126,8 +126,9 @@
 +    public ISaveFormat anvilConverterForAnvilFile;
      private final Snooper usageSnooper = new Snooper("server", this, getCurrentTimeMillis());
 -    private final File anvilFile;
+-    private final List<ITickable> tickables = Lists.<ITickable>newArrayList();
 +    public File anvilFile;
-     private final List<ITickable> tickables = Lists.<ITickable>newArrayList();
++    private final List<ITickable> tickables = Lists.newArrayList();
      public final ICommandManager commandManager;
      public final Profiler profiler = new Profiler();
      private final NetworkSystem networkSystem;
@@ -703,7 +704,7 @@
              {
                  if (worldserver1 != null)
                  {
-@@ -453,159 +562,213 @@
+@@ -453,159 +562,215 @@
                      worldserver1.flush();
                  }
              }
@@ -952,7 +953,9 @@
 +                try {
 +                    this.reader.getTerminal().restore();
 +                }
-+                catch (Exception ex) {}
++                catch (Exception ignored) {}
++                FMLCommonHandler.instance().handleServerStopped();
++                this.serverStopped = true;
 +                this.systemExitNow();
 +                }
              finally
@@ -991,7 +994,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +776,42 @@
+@@ -613,52 +778,42 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -1054,7 +1057,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +820,15 @@
+@@ -667,16 +822,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -1076,7 +1079,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +836,7 @@
+@@ -684,7 +838,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -1085,7 +1088,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,95 +849,100 @@
+@@ -697,95 +851,100 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1234,7 +1237,7 @@
          this.profiler.endStartSection("connection");
          this.getNetworkSystem().networkTick();
          this.profiler.endStartSection("players");
-@@ -794,33 +951,30 @@
+@@ -794,33 +953,30 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1276,7 +1279,7 @@
          LOGGER.warn(msg);
      }
  
-@@ -835,53 +989,51 @@
+@@ -835,53 +991,51 @@
          return ret;
      }
  
@@ -1354,7 +1357,7 @@
                  }
              });
          }
-@@ -889,145 +1041,115 @@
+@@ -889,145 +1043,115 @@
          return report;
      }
  
@@ -1544,7 +1547,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1157,75 @@
+@@ -1035,80 +1159,75 @@
          }
      }
  
@@ -1654,7 +1657,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1234,186 @@
+@@ -1117,228 +1236,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1931,7 +1934,7 @@
                      return entity;
                  }
              }
-@@ -1347,316 +1422,212 @@
+@@ -1347,316 +1424,212 @@
          return null;
      }
  

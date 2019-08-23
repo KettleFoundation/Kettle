@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.kettlemc.commands.KettleCommand;
+import org.kettlemc.commands.defaults.KettleCommand;
 
 import java.io.File;
 import java.io.IOException;

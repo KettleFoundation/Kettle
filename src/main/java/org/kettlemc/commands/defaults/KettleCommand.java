@@ -1,4 +1,4 @@
-package org.kettlemc.commands;
+package org.kettlemc.commands.defaults;
 
 import net.minecraft.command.CommandBase;
 import org.bukkit.Bukkit;

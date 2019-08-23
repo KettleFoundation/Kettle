@@ -1,0 +1,57 @@
+--- ../src-base/minecraft/net/minecraftforge/event/world/BlockEvent.java
++++ ../src-work/minecraft/net/minecraftforge/event/world/BlockEvent.java
+@@ -27,6 +27,7 @@
+ import net.minecraft.enchantment.EnchantmentHelper;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Enchantments;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.EnumHand;
+@@ -39,6 +40,10 @@
+ import net.minecraftforge.fml.common.eventhandler.Event;
+ 
+ import com.google.common.collect.ImmutableList;
++import org.bukkit.craftbukkit.block.CraftBlockState;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.event.block.BlockPlaceEvent;
+ 
+ import javax.annotation.Nonnull;
+ import javax.annotation.Nullable;
+@@ -125,15 +130,14 @@
+             super(world, pos, state);
+             this.player = player;
+ 
+-            if (state == null || !ForgeHooks.canHarvestBlock(state.getBlock(), player, world, pos) || // Handle empty block or player unable to break block scenario
+-                (state.getBlock().canSilkHarvest(world, pos, world.getBlockState(pos), player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, player.getHeldItemMainhand()) > 0)) // If the block is being silk harvested, the exp dropped is 0
+-            {
+-                this.exp = 0;
++            BlockBreakEvent bukkitEvent = CraftEventFactory.callBlockBreakEvent(world, pos, state, (EntityPlayerMP) player);
++
++            if (bukkitEvent.isCancelled()) {
++                this.setCanceled(true);
+             }
+             else
+             {
+-                int bonusLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, player.getHeldItemMainhand());
+-                this.exp = state.getBlock().getExpDrop(state, world, pos, bonusLevel);
++                this.exp = bukkitEvent.getExpToDrop();
+             }
+         }
+ 
+@@ -213,8 +217,12 @@
+             super(blockSnapshot, placedAgainst, player);
+             this.player = player;
+             this.hand = hand;
+-            if (DEBUG)
+-            {
++            CraftBlockState blockState = CraftBlockState.getBlockState(getWorld(), getPos().getX(), getPos().getY(), getPos().getZ());
++            BlockPlaceEvent bukkitEvent = CraftEventFactory.callBlockPlaceEvent(getWorld(), player, hand, blockState, getPos().getX(), getPos().getY(), getPos().getZ());
++            if (bukkitEvent.isCancelled() || !bukkitEvent.canBuild()) {
++                this.setCanceled(true);
++            }
++            if (DEBUG) {
+                 System.out.printf("Created PlaceEvent - [PlacedBlock: %s ][PlacedAgainst: %s ][ItemStack: %s ][Player: %s ][Hand: %s]\n", getPlacedBlock(), placedAgainst, player.getHeldItem(hand), player, hand);
+             }
+         }

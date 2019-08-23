@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.event;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.EntityLiving;
@@ -16,11 +17,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.*;
@@ -32,6 +35,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.FakePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -1092,5 +1096,28 @@ public class CraftEventFactory {
         }
 
         return !event.isCancelled();
+    }
+
+    public static BlockBreakEvent callBlockBreakEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, EntityPlayerMP player) {
+        Block bBlock = world.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ());
+        BlockBreakEvent bbe = new BlockBreakEvent(bBlock, player.getBukkitEntity());
+        EntityPlayerMP playermp = player;
+        net.minecraft.block.Block block = state.getBlock();
+        if (!(playermp instanceof FakePlayer)) {
+            boolean isSwordNoBreak = playermp.interactionManager.getGameType().isCreative() && !playermp.getHeldItemMainhand().isEmpty() && playermp.getHeldItemMainhand().getItem() instanceof ItemSword;
+            if (!isSwordNoBreak) {
+                int exp = 0;
+                if (!(block == null || !player.canHarvestBlock(block.getDefaultState()) || block.canSilkHarvest(world, pos, block.getBlockState().getBaseState(), player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, player.getHeldItemMainhand()) > 0)) {
+                    int bonusLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, player.getHeldItemMainhand());
+                    exp = block.getExpDrop(state, world, pos, bonusLevel);
+                }
+                bbe.setExpToDrop(exp);
+            } else {
+                bbe.setCancelled(true);
+            }
+        }
+
+        world.getServer().getPluginManager().callEvent(bbe);
+        return bbe;
     }
 }

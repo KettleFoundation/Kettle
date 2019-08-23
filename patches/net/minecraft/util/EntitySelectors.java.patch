@@ -5,7 +5,7 @@
                      else if (entitylivingbase instanceof EntityLiving)
                      {
 -                        return ((EntityLiving)entitylivingbase).canPickUpLoot();
-+                        return ((EntityLiving)entitylivingbase).thisisatestof();
++                        return ((EntityLiving)entitylivingbase).canPickupLoot();
                      }
                      else if (entitylivingbase instanceof EntityArmorStand)
                      {

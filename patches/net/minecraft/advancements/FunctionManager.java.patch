@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/advancements/FunctionManager.java
 +++ ../src-work/minecraft/net/minecraft/advancements/FunctionManager.java
-@@ -27,10 +27,13 @@
+@@ -27,15 +27,18 @@
      private final Map<ResourceLocation, FunctionObject> functions = Maps.<ResourceLocation, FunctionObject>newHashMap();
      private String currentGameLoopFunctionId = "-";
      private FunctionObject gameLoopFunction;
@@ -17,6 +17,12 @@
          public String getName()
          {
              return FunctionManager.this.currentGameLoopFunctionId;
+         }
+-        public boolean canUseCommand(int permLevel, String commandName)
++        public boolean canUseCommand(int permLevel, String commandName, String perm)
+         {
+             return permLevel <= 2;
+         }
 @@ -101,7 +104,7 @@
          {
              if (this.commandQueue.size() < i)

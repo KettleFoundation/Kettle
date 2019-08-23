@@ -108,7 +108,7 @@
 +            EntityItem item = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
 +            if (this.pickupStatus == PickupStatus.ALLOWED && entityIn.inventory.canHold(itemstack) > 0) {
 +                PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((org.bukkit.entity.Player) entityIn.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.world.getServer(), this, item), (org.bukkit.entity.Arrow) this.getBukkitEntity());
-+                // event.setCancelled(!entityhuman.thisisatest); TODO
++                // event.setCancelled(!entityhuman.canPickupLoot); TODO
 +                this.world.getServer().getPluginManager().callEvent(event);
  
 -            if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && !entityIn.inventory.addItemStackToInventory(this.getArrowStack()))
