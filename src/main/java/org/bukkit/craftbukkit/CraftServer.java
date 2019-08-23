@@ -27,7 +27,7 @@ import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.server.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PendingCommand;
@@ -36,6 +36,7 @@ import net.minecraft.server.management.UserListEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
@@ -46,6 +47,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.*;
+import org.bukkit.World;
 import org.bukkit.Warning.WarningState;
 import org.bukkit.World.Environment;
 import org.bukkit.boss.BarColor;
@@ -122,7 +124,7 @@ public final class CraftServer implements Server {
     private final SimplePluginManager pluginManager = new SimplePluginManager(this, commandMap);
     protected final MinecraftServer console;
     protected final DedicatedPlayerList playerList;
-    private final Map<String, World> worlds = new LinkedHashMap<>();
+    private final Map<String, World> worlds = new LinkedHashMap<String, World>();
     private YamlConfiguration configuration;
     private YamlConfiguration commandsConfiguration;
     private final Yaml yaml = new Yaml(new SafeConstructor());
@@ -160,13 +162,7 @@ public final class CraftServer implements Server {
     public CraftServer(MinecraftServer console, PlayerList playerList) {
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
-        this.playerView = Collections
-                .unmodifiableList(Lists.transform(playerList.getPlayers(), new Function<EntityPlayerMP, CraftPlayer>() {
-                    @Override
-                    public CraftPlayer apply(EntityPlayerMP player) {
-                        return player.getBukkitEntity();
-                    }
-                }));
+        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.getPlayers(), EntityPlayerMP::getBukkitEntity));
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
         online.value = console.getPropertyManager().getBooleanProperty("online-mode", true);
 

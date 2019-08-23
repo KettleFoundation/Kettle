@@ -4,7 +4,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
-import net.minecraft.server.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.util.math.BlockPos;

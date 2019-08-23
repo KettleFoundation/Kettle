@@ -198,7 +198,7 @@ final class PluginClassLoader extends URLClassLoader {
             if (url != null) {
                 InputStream stream = url.openStream();
                 if (stream != null) {
-                    byte[] bytecode = null;
+                    byte[] bytecode;
 
                     bytecode = remapper.remapClassFile(stream, RuntimeRepo.getInstance());
                     bytecode = Transformer.transform(bytecode);

@@ -42,6 +42,7 @@ public class Transformer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         JointProvider provider = new JointProvider();
         provider.add(new ClassInheritanceProvider());
         jarMapping.setFallbackInheritanceProvider(provider);
