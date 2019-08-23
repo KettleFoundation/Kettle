@@ -6,20 +6,19 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 
 public class CraftCustomEntity extends CraftEntity {
-    public Class<? extends Entity> entityClass;
     private String entityName;
 
     public CraftCustomEntity(CraftServer server, Entity entity) {
         super(server, entity);
-        this.entityClass = entity.getClass();
-        this.entityName = EntityRegistry.entityTypeMap.get(entityClass);
-        if (entityName == null)
-            entityName = entity.getCommandSenderEntity().getName();
+        this.entityName = EntityRegistry.entityTypeMap.get(entity.getClass());
+        if (entityName == null) {
+            entityName = entity.getName();
+        }
     }
 
     @Override
     public Entity getHandle() {
-        return (Entity) entity;
+        return entity;
     }
 
     @Override
@@ -27,10 +26,23 @@ public class CraftCustomEntity extends CraftEntity {
         return this.entityName;
     }
 
+    @Override
     public EntityType getType() {
         EntityType type = EntityType.fromName(this.entityName);
-        if (type != null)
+        if (type != null) {
             return type;
-        else return EntityType.UNKNOWN;
+        } else {
+            return EntityType.UNKNOWN;
+        }
+    }
+
+    @Override
+    public String getCustomName() {
+        final String name = getHandle().getCustomNameTag();
+        if (name == null || name.length() == 0) {
+            return entity.getName();
+        }
+
+        return name;
     }
 }

@@ -47,7 +47,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         if (entity instanceof EntityLiving || entity instanceof EntityArmorStand) {
             equipment = new CraftEntityEquipment(this);
         }
-        this.entityName = EntityRegistry.entityTypeMap.get(entity.getClass());
+        this.entityName = EntityRegistry.getCustomEntityTypeName(entity.getClass());
         if (entityName == null) {
             entityName = entity.getName();
         }
