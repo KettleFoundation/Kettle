@@ -124,4 +124,22 @@ public class KettleConfig {
         config.addDefault(path, def);
         return config.getString(path, config.getString(path));
     }
+
+    public static boolean betterPvp;
+
+    private static void betterPvp() {
+        betterPvp = getBoolean("betterPvp", false);
+    }
+
+    public static boolean useArraysForDatawatcher;
+
+    private static void useArraysForDatawatcher() {
+        useArraysForDatawatcher = getBoolean("useArraysForDatawatcher", false);
+    }
+
+    public static boolean disableDataWatcherReadLocking;
+
+    private static void disableDataWatcherReadLocking() {
+        disableDataWatcherReadLocking = getBoolean("disableDataWatcherReadLocking", false);
+    }
 }
