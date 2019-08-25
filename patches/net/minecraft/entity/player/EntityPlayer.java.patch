@@ -70,15 +70,6 @@
      }
  
      protected void applyEntityAttributes()
-@@ -271,7 +292,7 @@
-             this.setPosition(d0, this.posY, d1);
-         }
- 
--        ++this.ticksSinceLastSwing;
-+        ++this.clientTicksSinceLastAttack;
-         ItemStack itemstack = this.getHeldItemMainhand();
- 
-         if (!ItemStack.areItemStacksEqual(this.itemStackMainHand, itemstack))
 @@ -408,7 +429,7 @@
          return SoundCategory.PLAYERS;
      }
