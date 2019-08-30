@@ -1,253 +1,71 @@
 buildscript {
     repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "https://files.minecraftforge.net/maven"
-        }
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven {
-            url  "https://jcenter.bintray.com"
-        }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        jcenter()
+        maven { url = "https://files.minecraftforge.net/maven" }
+        maven { url = "https://repo.spongepowered.org/maven" }
+        maven { url = "https://jitpack.io" }
+        maven { url = "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
-        classpath 'net.nemerosa:versioning:2.7.1'
-        classpath "gradle.plugin.com.github.breadmoirai:github-release:2.2.4"
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
     }
 }
-
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: "idea"
-apply plugin: 'net.minecraftforge.gradle.patcher'
-apply plugin: 'net.minecraftforge.gradle.launch4j'
-apply plugin: 'net.nemerosa.versioning'
-apply plugin: "com.github.breadmoirai.github-release"
-
-group 'kettlefoundation'
-version 'git-' +  versioning.info.branch + "-" + versioning.info.build
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
-    clear()
-    mavenCentral()
-    maven {
-        name = "forge"
-        url = "https://files.minecraftforge.net/maven"
-    }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-    maven {
-        name 'minecraft'
-        url 'https://libraries.minecraft.net/'
-    }
-    maven {
-        name 'maven'
-        url 'https://mvnrepository.com/artifact/'
-    }
-    maven {
-        name 'KettleFoundation'
-        url 'https://repo.hexeption.co.uk/artifactory/Kettle/'
-    }
-    flatDir {
-        dirs 'src/main/resources'
-    }
+	mavenLocal()
+	mavenCentral()
+    maven { url = "https://repo.spongepowered.org/maven" }
 }
 
-configurations{
-    compile.extendsFrom exported
-    libraries
+version = "${version_minecraft}-${mod_version}"
+group = "${mod_group}"
+archivesBaseName = "${mod_name}"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+minecraft {
+    version = "${version_minecraft}-${version_forge}"
+    mappings = "${version_mcp}"
+    runDir = "run"
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile(group: 'bukkit', name: 'bukkit', version: '1.12.2-R0.1')
-}
-
-jar{
-    into('lib') {
-        from configurations.libraries
-    }
-    exclude "**/configurations/**"
-    exclude "**/META-INF/**"
-    exclude "log4j2.xml"
-}
-
-minecraft {
-    version = "1.12.2"
-    mappings = "snapshot_nodoc_20171003"
-    workspaceDir = "projects"
-    versionJson = "jsons/1.12.2-dev.json"
-    buildUserdev = true
-    buildInstaller = false
-    installerVersion = "1.5"
-
-    def common = {
-        patchPrefixOriginal "../src-base/minecraft"
-        patchPrefixChanged "../src-work/minecraft"
-        mainClassServer "net.minecraft.launchwrapper.Launch"
-        tweakClassServer "net.minecraftforge.fml.common.launcher.FMLServerTweaker"
-    }
-
-    projects {
-        forge {
-            rootDir "forge/"
-            patchDir "forge/patches/minecraft/"
-            patchAfter "clean"
-            genPatchesFrom "clean"
-            genMcpPatches = false
-            applyMcpPatches = false
-            s2sKeepImports = true
-            with common
-        }
-
-        kettle {
-            rootDir "."
-            patchDir "patches/"
-            patchAfter "forge"
-            genPatchesFrom "forge"
-            genMcpPatches = true
-            applyMcpPatches = true
-            s2sKeepImports = true
-            with common
-        }
+    provided('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+        transitive = false
     }
 }
 
-sourceCompatibility = 1.8
-tasks.generateXmlConfig.dependsOn installer
-tasks.compileJava.enabled = false
-tasks.build.dependsOn 'launch4j'
-tasks.reobfuscate.setProperty("extraSrg",["PK: org/bukkit/craftbukkit org/bukkit/craftbukkit/v1_12_R1"])
-
-installer {
-    classifier = 'installer'
-    from "forge/src/main/resources/forge_logo.png"
-    rename "forge_logo\\.png", "big_logo.png"
-}
-
-launch4j {
-    jar = installer.archivePath.canonicalPath
-    outfile = file("build/distributions/${project.name}-${project.version}-installer-win.exe").canonicalPath
-    icon = file('icon.ico').canonicalPath
-    manifest = file('l4jManifest.xml').canonicalPath
-    jreMinVersion = '1.8.0'
-    initialHeapPercent = 5
-    maxHeapPercent = 100
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-task signUniversal(type: SignJar, dependsOn: 'outputJar') {
-    onlyIf {
-        project.hasProperty('jarsigner')
+jar {
+    from configurations.provided.asFileTree.files.collect {
+        zipTree(it)
     }
-
-    def jarsigner = [:]
-
-    if (project.hasProperty('jarsigner'))
-        jarsigner = project.jarsigner
-
-    alias = 'forge'
-    exclude "paulscode/**"
-    storePass = jarsigner.storepass
-    keyPass = jarsigner.keypass
-    keyStore = jarsigner.keystore
-    inputFile = outputJar.archivePath
-    outputFile = outputJar.archivePath
-}
-build.dependsOn signUniversal
-installer.dependsOn signUniversal
-
-outputJar {
-    classifier = 'universal'
-
+    
     manifest.attributes([
-            "Implementation-Title": "Kettle",
-            "Implementation-Version": version,
-            "Main-Class": "net.minecraftforge.fml.relauncher.ServerLaunchWrapper",
-            "TweakClass": "net.minecraftforge.fml.common.launcher.FMLTweaker",
-            "Class-Path": getServerClasspath(file("jsons/1.12.2-rel.json"))
-    ])
+        "FMLCorePluginContainsFMLMod": "true",
+        "ForceLoadAsMod": "true",
+	    "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+        "MixinConfigs": "mixins.kettle.json",
+        "FMLCorePlugin": "org.kettlemc.kettle.KettleCoreMod"
+ 	])
 }
 
-processJson {
-    releaseJson = "jsons/1.12.2-rel.json"
-    addReplacements([
-            "@minecraft_version@": project.minecraft.version,
-            "@version@": project.version,
-            "@project@": "kettle",
-            "@artifact@": "kf:kettle:${project.version}",
-            "@universal_jar@": { outputJar.archiveName },
-            "@timestamp@": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-    ])
-}
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-extractForgeSources {
-    exclude "**/SideOnly.java", "**/Side.java"
-}
-
-genGradleProjects {
-    addCompileDep "junit:junit:4.12"
-    addCompileDep "bukkit:bukkit:1.12.2-R0.1"
-    addRepo("KettleFoundation", "https://repo.hexeption.co.uk/artifactory/Kettle/")
-}
-
-import groovy.json.JsonSlurper
-
-import java.util.stream.Collectors
-
-String getServerClasspath(File file) {
-    def node = new JsonSlurper().parse(file)
-    def out = new StringBuilder()
-    node.versionInfo.libraries.each { lib ->
-        if (lib.serverreq)
-        {
-            def split = lib.name.split(':')
-            def group = split[0].replace('.', '/')
-            def artifact = split[1]
-            def version = split[2]
-            out += "libraries/$group/$artifact/$version/$artifact-${version}.jar "
-        }
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-    out += "minecraft_server.1.12.2.jar"
-    return out.toString()
-}
-
-githubRelease {
-    if(System.getenv("GITHUB_TOKEN") != null){
-        token System.getenv("GITHUB_TOKEN")
-    }else{
-        token ""
+        
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
     }
-    owner "KettleFoundation"
-    repo "Kettle"
-    releaseName "Kettle Dev " + versioning.info.branch + "-" + versioning.info.build
-    body {
-        """\
-## Setup Info
-Don't forget to download [Minecraft Server 1.12.2](https://launcher.mojang.com/mc/game/1.12.2/server/886945bfb2b978778c3a0288fd7fab09d315b25f/server.jar) 
-
-(Rename it to `minecraft_server.1.12.2.jar`)
-
-${(changelog().call().readLines().stream().map { "- $it" }.collect(Collectors.joining('\n', '## Changelog\n', '')))}
-        """
-    }
-    prerelease true
-    draft true
-    releaseAssets = [
-        fileTree("build/distributions/").filter { it.name.endsWith("jar") || it.name.endsWith("zip") },
-        fileTree("/release/").filter { it.name.endsWith("zip") }
-    ]
 }

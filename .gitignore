@@ -29,11 +29,8 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-# We don't need those .rej files
-*.rej
 
 ### Kettle
-/projects/
 /bin/
 
 ### IDEs
