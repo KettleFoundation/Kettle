@@ -1,0 +1,10 @@
+{
+    "required": true,
+    "minVersion": "0.7.10",
+    "package": "org.kettlemc.kettle.mixin",
+    "refmap": "mixins.kettle.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+    ]
+}

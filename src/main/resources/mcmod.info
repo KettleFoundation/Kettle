@@ -1,0 +1,7 @@
+[{
+  "modid": "Kettle",
+  "name": "Kettle Server",
+  "version": "${version}",
+  "url": "https://github.com/KettleFoundation",
+  "authorList": ["GMatrixGames"]
+}]
