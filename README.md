@@ -4,9 +4,9 @@
 
 # Kettle
 
-![](https://img.shields.io/badge/Forge-1.12.2%20--%202844-orange?style=flat-square)
-![](https://img.shields.io/badge/MixinGradle-0.6--SNAPSHOT-yellow?style=flat-square)
-![https://github.com/KettleFoundation/KettleMixin](https://img.shields.io/badge/Mixin%20Version-Custom-yellow?style=flat-square)
+[![Forge Version](https://img.shields.io/badge/Forge-1.12.2%20--%202844-orange?style=flat-square)](http://github.com/MinecraftForge/MinecraftForge/tree/1.12.x)
+[![MixinGradle Version](https://img.shields.io/badge/MixinGradle-0.6--SNAPSHOT-yellow?style=flat-square)](http://github.com/SpongePowered/MixinGradle)
+[![Mixin Version](https://img.shields.io/badge/Mixin%20Version-Custom-yellow?style=flat-square)](https://github.com/KettleFoundation/KettleMixin)
 
 ### What's Kettle?
 
