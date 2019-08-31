@@ -4,7 +4,9 @@
 
 # Kettle
 
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202844-orange.svg?style=for-the-badge)
+![](https://img.shields.io/badge/Forge-1.12.2%20--%202844-orange?style=flat-square)
+![](https://img.shields.io/badge/MixinGradle-0.6--SNAPSHOT-yellow?style=flat-square)
+![https://github.com/KettleFoundation/KettleMixin](https://img.shields.io/badge/Mixin%20Version-Custom-yellow?style=flat-square)
 
 ### What's Kettle?
 
