@@ -23,7 +23,7 @@ apply plugin: 'maven-publish'
 repositories {
 	mavenLocal()
 	mavenCentral()
-    maven { url = "https://repo.spongepowered.org/maven" }
+    maven { url = "https://repo.openprocesses.ml/repository/kettle-dev/" }
 }
 
 version = "${version_minecraft}-${mod_version}"
@@ -45,7 +45,7 @@ minecraft {
 }
 
 dependencies {
-    shade('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
+    shade('org.spongepowered:mixin:0.7.12-SNAPSHOT') {
         transitive = false
     }
 }
