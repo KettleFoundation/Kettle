@@ -4,7 +4,9 @@
 
 # Kettle
 
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
+[![Forge Version](https://img.shields.io/badge/Forge-1.12.2%20--%202844-orange?style=flat-square)](http://github.com/MinecraftForge/MinecraftForge/tree/1.12.x)
+[![MixinGradle Version](https://img.shields.io/badge/MixinGradle-0.6--SNAPSHOT-yellow?style=flat-square)](http://github.com/SpongePowered/MixinGradle)
+[![Mixin Version](https://img.shields.io/badge/Mixin%20Version-Custom-yellow?style=flat-square)](https://github.com/KettleFoundation/KettleMixin)
 
 ### What's Kettle?
 
@@ -20,7 +22,7 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ### Installation
 
-1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases) or our [**Build Server**](https://ci.openprocesses.ml/job/Kettle/)
+1. Download the server from our [**Build Server**](https://ci.openprocesses.ml/job/Kettle-Mixins/)
 2. Add jar file to the /mods/ folder of your server
 3. Lauch your forge server as normal
 4. Viola, you can now add your plugins to the generated folder, as if it's a spigot server.
@@ -53,4 +55,4 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 
 ## Unstable/Test builds
 
-For unstable/test builds you can check __this repository__, or our build server: https://ci.openprocesses.ml/job/Kettle
+For unstable/test builds you can check __our build server__: https://ci.openprocesses.ml/job/Kettle-Mixins/
