@@ -121,6 +121,15 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+
+    from(sourceSets.main.java.srcDirs) {
+        include '*'
+        expand 'mod_version': ${mod_version}
+    }
+
+    from(sourceSets.main.java.srcDirs) {
+        exclude '*'
+    }
 }
 
 mixin {
