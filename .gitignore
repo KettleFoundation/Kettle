@@ -41,3 +41,5 @@ gradle-app.setting
 classes/
 
 run/
+!gradlew.bat
+*.bat
