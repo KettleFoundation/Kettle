@@ -41,6 +41,18 @@ public class KettleModConfig {
         return config;
     }
 
+    private static File getConfigDirectory() {
+        return new File("config");
+    }
+
+    private static File getConfigFile() {
+        return new File(getConfigDirectory(), "kettle.json");
+    }
+
+    private static Gson createGson() {
+        return new GsonBuilder().setPrettyPrinting().create();
+    }
+
     public void saveConfig() {
         File dir = getConfigDirectory();
 
@@ -57,17 +69,5 @@ public class KettleModConfig {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static File getConfigDirectory() {
-        return new File("config");
-    }
-
-    private static File getConfigFile() {
-        return new File(getConfigDirectory(), "kettle.json");
-    }
-
-    private static Gson createGson() {
-        return new GsonBuilder().setPrettyPrinting().create();
     }
 }
