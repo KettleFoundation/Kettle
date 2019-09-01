@@ -124,7 +124,7 @@ processResources {
 
     from(sourceSets.main.java.srcDirs) {
         include '*'
-        expand 'mod_version': ${mod_version}
+        expand 'mod_version': project.version
     }
 
     from(sourceSets.main.java.srcDirs) {
