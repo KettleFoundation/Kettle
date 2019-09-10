@@ -9,8 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
+    - name: Send post to jenkins at https://ci.openprocesses.ml/job/Kettle to build code.
+      # run: echo Hello, world!
     - name: Run a multi-line script
       run: |
         curl -X POST https://ci.openprocesses.ml/job/Kettle/build?token=kettle&cause=Push+from+GitHub
