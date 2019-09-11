@@ -56,7 +56,7 @@ repositories {
     }
     maven {
     	name 'kettle'
-    	url 'https://repo.openprocesses.ml/repository/kettle/'
+    	url 'https://repo.openprocesses.ml/repository/kettle-dev/'
     }
     flatDir {
         dirs 'src/main/resources'
