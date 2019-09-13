@@ -1,13 +1,13 @@
 package org.bukkit.plugin;
 
-import java.io.File;
-import java.util.Set;
-
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
+
+import java.io.File;
+import java.util.Set;
 
 /**
  * Handles all plugin management from the Server
@@ -19,7 +19,7 @@ public interface PluginManager {
      *
      * @param loader Class name of the PluginLoader to register
      * @throws IllegalArgumentException Thrown when the given Class is not a
-     *     valid PluginLoader
+     *                                  valid PluginLoader
      */
     public void registerInterface(Class<? extends PluginLoader> loader) throws IllegalArgumentException;
 
@@ -65,12 +65,12 @@ public interface PluginManager {
      *
      * @param file File containing the plugin to load
      * @return The Plugin loaded, or null if it was invalid
-     * @throws InvalidPluginException Thrown when the specified file is not a
-     *     valid plugin
+     * @throws InvalidPluginException      Thrown when the specified file is not a
+     *                                     valid plugin
      * @throws InvalidDescriptionException Thrown when the specified file
-     *     contains an invalid description
-     * @throws UnknownDependencyException If a required dependency could not
-     *     be resolved
+     *                                     contains an invalid description
+     * @throws UnknownDependencyException  If a required dependency could not
+     *                                     be resolved
      */
     public Plugin loadPlugin(File file) throws InvalidPluginException, InvalidDescriptionException, UnknownDependencyException;
 
@@ -88,12 +88,13 @@ public interface PluginManager {
     void disablePlugins();
 
     // Paper start - close Classloader on disable
+
     /**
      * Disables the specified plugin
      * <p>
      * Attempting to disable a plugin that is not enabled will have no effect
      *
-     * @param plugin Plugin to disable
+     * @param plugin           Plugin to disable
      * @param closeClassloader if the classloader for the Plugin should be closed
      */
     void disablePlugin(Plugin plugin, boolean closeClassloader);
@@ -109,10 +110,10 @@ public interface PluginManager {
      *
      * @param event Event details
      * @throws IllegalStateException Thrown when an asynchronous event is
-     *     fired from synchronous code.
-     *     <p>
-     *     <i>Note: This is best-effort basis, and should not be used to test
-     *     synchronized state. This is an indicator for flawed flow logic.</i>
+     *                               fired from synchronous code.
+     *                               <p>
+     *                               <i>Note: This is best-effort basis, and should not be used to test
+     *                               synchronized state. This is an indicator for flawed flow logic.</i>
      */
     public void callEvent(Event event) throws IllegalStateException;
 
@@ -120,29 +121,29 @@ public interface PluginManager {
      * Registers all the events in the given listener class
      *
      * @param listener Listener to register
-     * @param plugin Plugin to register
+     * @param plugin   Plugin to register
      */
     public void registerEvents(Listener listener, Plugin plugin);
 
     /**
      * Registers the specified executor to the given event class
      *
-     * @param event Event type to register
+     * @param event    Event type to register
      * @param listener Listener to register
      * @param priority Priority to register this event at
      * @param executor EventExecutor to register
-     * @param plugin Plugin to register
+     * @param plugin   Plugin to register
      */
     public void registerEvent(Class<? extends Event> event, Listener listener, EventPriority priority, EventExecutor executor, Plugin plugin);
 
     /**
      * Registers the specified executor to the given event class
      *
-     * @param event Event type to register
-     * @param listener Listener to register
-     * @param priority Priority to register this event at
-     * @param executor EventExecutor to register
-     * @param plugin Plugin to register
+     * @param event           Event type to register
+     * @param listener        Listener to register
+     * @param priority        Priority to register this event at
+     * @param executor        EventExecutor to register
+     * @param plugin          Plugin to register
      * @param ignoreCancelled Whether to pass cancelled events or not
      */
     public void registerEvent(Class<? extends Event> event, Listener listener, EventPriority priority, EventExecutor executor, Plugin plugin, boolean ignoreCancelled);
@@ -182,7 +183,7 @@ public interface PluginManager {
      *
      * @param perm Permission to add
      * @throws IllegalArgumentException Thrown when a permission with the same
-     *     name already exists
+     *                                  name already exists
      */
     public void addPermission(Permission perm);
 
@@ -237,7 +238,7 @@ public interface PluginManager {
      * If the specified Permission changes in any form, the Permissible will
      * be asked to recalculate.
      *
-     * @param permission Permission to subscribe to
+     * @param permission  Permission to subscribe to
      * @param permissible Permissible subscribing
      */
     public void subscribeToPermission(String permission, Permissible permissible);
@@ -246,7 +247,7 @@ public interface PluginManager {
      * Unsubscribes the given Permissible for information about the requested
      * Permission, by name.
      *
-     * @param permission Permission to unsubscribe from
+     * @param permission  Permission to unsubscribe from
      * @param permissible Permissible subscribing
      */
     public void unsubscribeFromPermission(String permission, Permissible permissible);
@@ -266,7 +267,7 @@ public interface PluginManager {
      * If the specified defaults change in any form, the Permissible will be
      * asked to recalculate.
      *
-     * @param op Default list to subscribe to
+     * @param op          Default list to subscribe to
      * @param permissible Permissible subscribing
      */
     public void subscribeToDefaultPerms(boolean op, Permissible permissible);
@@ -274,7 +275,7 @@ public interface PluginManager {
     /**
      * Unsubscribes from the given Default permissions by operator status
      *
-     * @param op Default list to unsubscribe from
+     * @param op          Default list to unsubscribe from
      * @param permissible Permissible subscribing
      */
     public void unsubscribeFromDefaultPerms(boolean op, Permissible permissible);

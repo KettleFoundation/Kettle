@@ -1,20 +1,8 @@
 package org.bukkit;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableList;
 import org.bukkit.Warning.WarningState;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
@@ -27,12 +15,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.help.HelpMap;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Merchant;
-import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapView;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.PluginManager;
@@ -42,12 +28,13 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
-import com.google.common.collect.ImmutableList;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.generator.ChunkGenerator;
-
-import org.bukkit.inventory.ItemFactory;
-import org.bukkit.inventory.meta.ItemMeta;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.Serializable;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Represents the Bukkit core, for version and Server singleton handling
@@ -58,7 +45,8 @@ public final class Bukkit {
     /**
      * Static class cannot be initialized.
      */
-    private Bukkit() {}
+    private Bukkit() {
+    }
 
     /**
      * Gets the current {@link Server} singleton
@@ -130,7 +118,7 @@ public final class Bukkit {
      * affect the collection are fully supported. The effects following
      * (non-exhaustive) {@link Entity#teleport(Location) teleportation},
      * {@link Player#setHealth(double) death}, and {@link Player#kickPlayer(
-     * String) kicking} are undefined. Any use of this collection from
+     *String) kicking} are undefined. Any use of this collection from
      * asynchronous threads is unsafe.
      * <p>
      * For safe consequential iteration or mimicking the old array behavior,
@@ -179,7 +167,7 @@ public final class Bukkit {
      * specified.
      *
      * @return the IP string that this server is bound to, otherwise empty
-     *     string
+     * string
      */
     public static String getIp() {
         return server.getIp();
@@ -475,7 +463,7 @@ public final class Bukkit {
      * Unloads the given world.
      *
      * @param world the world to unload
-     * @param save whether to save the chunks before unloading
+     * @param save  whether to save the chunks before unloading
      * @return true if successful, false otherwise
      */
     public static boolean unloadWorld(World world, boolean save) {
@@ -568,12 +556,12 @@ public final class Bukkit {
     /**
      * Dispatches a command on this server, and executes it if found.
      *
-     * @param sender the apparent sender of the command
+     * @param sender      the apparent sender of the command
      * @param commandLine the command + arguments. Example: <code>test abc
-     *     123</code>
+     *                    123</code>
      * @return returns false if no target is found
      * @throws CommandException thrown when the executor for the given command
-     *     fails with an unhandled exception
+     *                          fails with an unhandled exception
      */
     public static boolean dispatchCommand(CommandSender sender, String commandLine) throws CommandException {
         return server.dispatchCommand(sender, commandLine);
@@ -584,7 +572,7 @@ public final class Bukkit {
      *
      * @param recipe the recipe to add
      * @return true if the recipe was added, false if it wasn't for some
-     *     reason
+     * reason
      */
     public static boolean addRecipe(Recipe recipe) {
         return server.addRecipe(recipe);
@@ -689,9 +677,9 @@ public final class Bukkit {
      * Broadcasts the specified message to every user with the given
      * permission name.
      *
-     * @param message message to broadcast
+     * @param message    message to broadcast
      * @param permission the required permission {@link Permissible
-     *     permissibles} must have to receive the broadcast
+     *                   permissibles} must have to receive the broadcast
      * @return number of message recipients
      */
     public static int broadcast(String message, String permission) {
@@ -708,11 +696,11 @@ public final class Bukkit {
      * This will return an object even if the player does not exist. To this
      * method, all players will exist.
      *
-     * @deprecated Persistent storage of users should be by UUID as names are no longer
-     *             unique past a single session.
      * @param name the name the player to retrieve
      * @return an offline player
      * @see #getOfflinePlayer(UUID)
+     * @deprecated Persistent storage of users should be by UUID as names are no longer
+     * unique past a single session.
      */
     @Deprecated
     public static OfflinePlayer getOfflinePlayer(String name) {
@@ -861,7 +849,7 @@ public final class Bukkit {
      * new inventory has the normal size for its type.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param type the type of inventory to create
+     * @param type  the type of inventory to create
      * @return a new inventory
      */
     public static Inventory createInventory(InventoryHolder owner, InventoryType type) {
@@ -876,7 +864,7 @@ public final class Bukkit {
      * may not render with said titles on the Minecraft client.
      *
      * @param owner The holder of the inventory; can be null if there's no holder.
-     * @param type The type of inventory to create.
+     * @param type  The type of inventory to create.
      * @param title The title of the inventory, to be displayed when it is viewed.
      * @return The new inventory.
      */
@@ -889,7 +877,7 @@ public final class Bukkit {
      * specified size.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param size a multiple of 9 as the size of inventory to create
+     * @param size  a multiple of 9 as the size of inventory to create
      * @return a new inventory
      * @throws IllegalArgumentException if the size is not a multiple of 9
      */
@@ -902,9 +890,9 @@ public final class Bukkit {
      * specified size and title.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param size a multiple of 9 as the size of inventory to create
+     * @param size  a multiple of 9 as the size of inventory to create
      * @param title the title of the inventory, displayed when inventory is
-     *     viewed
+     *              viewed
      * @return a new inventory
      * @throws IllegalArgumentException if the size is not a multiple of 9
      */
@@ -916,7 +904,7 @@ public final class Bukkit {
      * Creates an empty merchant.
      *
      * @param title the title of the corresponding merchant inventory, displayed
-     * when the merchant inventory is viewed
+     *              when the merchant inventory is viewed
      * @return a new merchant
      */
     public static Merchant createMerchant(String title) {
@@ -973,7 +961,7 @@ public final class Bukkit {
      * preclude</b> the same assumption.
      *
      * @return true if the current thread matches the expected primary thread,
-     *     false otherwise
+     * false otherwise
      */
     public static boolean isPrimaryThread() {
         return server.isPrimaryThread();
@@ -1031,8 +1019,8 @@ public final class Bukkit {
      * Gets an instance of the server's default server-icon.
      *
      * @return the default server-icon; null values may be used by the
-     *     implementation to indicate no defined icon, but this behavior is
-     *     not guaranteed
+     * implementation to indicate no defined icon, but this behavior is
+     * not guaranteed
      */
     public static CachedServerIcon getServerIcon() {
         return server.getServerIcon();
@@ -1046,11 +1034,11 @@ public final class Bukkit {
      * guaranteed to throw an implementation-defined {@link Exception}.
      *
      * @param file the file to load the from
-     * @throws IllegalArgumentException if image is null
-     * @throws Exception if the image does not meet current server server-icon
-     *     specifications
      * @return a cached server-icon that can be used for a {@link
-     *     ServerListPingEvent#setServerIcon(CachedServerIcon)}
+     * ServerListPingEvent#setServerIcon(CachedServerIcon)}
+     * @throws IllegalArgumentException if image is null
+     * @throws Exception                if the image does not meet current server server-icon
+     *                                  specifications
      */
     public static CachedServerIcon loadServerIcon(File file) throws IllegalArgumentException, Exception {
         return server.loadServerIcon(file);
@@ -1063,11 +1051,11 @@ public final class Bukkit {
      * guaranteed to throw an implementation-defined {@link Exception}.
      *
      * @param image the image to use
-     * @throws IllegalArgumentException if image is null
-     * @throws Exception if the image does not meet current server
-     *     server-icon specifications
      * @return a cached server-icon that can be used for a {@link
-     *     ServerListPingEvent#setServerIcon(CachedServerIcon)}
+     * ServerListPingEvent#setServerIcon(CachedServerIcon)}
+     * @throws IllegalArgumentException if image is null
+     * @throws Exception                if the image does not meet current server
+     *                                  server-icon specifications
      */
     public static CachedServerIcon loadServerIcon(BufferedImage image) throws IllegalArgumentException, Exception {
         return server.loadServerIcon(image);
@@ -1096,12 +1084,11 @@ public final class Bukkit {
 
     /**
      * Create a ChunkData for use in a generator.
-     *
+     * <p>
      * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
      *
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world
-     *
      */
     public static ChunkGenerator.ChunkData createChunkData(World world) {
         return server.createChunkData(world);
@@ -1132,14 +1119,16 @@ public final class Bukkit {
     }
 
     // Paper start
-	/**
+
+    /**
      * Gets the current server TPS
+     *
      * @return current server TPS (1m, 5m, 15m in Paper-Server)
      */
     public static double[] getTPS() {
         return server.getTPS();
     }
-	// Paper end
+    // Paper end
 
     /**
      * Get the advancement specified by this key.
@@ -1162,16 +1151,15 @@ public final class Bukkit {
     }
 
     /**
-     * @see UnsafeValues
      * @return the unsafe values instance
+     * @see UnsafeValues
      */
 
     public static UnsafeValues getUnsafe() {
         return server.getUnsafe();
     }
 
-    public static Server.Spigot spigot()
-    {
+    public static Server.Spigot spigot() {
         return server.spigot();
     }
 
@@ -1187,6 +1175,7 @@ public final class Bukkit {
 
     /**
      * Creates a PlayerProfile for the specified uuid, with name as null
+     *
      * @param uuid UUID to create profile for
      * @return A PlayerProfile object
      */
@@ -1196,6 +1185,7 @@ public final class Bukkit {
 
     /**
      * Creates a PlayerProfile for the specified name, with UUID as null
+     *
      * @param name Name to create profile for
      * @return A PlayerProfile object
      */
@@ -1205,7 +1195,7 @@ public final class Bukkit {
 
     /**
      * Creates a PlayerProfile for the specified name/uuid
-     *
+     * <p>
      * Both UUID and Name can not be null at same time. One must be supplied.
      *
      * @param uuid UUID to create profile for

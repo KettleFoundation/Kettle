@@ -19,7 +19,7 @@ public class PlayerChangedWorldEvent extends PlayerEvent {
     /**
      * Gets the world the player is switching from.
      *
-     * @return  player's previous world
+     * @return player's previous world
      */
     public World getFrom() {
         return from;

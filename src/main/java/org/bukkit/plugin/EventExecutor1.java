@@ -1,13 +1,13 @@
 package org.bukkit.plugin;
 
-import java.lang.reflect.InvocationTargetException;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
-import org.bukkit.event.Event;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class EventExecutor1 implements EventExecutor
-{
+public class EventExecutor1 implements EventExecutor {
     private Method method;
     private Class<? extends Event> eventClass;
 
@@ -23,11 +23,9 @@ public class EventExecutor1 implements EventExecutor
                 return;
             }
             this.method.invoke(listener, event);
-        }
-        catch (InvocationTargetException ex) {
+        } catch (InvocationTargetException ex) {
             throw new EventException(ex.getCause());
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             throw new EventException(t);
         }
     }

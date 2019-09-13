@@ -19,7 +19,7 @@ public class CocoaPlant extends MaterialData implements Directional, Attachable 
     }
 
     /**
-     * @param type the raw type id     
+     * @param type the raw type id
      * @deprecated Magic value
      */
     @Deprecated

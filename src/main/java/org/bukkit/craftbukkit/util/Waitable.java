@@ -9,6 +9,7 @@ public abstract class Waitable<T> implements Runnable {
         RUNNING,
         FINISHED,
     }
+
     Throwable t = null;
     T value = null;
     Status status = Status.WAITING;

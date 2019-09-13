@@ -1,15 +1,14 @@
 package org.bukkit.inventory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Keyed;
-
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.material.MaterialData;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Represents a shapeless recipe, where the arrangement of the ingredients on
@@ -31,14 +30,14 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * constructor merely determines the result and type; to set the actual
      * recipe, you'll need to call the appropriate methods.
      *
-     * @param key the unique recipe key
+     * @param key    the unique recipe key
      * @param result The item you want the recipe to create.
      * @see ShapelessRecipe#addIngredient(Material)
      * @see ShapelessRecipe#addIngredient(MaterialData)
-     * @see ShapelessRecipe#addIngredient(Material,int)
-     * @see ShapelessRecipe#addIngredient(int,Material)
-     * @see ShapelessRecipe#addIngredient(int,MaterialData)
-     * @see ShapelessRecipe#addIngredient(int,Material,int)
+     * @see ShapelessRecipe#addIngredient(Material, int)
+     * @see ShapelessRecipe#addIngredient(int, Material)
+     * @see ShapelessRecipe#addIngredient(int, MaterialData)
+     * @see ShapelessRecipe#addIngredient(int, Material, int)
      */
     public ShapelessRecipe(NamespacedKey key, ItemStack result) {
         this.key = key;
@@ -69,7 +68,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * Adds the specified ingredient.
      *
      * @param ingredient The ingredient to add.
-     * @param rawdata The data value, or -1 to allow any data value.
+     * @param rawdata    The data value, or -1 to allow any data value.
      * @return The changed recipe, so you can chain calls.
      * @deprecated Magic value
      */
@@ -81,7 +80,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
     /**
      * Adds multiples of the specified ingredient.
      *
-     * @param count How many to add (can't be more than 9!)
+     * @param count      How many to add (can't be more than 9!)
      * @param ingredient The ingredient to add.
      * @return The changed recipe, so you can chain calls.
      */
@@ -92,7 +91,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
     /**
      * Adds multiples of the specified ingredient.
      *
-     * @param count How many to add (can't be more than 9!)
+     * @param count      How many to add (can't be more than 9!)
      * @param ingredient The ingredient to add.
      * @return The changed recipe, so you can chain calls.
      */
@@ -103,9 +102,9 @@ public class ShapelessRecipe implements Recipe, Keyed {
     /**
      * Adds multiples of the specified ingredient.
      *
-     * @param count How many to add (can't be more than 9!)
+     * @param count      How many to add (can't be more than 9!)
      * @param ingredient The ingredient to add.
-     * @param rawdata The data value, or -1 to allow any data value.
+     * @param rawdata    The data value, or -1 to allow any data value.
      * @return The changed recipe, so you can chain calls.
      * @deprecated Magic value
      */
@@ -153,7 +152,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * less instances then specified, all will be removed. Only removes exact
      * matches, with a data value of 0.
      *
-     * @param count The number of copies to remove.
+     * @param count      The number of copies to remove.
      * @param ingredient The ingredient to remove
      * @return The changed recipe.
      */
@@ -166,7 +165,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * less instances then specified, all will be removed. If the data value
      * is -1, only ingredients with a -1 data value will be removed.
      *
-     * @param count The number of copies to remove.
+     * @param count      The number of copies to remove.
      * @param ingredient The ingredient to remove.
      * @return The changed recipe.
      */
@@ -180,7 +179,7 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * only ingredients with a -1 data value will be removed.
      *
      * @param ingredient The ingredient to remove
-     * @param rawdata The data value;
+     * @param rawdata    The data value;
      * @return The changed recipe.
      * @deprecated Magic value
      */
@@ -194,9 +193,9 @@ public class ShapelessRecipe implements Recipe, Keyed {
      * less instances then specified, all will be removed. If the data value
      * is -1, only ingredients with a -1 data value will be removed.
      *
-     * @param count The number of copies to remove.
+     * @param count      The number of copies to remove.
      * @param ingredient The ingredient to remove.
-     * @param rawdata The data value.
+     * @param rawdata    The data value.
      * @return The changed recipe.
      * @deprecated Magic value
      */

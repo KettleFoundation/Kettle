@@ -38,8 +38,7 @@ public enum Rotation {
     /**
      * Rotated counter-clockwise by 45 degrees
      */
-    COUNTER_CLOCKWISE_45
-    ;
+    COUNTER_CLOCKWISE_45;
 
     private static final Rotation[] rotations = values();
 

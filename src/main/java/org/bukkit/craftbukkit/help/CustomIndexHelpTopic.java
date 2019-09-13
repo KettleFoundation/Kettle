@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ *
  */
 public class CustomIndexHelpTopic extends IndexHelpTopic {
     private List<String> futureTopics;

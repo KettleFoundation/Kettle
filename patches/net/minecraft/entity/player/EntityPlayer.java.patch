@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayer.java
-@@ -92,6 +92,16 @@
+@@ -92,6 +92,17 @@
  import net.minecraft.world.WorldServer;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -14,10 +14,11 @@
 +import org.bukkit.event.player.PlayerDropItemEvent;
 +import org.bukkit.event.player.PlayerVelocityEvent;
 +import org.bukkit.util.Vector;
++import org.kettlemc.configuration.KettleConfig;
  
  @SuppressWarnings("incomplete-switch")
  public abstract class EntityPlayer extends EntityLivingBase
-@@ -109,10 +119,10 @@
+@@ -109,10 +120,10 @@
      protected static final DataParameter<NBTTagCompound> LEFT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
      protected static final DataParameter<NBTTagCompound> RIGHT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
      public InventoryPlayer inventory = new InventoryPlayer(this);
@@ -30,7 +31,7 @@
      protected int flyToggleTimer;
      public float prevCameraYaw;
      public float cameraYaw;
-@@ -123,9 +133,9 @@
+@@ -123,9 +134,9 @@
      public double chasingPosX;
      public double chasingPosY;
      public double chasingPosZ;
@@ -42,7 +43,7 @@
      public float renderOffsetX;
      @SideOnly(Side.CLIENT)
      public float renderOffsetY;
-@@ -147,6 +157,12 @@
+@@ -147,6 +158,12 @@
      @Nullable
      public EntityFishHook fishEntity;
  
@@ -55,7 +56,7 @@
      protected CooldownTracker createCooldownTracker()
      {
          return new CooldownTracker();
-@@ -159,9 +175,13 @@
+@@ -159,9 +176,13 @@
          this.gameProfile = gameProfileIn;
          this.inventoryContainer = new ContainerPlayer(this.inventory, !worldIn.isRemote, this);
          this.openContainer = this.inventoryContainer;
@@ -69,7 +70,7 @@
      }
  
      protected void applyEntityAttributes()
-@@ -408,7 +428,7 @@
+@@ -408,7 +429,7 @@
          return SoundCategory.PLAYERS;
      }
  
@@ -78,7 +79,7 @@
      {
          return 20;
      }
-@@ -499,7 +519,8 @@
+@@ -499,7 +520,8 @@
          {
              if (this.getHealth() < this.getMaxHealth() && this.ticksExisted % 20 == 0)
              {
@@ -88,7 +89,7 @@
              }
  
              if (this.foodStats.needFood() && this.ticksExisted % 10 == 0)
-@@ -527,7 +548,7 @@
+@@ -527,7 +549,7 @@
  
          this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
          float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
@@ -97,7 +98,7 @@
  
          if (f > 0.1F)
          {
-@@ -691,6 +712,7 @@
+@@ -691,6 +713,7 @@
      @Nullable
      public EntityItem dropItem(boolean dropAll)
      {
@@ -105,7 +106,7 @@
          ItemStack stack = inventory.getCurrentItem();
  
          if (stack.isEmpty())
-@@ -750,6 +772,30 @@
+@@ -750,6 +773,30 @@
                  entityitem.motionZ += Math.sin((double)f3) * (double)f2;
              }
  
@@ -136,7 +137,7 @@
              ItemStack itemstack = this.dropItemAndGetStack(entityitem);
  
              if (traceItem)
-@@ -893,6 +939,13 @@
+@@ -893,6 +940,13 @@
              this.wakeUpPlayer(true, true, false);
          }
  
@@ -150,7 +151,7 @@
          if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99))
          {
              this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
-@@ -987,6 +1040,7 @@
+@@ -987,6 +1041,7 @@
          {
              compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
          }
@@ -158,7 +159,7 @@
      }
  
      public boolean attackEntityFrom(DamageSource source, float amount)
-@@ -1015,13 +1069,13 @@
+@@ -1015,13 +1070,13 @@
                      this.wakeUpPlayer(true, true, false);
                  }
  
@@ -174,7 +175,7 @@
                      }
  
                      if (this.world.getDifficulty() == EnumDifficulty.EASY)
-@@ -1035,7 +1089,14 @@
+@@ -1035,7 +1090,14 @@
                      }
                  }
  
@@ -190,7 +191,7 @@
              }
          }
      }
-@@ -1052,17 +1113,29 @@
+@@ -1052,17 +1114,29 @@
  
      public boolean canAttackPlayer(EntityPlayer other)
      {
@@ -229,7 +230,7 @@
      }
  
      protected void damageArmor(float damage)
-@@ -1140,6 +1213,7 @@
+@@ -1140,6 +1214,7 @@
                  }
              }
          }
@@ -237,7 +238,7 @@
      }
  
      public void openEditSign(TileEntitySign signTile)
-@@ -1317,8 +1391,17 @@
+@@ -1317,8 +1392,17 @@
  
                          if (j > 0 && !targetEntity.isBurning())
                          {
@@ -257,7 +258,7 @@
                          }
                      }
  
-@@ -1353,8 +1436,10 @@
+@@ -1353,8 +1437,10 @@
                              {
                                  if (entitylivingbase != this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D)
                                  {
@@ -270,7 +271,7 @@
                                  }
                              }
  
-@@ -1364,11 +1449,28 @@
+@@ -1364,11 +1450,28 @@
  
                          if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged)
                          {
@@ -304,7 +305,7 @@
                          }
  
                          if (flag2)
-@@ -1434,7 +1536,15 @@
+@@ -1434,7 +1537,15 @@
  
                              if (j > 0)
                              {
@@ -321,7 +322,7 @@
                              }
  
                              if (this.world instanceof WorldServer && f5 > 2.0F)
-@@ -1443,8 +1553,7 @@
+@@ -1443,8 +1554,7 @@
                                  ((WorldServer)this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double)(targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D);
                              }
                          }
@@ -331,7 +332,7 @@
                      }
                      else
                      {
-@@ -1454,6 +1563,11 @@
+@@ -1454,6 +1564,11 @@
                          {
                              targetEntity.extinguish();
                          }
@@ -343,7 +344,7 @@
                      }
                  }
              }
-@@ -1527,9 +1641,9 @@
+@@ -1527,9 +1642,9 @@
          return this.gameProfile;
      }
  
@@ -355,7 +356,7 @@
          if (ret != null) return ret;
          final IBlockState state = this.world.isBlockLoaded(bedLocation) ? this.world.getBlockState(bedLocation) : null;
          final boolean isBed = state != null && state.getBlock().isBed(state, this.world, bedLocation, this);
-@@ -1539,31 +1653,31 @@
+@@ -1539,31 +1654,31 @@
          {
              if (this.isPlayerSleeping() || !this.isEntityAlive())
              {
@@ -394,7 +395,7 @@
              }
          }
  
-@@ -1572,6 +1686,20 @@
+@@ -1572,6 +1687,20 @@
              this.dismountRidingEntity();
          }
  
@@ -415,7 +416,7 @@
          this.spawnShoulderEntities();
          this.setSize(0.2F, 0.2F);
  
-@@ -1598,7 +1726,7 @@
+@@ -1598,7 +1727,7 @@
              this.world.updateAllPlayersSleepingFlag();
          }
  
@@ -424,7 +425,7 @@
      }
  
      private boolean bedInRange(BlockPos p_190774_1_, EnumFacing p_190774_2_)
-@@ -1651,6 +1779,23 @@
+@@ -1651,6 +1780,23 @@
              this.world.updateAllPlayersSleepingFlag();
          }
  
@@ -448,7 +449,7 @@
          this.sleepTimer = immediately ? 0 : 100;
  
          if (setSpawn)
-@@ -1757,11 +1902,13 @@
+@@ -1757,11 +1903,13 @@
          {
              this.spawnPos = pos;
              this.spawnForced = forced;
@@ -462,7 +463,7 @@
          }
      }
  
-@@ -1797,11 +1944,11 @@
+@@ -1797,11 +1945,11 @@
  
          if (this.isSprinting())
          {
@@ -476,7 +477,7 @@
          }
      }
  
-@@ -1820,7 +1967,12 @@
+@@ -1820,7 +1968,12 @@
              this.motionY = d3 * 0.6D;
              this.jumpMovementFactor = f;
              this.fallDistance = 0.0F;
@@ -490,7 +491,7 @@
          }
          else
          {
-@@ -1846,7 +1998,7 @@
+@@ -1846,7 +1999,7 @@
                  if (i > 0)
                  {
                      this.addStat(StatList.DIVE_ONE_CM, i);
@@ -499,7 +500,7 @@
                  }
              }
              else if (this.isInWater())
-@@ -1856,7 +2008,7 @@
+@@ -1856,7 +2009,7 @@
                  if (j > 0)
                  {
                      this.addStat(StatList.SWIM_ONE_CM, j);
@@ -508,7 +509,7 @@
                  }
              }
              else if (this.isOnLadder())
-@@ -1875,17 +2027,17 @@
+@@ -1875,17 +2028,17 @@
                      if (this.isSprinting())
                      {
                          this.addStat(StatList.SPRINT_ONE_CM, k);
@@ -529,7 +530,7 @@
                      }
                  }
              }
-@@ -2225,10 +2377,16 @@
+@@ -2225,10 +2378,16 @@
  
      protected void spawnShoulderEntities()
      {
@@ -550,7 +551,7 @@
      }
  
      private void spawnShoulderEntity(@Nullable NBTTagCompound p_192026_1_)
-@@ -2247,6 +2405,23 @@
+@@ -2247,6 +2406,23 @@
          }
      }
  
@@ -574,7 +575,7 @@
      @SideOnly(Side.CLIENT)
      public boolean isInvisibleToPlayer(EntityPlayer player)
      {
-@@ -2481,7 +2656,7 @@
+@@ -2481,7 +2657,7 @@
          return (NBTTagCompound)this.dataManager.get(LEFT_SHOULDER_ENTITY);
      }
  
@@ -583,7 +584,7 @@
      {
          this.dataManager.set(LEFT_SHOULDER_ENTITY, tag);
      }
-@@ -2491,7 +2666,7 @@
+@@ -2491,11 +2667,12 @@
          return (NBTTagCompound)this.dataManager.get(RIGHT_SHOULDER_ENTITY);
      }
  
@@ -592,7 +593,41 @@
      {
          this.dataManager.set(RIGHT_SHOULDER_ENTITY, tag);
      }
-@@ -2531,7 +2706,7 @@
+ 
++    public Float getAttackSpeed() { return this.getCooldownPeriod(); } // TacoSpigot - OBFHELPER
+     public float getCooldownPeriod()
+     {
+         return (float)(1.0D / this.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue() * 20.0D);
+@@ -2503,12 +2680,27 @@
+ 
+     public float getCooledAttackStrength(float adjustTicks)
+     {
+-        return MathHelper.clamp(((float)this.ticksSinceLastSwing + adjustTicks) / this.getCooldownPeriod(), 0.0F, 1.0F);
++        // TacoSpigot start - use both client and server ticks
++        if (KettleConfig.betterPvp) {
++            return MathHelper.clamp(
++                    (Math.max(
++                            this.getTicksSinceLastSwing(),
++                            this.clientTicksSinceLastAttack
++                    ) + adjustTicks) / this.getAttackSpeed(),
++                    0.0F,
++                    1.0F
++            );
++        } else {
++            return MathHelper.clamp(((float) this.getTicksSinceLastSwing() + adjustTicks) / this.getAttackSpeed(), 0.0F, 1.0F);
++        }
++        // TacoSpigot end
+     }
+ 
++    public int getTicksSinceLastSwing() { return this.ticksSinceLastSwing; } // TacoSpigot - OBFHELPER
+     public void resetCooldown()
+     {
+         this.ticksSinceLastSwing = 0;
++        this.clientTicksSinceLastAttack = 0;
+     }
+ 
+     public CooldownTracker getCooldownTracker()
+@@ -2531,7 +2723,7 @@
  
      public boolean canUseCommandBlock()
      {
@@ -601,7 +636,7 @@
      }
  
      /**
-@@ -2671,7 +2846,7 @@
+@@ -2671,7 +2863,7 @@
      @SuppressWarnings("unchecked")
      @Override
      @Nullable
@@ -610,7 +645,7 @@
      {
          if (capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
          {
-@@ -2683,7 +2858,7 @@
+@@ -2683,7 +2875,7 @@
      }
  
      @Override
@@ -619,7 +654,7 @@
      {
          return capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
      }
-@@ -2702,7 +2877,7 @@
+@@ -2702,7 +2894,7 @@
          SYSTEM(1, "options.chat.visibility.system"),
          HIDDEN(2, "options.chat.visibility.hidden");
  
@@ -628,7 +663,7 @@
          private final int chatVisibility;
          private final String resourceKey;
  
-@@ -2732,7 +2907,7 @@
+@@ -2732,7 +2924,7 @@
  
          static
          {
@@ -637,7 +672,7 @@
              {
                  ID_LOOKUP[entityplayer$enumchatvisibility.chatVisibility] = entityplayer$enumchatvisibility;
              }
-@@ -2763,4 +2938,11 @@
+@@ -2763,4 +2955,11 @@
          OTHER_PROBLEM,
          NOT_SAFE;
      }

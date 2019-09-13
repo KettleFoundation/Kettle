@@ -1,10 +1,8 @@
 package org.bukkit.command.defaults;
 
 import com.google.common.base.Charsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
 import net.minecraftforge.common.ForgeVersion;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
@@ -13,25 +11,27 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.util.StringUtil;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.Resources;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// LB Start
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-// LB End
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class VersionCommand extends BukkitCommand {
+    private static final String BRANCH = "KettleJava";
+    private final ReentrantLock versionLock = new ReentrantLock();
+    private final Set<CommandSender> versionWaiters = new HashSet<>();
+    private boolean hasVersion = false;
+    private String versionMessage = null;
+    private boolean versionTaskStarted = false;
+    private long lastCheck = 0;
+
     public VersionCommand(String name) {
         super(name);
 
@@ -39,6 +39,63 @@ public class VersionCommand extends BukkitCommand {
         this.usageMessage = "/version [plugin name]";
         this.setPermission("bukkit.command.version");
         this.setAliases(Arrays.asList("ver", "about"));
+    }
+
+    // Taken from Paper / Modified by GMatrixGames
+    private static int getDistance(String repo, String verInfo) {
+        try {
+            int currentVer = Integer.decode(verInfo);
+            return getFromJenkins(currentVer);
+        } catch (NumberFormatException ex) {
+            verInfo = verInfo.replace("\"", "");
+            return getFromRepo("KettleFoundation/Kettle", verInfo);
+        }
+    }
+
+    private static int getFromJenkins(int currentVer) {
+        try {
+            try (BufferedReader reader = Resources.asCharSource(
+                    new URL("https://ci.openprocesses.ml/job/Kettle/lastSuccessfulBuild/buildNumber"),
+                    Charsets.UTF_8
+            ).openBufferedStream()) {
+                int newVer = Integer.decode(reader.readLine());
+                return newVer - currentVer;
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                return -2;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    private static int getFromRepo(String repo, String hash) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
+            connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+            try (
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
+            ) {
+                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
+                String status = (String) obj.get("status");
+                switch (status) {
+                    case "identical":
+                        return 0;
+                    case "behind":
+                        return ((Number) obj.get("behind_by")).intValue();
+                    default:
+                        return -1;
+                }
+            } catch (ParseException | NumberFormatException e) {
+                e.printStackTrace();
+                return -1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     @Override
@@ -133,7 +190,7 @@ public class VersionCommand extends BukkitCommand {
         Validate.notNull(alias, "Alias cannot be null");
 
         if (args.length == 1) {
-            List<String> completions = new ArrayList<String>();
+            List<String> completions = new ArrayList<>();
             String toComplete = args[0].toLowerCase(java.util.Locale.ENGLISH);
             for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
                 if (StringUtil.startsWithIgnoreCase(plugin.getName(), toComplete)) {
@@ -144,13 +201,6 @@ public class VersionCommand extends BukkitCommand {
         }
         return ImmutableList.of();
     }
-
-    private final ReentrantLock versionLock = new ReentrantLock();
-    private boolean hasVersion = false;
-    private String versionMessage = null;
-    private final Set<CommandSender> versionWaiters = new HashSet<CommandSender>();
-    private boolean versionTaskStarted = false;
-    private long lastCheck = 0;
 
     private void sendVersion(CommandSender sender) {
         if (hasVersion) {
@@ -172,7 +222,7 @@ public class VersionCommand extends BukkitCommand {
             sender.sendMessage("Checking version, please wait...");
             if (!versionTaskStarted) {
                 versionTaskStarted = true;
-                new Thread(() -> obtainVersion()).start();
+                new Thread(this::obtainVersion).start();
             }
         } finally {
             versionLock.unlock();
@@ -182,8 +232,8 @@ public class VersionCommand extends BukkitCommand {
     private void obtainVersion() {
         String version = Bukkit.getVersion();
         if (version == null) version = "Custom";
-        if (version.startsWith("git-LavaBukkit-")) {
-            String[] parts = version.substring("git-LavaBukkit-".length()).split("[-\\s]");
+        if (version.startsWith("git-Kettle-")) {
+            String[] parts = version.substring("git-Kettle-".length()).split("[-\\s]");
             int distance = getDistance(null, parts[0]);
             switch (distance) {
                 case -1:
@@ -231,85 +281,5 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 
-	// LB Start - Taken from Paper / Modified by GMatrixGames
-    private static int getDistance(String repo, String verInfo) {
-      /*  try {
-            int currentVer = Integer.decode(verInfo);
-            return getFromJenkins(currentVer);
-        } catch (NumberFormatException ex) {
-            verInfo = verInfo.replace("\"", "");
-            return getFromRepo("MatrixDevTeam/LavaBukkit", verInfo);
-        } */
-		
-		verInfo = verInfo.replace("\"", "");
-        return getFromRepo("MatrixDevTeam/LavaBukkit", verInfo);
-            /*
-            BufferedReader reader = Resources.asCharSource(
-                    new URL("https://hub.spigotmc.org/stash/rest/api/1.0/projects/SPIGOT/repos/" + repo + "/commits?since=" + URLEncoder.encode(hash, "UTF-8") + "&withCounts=true"),
-                    Charsets.UTF_8
-            ).openBufferedStream();
-            try {
-                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
-                return ((Number) obj.get("totalCount")).intValue();
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-                return -1;
-            } finally {
-                reader.close();
-            }
-            */
-    }
-	
-	private static int getFromJenkins(int currentVer) {
-        try {
-            BufferedReader reader = Resources.asCharSource(
-                    new URL("https://ci.destroystokyo.com/job/Paper/lastSuccessfulBuild/buildNumber"), // Paper
-                    Charsets.UTF_8
-            ).openBufferedStream();
-            try {
-                int newVer = Integer.decode(reader.readLine());
-                return newVer - currentVer;
-            } catch (NumberFormatException ex) {
-                ex.printStackTrace();
-                return -2;
-            } finally {
-                reader.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-	
-	// Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
-    private static final String BRANCH = "master";
-    private static int getFromRepo(String repo, String hash) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
-            connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
-            try (
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
-            ) {
-                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
-                String status = (String) obj.get("status");
-                switch (status) {
-                    case "identical":
-                        return 0;
-                    case "behind":
-                        return ((Number) obj.get("behind_by")).intValue();
-                    default:
-                        return -1;
-                }
-            } catch (ParseException | NumberFormatException e) {
-                e.printStackTrace();
-                return -1;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-	
-	// MB End
+    // Kettle End
 }

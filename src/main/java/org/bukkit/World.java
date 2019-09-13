@@ -1,23 +1,19 @@
 package org.bukkit;
 
-import java.io.File;
-import org.bukkit.generator.ChunkGenerator;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.generator.BlockPopulator;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.messaging.PluginMessageRecipient;
 import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * Represents a world, which may contain entities, chunks and blocks
@@ -32,7 +28,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param z Z-coordinate of the block
      * @return Block at the given coordinates
      * @see #getBlockTypeIdAt(int, int, int) Returns the current type ID of
-     *     the block
+     * the block
      */
     public Block getBlockAt(int x, int y, int z);
 
@@ -42,7 +38,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param location Location of the block
      * @return Block at the given location
      * @see #getBlockTypeIdAt(Location) Returns the current type ID
-     *     of the block
+     * of the block
      */
     public Block getBlockAt(Location location);
 
@@ -54,7 +50,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param z Z-coordinate of the block
      * @return Type ID of the block at the given coordinates
      * @see #getBlockAt(int, int, int) Returns a live Block object at the
-     *     given location
+     * given location
      * @deprecated Magic value
      */
     @Deprecated
@@ -66,7 +62,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param location Location of the block
      * @return Type ID of the block at the given location
      * @see #getBlockAt(Location) Returns a live Block object at
-     *     the given location
+     * the given location
      * @deprecated Magic value
      */
     @Deprecated
@@ -174,7 +170,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param x X-coordinate of the chunk
      * @param z Z-coordinate of the chunk
      * @return true if the chunk is loaded and in use by one or more players,
-     *     otherwise false
+     * otherwise false
      */
     public boolean isChunkInUse(int x, int z);
 
@@ -194,10 +190,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Loads the {@link Chunk} at the specified coordinates
      *
-     * @param x X-coordinate of the chunk
-     * @param z Z-coordinate of the chunk
+     * @param x        X-coordinate of the chunk
+     * @param z        Z-coordinate of the chunk
      * @param generate Whether or not to generate a chunk if it doesn't
-     *     already exist
+     *                 already exist
      * @return true if the chunk has loaded successfully, otherwise false
      */
     public boolean loadChunk(int x, int z, boolean generate);
@@ -232,8 +228,8 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * This method is analogous to {@link #unloadChunk(int, int, boolean,
      * boolean)} where save is true
      *
-     * @param x X-coordinate of the chunk
-     * @param z Z-coordinate of the chunk
+     * @param x    X-coordinate of the chunk
+     * @param z    Z-coordinate of the chunk
      * @param save Whether or not to save the chunk
      * @return true if the chunk has unloaded successfully, otherwise false
      */
@@ -243,11 +239,11 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Unloads and optionally saves the {@link Chunk} at the specified
      * coordinates
      *
-     * @param x X-coordinate of the chunk
-     * @param z Z-coordinate of the chunk
+     * @param x    X-coordinate of the chunk
+     * @param z    Z-coordinate of the chunk
      * @param save Controls whether the chunk is saved
      * @param safe Controls whether to unload the chunk when players are
-     *     nearby
+     *             nearby
      * @return true if the chunk has unloaded successfully, otherwise false
      * @deprecated it is never safe to remove a chunk in use
      */
@@ -270,8 +266,8 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Queues the {@link Chunk} at the specified coordinates for unloading
      *
-     * @param x X-coordinate of the chunk
-     * @param z Z-coordinate of the chunk
+     * @param x    X-coordinate of the chunk
+     * @param z    Z-coordinate of the chunk
      * @param safe Controls whether to queue the chunk when players are nearby
      * @return Whether the chunk was actually queued
      */
@@ -292,7 +288,6 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * @param x X-coordinate of the chunk
      * @param z Z-coordinate of the chunk
      * @return Whether the chunk was actually refreshed
-     * 
      * @deprecated This method is not guaranteed to work suitably across all client implementations.
      */
     @Deprecated
@@ -302,7 +297,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Drops an item at the specified {@link Location}
      *
      * @param location Location to drop the item
-     * @param item ItemStack to drop
+     * @param item     ItemStack to drop
      * @return ItemDrop entity created as a result of this method
      */
     public Item dropItem(Location location, ItemStack item);
@@ -311,7 +306,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Drops an item at the specified {@link Location} with a random offset
      *
      * @param location Location to drop the item
-     * @param item ItemStack to drop
+     * @param item     ItemStack to drop
      * @return ItemDrop entity created as a result of this method
      */
     public Item dropItemNaturally(Location location, ItemStack item);
@@ -319,10 +314,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates an {@link Arrow} entity at the given {@link Location}
      *
-     * @param location Location to spawn the arrow
+     * @param location  Location to spawn the arrow
      * @param direction Direction to shoot the arrow in
-     * @param speed Speed of the arrow. A recommend speed is 0.6
-     * @param spread Spread of the arrow. A recommend spread is 12
+     * @param speed     Speed of the arrow. A recommend speed is 0.6
+     * @param spread    Spread of the arrow. A recommend spread is 12
      * @return Arrow entity spawned as a result of this method
      */
     public Arrow spawnArrow(Location location, Vector direction, float speed, float spread);
@@ -330,13 +325,13 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates an arrow entity of the given class at the given {@link Location}
      *
-     * @param <T> type of arrow to spawn
-     * @param location Location to spawn the arrow
+     * @param <T>       type of arrow to spawn
+     * @param location  Location to spawn the arrow
      * @param direction Direction to shoot the arrow in
-     * @param speed Speed of the arrow. A recommend speed is 0.6
-     * @param spread Spread of the arrow. A recommend spread is 12
-     * @param clazz the Entity class for the arrow
-     * {@link SpectralArrow},{@link Arrow},{@link TippedArrow}
+     * @param speed     Speed of the arrow. A recommend speed is 0.6
+     * @param spread    Spread of the arrow. A recommend spread is 12
+     * @param clazz     the Entity class for the arrow
+     *                  {@link SpectralArrow},{@link Arrow},{@link TippedArrow}
      * @return Arrow entity spawned as a result of this method
      */
     public <T extends Arrow> T spawnArrow(Location location, Vector direction, float speed, float spread, Class<T> clazz);
@@ -345,7 +340,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Creates a tree at the given {@link Location}
      *
      * @param location Location to spawn the tree
-     * @param type Type of the tree to create
+     * @param type     Type of the tree to create
      * @return true if the tree was created successfully, otherwise false
      */
     public boolean generateTree(Location location, TreeType type);
@@ -353,10 +348,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates a tree at the given {@link Location}
      *
-     * @param loc Location to spawn the tree
-     * @param type Type of the tree to create
+     * @param loc      Location to spawn the tree
+     * @param type     Type of the tree to create
      * @param delegate A class to call for each block changed as a result of
-     *     this method
+     *                 this method
      * @return true if the tree was created successfully, otherwise false
      * @deprecated rarely used API that was largely for implementation purposes
      */
@@ -366,7 +361,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates a entity at the given {@link Location}
      *
-     * @param loc The location to spawn the entity
+     * @param loc  The location to spawn the entity
      * @param type The entity to spawn
      * @return Resulting Entity of this method, or null if it was unsuccessful
      */
@@ -406,10 +401,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Get a collection of all entities in this World matching the given
      * class/interface
      *
-     * @param <T> an entity subclass
+     * @param <T>     an entity subclass
      * @param classes The classes representing the types of entity to match
      * @return A List of all Entities currently residing in this world that
-     *     match the given class/interface
+     * match the given class/interface
      */
     @Deprecated
     public <T extends Entity> Collection<T> getEntitiesByClass(Class<T>... classes);
@@ -417,11 +412,11 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Get a collection of all entities in this World matching the given
      * class/interface
-     * 
+     *
      * @param <T> an entity subclass
      * @param cls The class representing the type of entity to match
      * @return A List of all Entities currently residing in this world that
-     *     match the given class/interface
+     * match the given class/interface
      */
     public <T extends Entity> Collection<T> getEntitiesByClass(Class<T> cls);
 
@@ -431,7 +426,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param classes The classes representing the types of entity to match
      * @return A List of all Entities currently residing in this world that
-     *     match one or more of the given classes/interfaces
+     * match one or more of the given classes/interfaces
      */
     public Collection<Entity> getEntitiesByClasses(Class<?>... classes);
 
@@ -444,13 +439,13 @@ public interface World extends PluginMessageRecipient, Metadatable {
 
     /**
      * Returns a list of entities within a bounding box centered around a Location.
-     *
+     * <p>
      * Some implementations may impose artificial restrictions on the size of the search bounding box.
      *
      * @param location The center of the bounding box
-     * @param x 1/2 the size of the box along x axis
-     * @param y 1/2 the size of the box along y axis
-     * @param z 1/2 the size of the box along z axis
+     * @param x        1/2 the size of the box along x axis
+     * @param y        1/2 the size of the box along y axis
+     * @param z        1/2 the size of the box along z axis
      * @return the collection of entities near location. This will always be a non-null collection.
      */
     public Collection<Entity> getNearbyEntities(Location location, double x, double y, double z);
@@ -516,7 +511,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * time, please see {@link #setFullTime(long)}
      *
      * @param time The new relative time to set the in-game time to (in
-     *     hours*1000)
+     *             hours*1000)
      * @see #setFullTime(long) Sets the absolute time of this world
      */
     public void setTime(long time);
@@ -600,9 +595,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates explosion at given coordinates with given power
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
+     * @param x     X coordinate
+     * @param y     Y coordinate
+     * @param z     Z coordinate
      * @param power The power of explosion, where 4F is TNT
      * @return false if explosion was canceled, otherwise true
      */
@@ -612,10 +607,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Creates explosion at given coordinates with given power and optionally
      * setting blocks on fire.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
-     * @param power The power of explosion, where 4F is TNT
+     * @param x       X coordinate
+     * @param y       Y coordinate
+     * @param z       Z coordinate
+     * @param power   The power of explosion, where 4F is TNT
      * @param setFire Whether or not to set blocks on fire
      * @return false if explosion was canceled, otherwise true
      */
@@ -625,11 +620,11 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Creates explosion at given coordinates with given power and optionally
      * setting blocks on fire or breaking blocks.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
-     * @param power The power of explosion, where 4F is TNT
-     * @param setFire Whether or not to set blocks on fire
+     * @param x           X coordinate
+     * @param y           Y coordinate
+     * @param z           Z coordinate
+     * @param power       The power of explosion, where 4F is TNT
+     * @param setFire     Whether or not to set blocks on fire
      * @param breakBlocks Whether or not to have blocks be destroyed
      * @return false if explosion was canceled, otherwise true
      */
@@ -638,7 +633,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Creates explosion at given coordinates with given power
      *
-     * @param loc Location to blow up
+     * @param loc   Location to blow up
      * @param power The power of explosion, where 4F is TNT
      * @return false if explosion was canceled, otherwise true
      */
@@ -648,104 +643,108 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Creates explosion at given coordinates with given power and optionally
      * setting blocks on fire.
      *
-     * @param loc Location to blow up
-     * @param power The power of explosion, where 4F is TNT
+     * @param loc     Location to blow up
+     * @param power   The power of explosion, where 4F is TNT
      * @param setFire Whether or not to set blocks on fire
      * @return false if explosion was canceled, otherwise true
      */
     boolean createExplosion(Location loc, float power, boolean setFire);
 
     // Paper start
+
     /**
-   * Creates explosion at given location with given power and optionally
-   * setting blocks on fire, with the specified entity as the source.
-   *
-   * @param source The source entity of the explosion
-   * @param loc Location to blow up
-   * @param power The power of explosion, where 4F is TNT
-   * @param setFire Whether or not to set blocks on fire
-   * @param breakBlocks Whether or not to have blocks be destroyed
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source      The source entity of the explosion
+     * @param loc         Location to blow up
+     * @param power       The power of explosion, where 4F is TNT
+     * @param setFire     Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
     boolean createExplosion(Entity source, Location loc, float power, boolean setFire, boolean breakBlocks);
 
     /**
-   * Creates explosion at given location with given power and optionally
-   * setting blocks on fire, with the specified entity as the source.
-   *
-   * Will destroy other blocks
-   *
-   * @param source The source entity of the explosion
-   * @param loc Location to blow up
-   * @param power The power of explosion, where 4F is TNT
-   * @param setFire Whether or not to set blocks on fire
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     * <p>
+     * Will destroy other blocks
+     *
+     * @param source  The source entity of the explosion
+     * @param loc     Location to blow up
+     * @param power   The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Entity source, Location loc, float power, boolean setFire) {
         return createExplosion(source, loc, power, setFire, true);
     }
+
     /**
-   * Creates explosion at given location with given power, with the specified entity as the source.
-   * Will set blocks on fire and destroy blocks.
-   *
-   * @param source The source entity of the explosion
-   * @param loc Location to blow up
-   * @param power The power of explosion, where 4F is TNT
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given location with given power, with the specified entity as the source.
+     * Will set blocks on fire and destroy blocks.
+     *
+     * @param source The source entity of the explosion
+     * @param loc    Location to blow up
+     * @param power  The power of explosion, where 4F is TNT
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Entity source, Location loc, float power) {
         return createExplosion(source, loc, power, true, true);
     }
+
     /**
-   * Creates explosion at given entities location with given power and optionally
-   * setting blocks on fire, with the specified entity as the source.
-   *
-   * @param source The source entity of the explosion
-   * @param power The power of explosion, where 4F is TNT
-   * @param setFire Whether or not to set blocks on fire
-   * @param breakBlocks Whether or not to have blocks be destroyed
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source      The source entity of the explosion
+     * @param power       The power of explosion, where 4F is TNT
+     * @param setFire     Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Entity source, float power, boolean setFire, boolean breakBlocks) {
         return createExplosion(source, source.getLocation(), power, setFire, breakBlocks);
     }
+
     /**
-   * Creates explosion at given entities location with given power and optionally
-   * setting blocks on fire, with the specified entity as the source.
-   *
-   * Will destroy blocks.
-   *
-   * @param source The source entity of the explosion
-   * @param power The power of explosion, where 4F is TNT
-   * @param setFire Whether or not to set blocks on fire
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     * <p>
+     * Will destroy blocks.
+     *
+     * @param source  The source entity of the explosion
+     * @param power   The power of explosion, where 4F is TNT
+     * @param setFire Whether or not to set blocks on fire
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Entity source, float power, boolean setFire) {
         return createExplosion(source, source.getLocation(), power, setFire, true);
     }
 
     /**
-   * Creates explosion at given entities location with given power and optionally
-   * setting blocks on fire, with the specified entity as the source.
-   *
-   * @param source The source entity of the explosion
-   * @param power The power of explosion, where 4F is TNT
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given entities location with given power and optionally
+     * setting blocks on fire, with the specified entity as the source.
+     *
+     * @param source The source entity of the explosion
+     * @param power  The power of explosion, where 4F is TNT
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Entity source, float power) {
         return createExplosion(source, source.getLocation(), power, true, true);
     }
 
     /**
-   * Creates explosion at given location with given power and optionally
-   * setting blocks on fire or breaking blocks.
-   *
-   * @param loc Location to blow up
-   * @param power The power of explosion, where 4F is TNT
-   * @param setFire Whether or not to set blocks on fire
-   * @param breakBlocks Whether or not to have blocks be destroyed
-   * @return false if explosion was canceled, otherwise true
-   */
+     * Creates explosion at given location with given power and optionally
+     * setting blocks on fire or breaking blocks.
+     *
+     * @param loc         Location to blow up
+     * @param power       The power of explosion, where 4F is TNT
+     * @param setFire     Whether or not to set blocks on fire
+     * @param breakBlocks Whether or not to have blocks be destroyed
+     * @return false if explosion was canceled, otherwise true
+     */
     default boolean createExplosion(Location loc, float power, boolean setFire, boolean breakBlocks) {
         return createExplosion(loc.getX(), loc.getY(), loc.getZ(), power, setFire, breakBlocks);
     }
@@ -802,11 +801,11 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Spawn an entity of a specific class at the given {@link Location}
      *
      * @param location the {@link Location} to spawn the entity at
-     * @param clazz the class of the {@link Entity} to spawn
-     * @param <T> the class of the {@link Entity} to spawn
+     * @param clazz    the class of the {@link Entity} to spawn
+     * @param <T>      the class of the {@link Entity} to spawn
      * @return an instance of the spawned {@link Entity}
      * @throws IllegalArgumentException if either parameter is null or the
-     *     {@link Entity} requested cannot be spawned
+     *                                  {@link Entity} requested cannot be spawned
      */
     public <T extends Entity> T spawn(Location location, Class<T> clazz) throws IllegalArgumentException;
 
@@ -819,12 +818,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * until after this function returns.
      *
      * @param location the {@link Location} to spawn the entity at
-     * @param clazz the class of the {@link Entity} to spawn
+     * @param clazz    the class of the {@link Entity} to spawn
      * @param function the function to be run before the entity is spawned.
-     * @param <T> the class of the {@link Entity} to spawn
+     * @param <T>      the class of the {@link Entity} to spawn
      * @return an instance of the spawned {@link Entity}
      * @throws IllegalArgumentException if either parameter is null or the
-     *     {@link Entity} requested cannot be spawned
+     *                                  {@link Entity} requested cannot be spawned
      */
     public <T extends Entity> T spawn(Location location, Class<T> clazz, Consumer<T> function) throws IllegalArgumentException;
 
@@ -837,10 +836,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * material.isBlock()}. The Material may not be air.
      *
      * @param location The {@link Location} to spawn the FallingBlock
-     * @param data The block data
+     * @param data     The block data
      * @return The spawned {@link FallingBlock} instance
      * @throws IllegalArgumentException if {@link Location} or {@link
-     *     MaterialData} are null or {@link Material} of the {@link MaterialData} is not a block
+     *                                  MaterialData} are null or {@link Material} of the {@link MaterialData} is not a block
      */
     public FallingBlock spawnFallingBlock(Location location, MaterialData data) throws IllegalArgumentException;
 
@@ -854,10 +853,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param location The {@link Location} to spawn the FallingBlock
      * @param material The block {@link Material} type
-     * @param data The block data
+     * @param data     The block data
      * @return The spawned {@link FallingBlock} instance
      * @throws IllegalArgumentException if {@link Location} or {@link
-     *     Material} are null or {@link Material} is not a block
+     *                                  Material} are null or {@link Material} is not a block
      * @deprecated Magic value
      */
     @Deprecated
@@ -867,12 +866,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Spawn a {@link FallingBlock} entity at the given {@link Location} of
      * the specified blockId (converted to {@link Material})
      *
-     * @param location The {@link Location} to spawn the FallingBlock
-     * @param blockId The id of the intended material
+     * @param location  The {@link Location} to spawn the FallingBlock
+     * @param blockId   The id of the intended material
      * @param blockData The block data
      * @return The spawned FallingBlock instance
      * @throws IllegalArgumentException if location is null, or blockId is
-     *     invalid
+     *                                  invalid
      * @see #spawnFallingBlock(Location, Material, byte)
      * @deprecated Magic value
      */
@@ -884,9 +883,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * location.
      *
      * @param location the {@link Location} around which players must be to
-     *     hear the sound
-     * @param effect the {@link Effect}
-     * @param data a data bit needed for some effects
+     *                 hear the sound
+     * @param effect   the {@link Effect}
+     * @param data     a data bit needed for some effects
      */
     public void playEffect(Location location, Effect effect, int data);
 
@@ -894,10 +893,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Plays an effect to all players within a given radius around a location.
      *
      * @param location the {@link Location} around which players must be to
-     *     hear the effect
-     * @param effect the {@link Effect}
-     * @param data a data bit needed for some effects
-     * @param radius the radius around the location
+     *                 hear the effect
+     * @param effect   the {@link Effect}
+     * @param data     a data bit needed for some effects
+     * @param radius   the radius around the location
      */
     public void playEffect(Location location, Effect effect, int data, int radius);
 
@@ -905,23 +904,23 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Plays an effect to all players within a default radius around a given
      * location.
      *
-     * @param <T> data dependant on the type of effect
+     * @param <T>      data dependant on the type of effect
      * @param location the {@link Location} around which players must be to
-     *     hear the sound
-     * @param effect the {@link Effect}
-     * @param data a data bit needed for some effects
+     *                 hear the sound
+     * @param effect   the {@link Effect}
+     * @param data     a data bit needed for some effects
      */
     public <T> void playEffect(Location location, Effect effect, T data);
 
     /**
      * Plays an effect to all players within a given radius around a location.
      *
-     * @param <T> data dependant on the type of effect
+     * @param <T>      data dependant on the type of effect
      * @param location the {@link Location} around which players must be to
-     *     hear the effect
-     * @param effect the {@link Effect}
-     * @param data a data bit needed for some effects
-     * @param radius the radius around the location
+     *                 hear the effect
+     * @param effect   the {@link Effect}
+     * @param data     a data bit needed for some effects
+     * @param radius   the radius around the location
      */
     public <T> void playEffect(Location location, Effect effect, T data, int radius);
 
@@ -930,12 +929,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * including valid biome data. Used for representing an ungenerated chunk,
      * or for fetching only biome data without loading a chunk.
      *
-     * @param x - chunk x coordinate
-     * @param z - chunk z coordinate
-     * @param includeBiome - if true, snapshot includes per-coordinate biome
-     *     type
+     * @param x                    - chunk x coordinate
+     * @param z                    - chunk z coordinate
+     * @param includeBiome         - if true, snapshot includes per-coordinate biome
+     *                             type
      * @param includeBiomeTempRain - if true, snapshot includes per-coordinate
-     *     raw biome temperature and rainfall
+     *                             raw biome temperature and rainfall
      * @return The empty snapshot.
      */
     public ChunkSnapshot getEmptyChunkSnapshot(int x, int z, boolean includeBiome, boolean includeBiomeTempRain);
@@ -944,9 +943,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Sets the spawn flags for this.
      *
      * @param allowMonsters - if true, monsters are allowed to spawn in this
-     *     world.
-     * @param allowAnimals - if true, animals are allowed to spawn in this
-     *     world.
+     *                      world.
+     * @param allowAnimals  - if true, animals are allowed to spawn in this
+     *                      world.
      */
     public void setSpawnFlags(boolean allowMonsters, boolean allowAnimals);
 
@@ -976,8 +975,8 @@ public interface World extends PluginMessageRecipient, Metadatable {
     /**
      * Sets the biome for the given block coordinates
      *
-     * @param x X coordinate of the block
-     * @param z Z coordinate of the block
+     * @param x   X coordinate of the block
+     * @param z   Z coordinate of the block
      * @param bio new Biome type for this block
      */
     void setBiome(int x, int z, Biome bio);
@@ -1037,7 +1036,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * or not.
      *
      * @param keepLoaded if true then the world's spawn area will be kept
-     *     loaded into memory.
+     *                   loaded into memory.
      */
     public void setKeepSpawnInMemory(boolean keepLoaded);
 
@@ -1052,7 +1051,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Sets whether or not the world will automatically save
      *
      * @param value true if the world should automatically save, otherwise
-     *     false
+     *              false
      */
     public void setAutoSave(boolean value);
 
@@ -1140,7 +1139,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Minecraft default: 400.
      *
      * @param ticksPerAnimalSpawns the ticks per animal spawns value you want
-     *     to set the world to
+     *                             to set the world to
      */
     public void setTicksPerAnimalSpawns(int ticksPerAnimalSpawns);
 
@@ -1193,7 +1192,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * Minecraft default: 1.
      *
      * @param ticksPerMonsterSpawns the ticks per monster spawns value you
-     *     want to set the world to
+     *                              want to set the world to
      */
     public void setTicksPerMonsterSpawns(int ticksPerMonsterSpawns);
 
@@ -1211,7 +1210,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * <b>Note:</b> If set to a negative number the world will use the
      * server-wide spawn limit instead.
-     * 
+     *
      * @param limit the new mob limit
      */
     void setMonsterSpawnLimit(int limit);
@@ -1230,7 +1229,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * <b>Note:</b> If set to a negative number the world will use the
      * server-wide spawn limit instead.
-     * 
+     *
      * @param limit the new mob limit
      */
     void setAnimalSpawnLimit(int limit);
@@ -1249,7 +1248,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * <b>Note:</b> If set to a negative number the world will use the
      * server-wide spawn limit instead.
-     * 
+     *
      * @param limit the new mob limit
      */
     void setWaterAnimalSpawnLimit(int limit);
@@ -1268,7 +1267,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * <b>Note:</b> If set to a negative number the world will use the
      * server-wide spawn limit instead.
-     * 
+     *
      * @param limit the new mob limit
      */
     void setAmbientSpawnLimit(int limit);
@@ -1279,9 +1278,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * This function will fail silently if Location or Sound are null.
      *
      * @param location The location to play the sound
-     * @param sound The sound to play
-     * @param volume The volume of the sound
-     * @param pitch The pitch of the sound
+     * @param sound    The sound to play
+     * @param volume   The volume of the sound
+     * @param pitch    The pitch of the sound
      */
     void playSound(Location location, Sound sound, float volume, float pitch);
 
@@ -1293,9 +1292,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * respective sound for the value passed.
      *
      * @param location the location to play the sound
-     * @param sound the internal sound name to play
-     * @param volume the volume of the sound
-     * @param pitch the pitch of the sound
+     * @param sound    the internal sound name to play
+     * @param volume   the volume of the sound
+     * @param pitch    the pitch of the sound
      */
     void playSound(Location location, String sound, float volume, float pitch);
 
@@ -1305,10 +1304,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * This function will fail silently if Location or Sound are null.
      *
      * @param location The location to play the sound
-     * @param sound The sound to play
+     * @param sound    The sound to play
      * @param category the category of the sound
-     * @param volume The volume of the sound
-     * @param pitch The pitch of the sound
+     * @param volume   The volume of the sound
+     * @param pitch    The pitch of the sound
      */
     void playSound(Location location, Sound sound, SoundCategory category, float volume, float pitch);
 
@@ -1320,10 +1319,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * sound for the value passed.
      *
      * @param location the location to play the sound
-     * @param sound the internal sound name to play
+     * @param sound    the internal sound name to play
      * @param category the category of the sound
-     * @param volume the volume of the sound
-     * @param pitch the pitch of the sound
+     * @param volume   the volume of the sound
+     * @param pitch    the pitch of the sound
      */
     void playSound(Location location, String sound, SoundCategory category, float volume, float pitch);
 
@@ -1352,7 +1351,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * <p>
      * If rule is null, the function will return false.
      *
-     * @param rule Rule to set
+     * @param rule  Rule to set
      * @param value Value to set rule to
      * @return True if rule was set
      */
@@ -1379,7 +1378,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
+     * @param count    the number of particles
      */
     public void spawnParticle(Particle particle, Location location, int count);
 
@@ -1388,10 +1387,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * at the target location.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count);
 
@@ -1401,9 +1400,9 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param count    the number of particles
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, T data);
 
@@ -1413,12 +1412,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * at the target location.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, T data);
 
@@ -1430,10 +1429,10 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
      */
     public void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ);
 
@@ -1444,13 +1443,13 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ);
 
@@ -1462,12 +1461,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1478,15 +1477,15 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1498,12 +1497,12 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param extra the extra data for this particle, depends on the
-     *              particle used (normally speed)
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param extra    the extra data for this particle, depends on the
+     *                 particle used (normally speed)
      */
     public void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra);
 
@@ -1514,15 +1513,15 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param extra the extra data for this particle, depends on the
-     *              particle used (normally speed)
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param extra    the extra data for this particle, depends on the
+     *                 particle used (normally speed)
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra);
 
@@ -1534,14 +1533,14 @@ public interface World extends PluginMessageRecipient, Metadatable {
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param extra the extra data for this particle, depends on the
-     *              particle used (normally speed)
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param extra    the extra data for this particle, depends on the
+     *                 particle used (normally speed)
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
@@ -1552,39 +1551,37 @@ public interface World extends PluginMessageRecipient, Metadatable {
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x the position on the x axis to spawn at
-     * @param y the position on the y axis to spawn at
-     * @param z the position on the z axis to spawn at
-     * @param count the number of particles
-     * @param offsetX the maximum random offset on the X axis
-     * @param offsetY the maximum random offset on the Y axis
-     * @param offsetZ the maximum random offset on the Z axis
-     * @param extra the extra data for this particle, depends on the
-     *              particle used (normally speed)
-     * @param data the data to use for the particle or null,
-     *             the type of this depends on {@link Particle#getDataType()}
+     * @param x        the position on the x axis to spawn at
+     * @param y        the position on the y axis to spawn at
+     * @param z        the position on the z axis to spawn at
+     * @param count    the number of particles
+     * @param offsetX  the maximum random offset on the X axis
+     * @param offsetY  the maximum random offset on the Y axis
+     * @param offsetZ  the maximum random offset on the Z axis
+     * @param extra    the extra data for this particle, depends on the
+     *                 particle used (normally speed)
+     * @param data     the data to use for the particle or null,
+     *                 the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
     // Spigot start
-    public class Spigot
-    {
+    public class Spigot {
 
         /**
          * Plays an effect to all players within a default radius around a given
          * location.
          *
          * @param location the {@link Location} around which players must be to
-         * see the effect
-         * @param effect the {@link Effect}
+         *                 see the effect
+         * @param effect   the {@link Effect}
          * @throws IllegalArgumentException if the location or effect is null.
-         * It also throws when the effect requires a material or a material data
+         *                                  It also throws when the effect requires a material or a material data
          * @deprecated Spigot specific API, use {@link Particle}.
          */
         @Deprecated
-        public void playEffect(Location location, Effect effect)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+        public void playEffect(Location location, Effect effect) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         /**
@@ -1597,47 +1594,44 @@ public interface World extends PluginMessageRecipient, Metadatable {
          * the given speed and particle count if the effect is a particle. Some
          * effect will create multiple particles.
          *
-         * @param location the {@link Location} around which players must be to
-         * see the effect
-         * @param effect effect the {@link Effect}
-         * @param id the item/block/data id for the effect
-         * @param data the data value of the block/item for the effect
-         * @param offsetX the amount to be randomly offset by in the X axis
-         * @param offsetY the amount to be randomly offset by in the Y axis
-         * @param offsetZ the amount to be randomly offset by in the Z axis
-         * @param speed the speed of the particles
+         * @param location      the {@link Location} around which players must be to
+         *                      see the effect
+         * @param effect        effect the {@link Effect}
+         * @param id            the item/block/data id for the effect
+         * @param data          the data value of the block/item for the effect
+         * @param offsetX       the amount to be randomly offset by in the X axis
+         * @param offsetY       the amount to be randomly offset by in the Y axis
+         * @param offsetZ       the amount to be randomly offset by in the Z axis
+         * @param speed         the speed of the particles
          * @param particleCount the number of particles
-         * @param radius the radius around the location
+         * @param radius        the radius around the location
          * @deprecated Spigot specific API, use {@link Particle}.
          */
         @Deprecated
-        public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+        public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         /**
          * Strikes lightning at the given {@link Location} and possibly without sound
          *
-         * @param loc The location to strike lightning
-         * @param isSilent Whether this strike makes no sound
-         * @return The lightning entity.
-         */        
-        public LightningStrike strikeLightning(Location loc, boolean isSilent)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
-        }
-        
-        /**
-         * Strikes lightning at the given {@link Location} without doing damage and possibly without sound
-         *
-         * @param loc The location to strike lightning
+         * @param loc      The location to strike lightning
          * @param isSilent Whether this strike makes no sound
          * @return The lightning entity.
          */
-        public LightningStrike strikeLightningEffect(Location loc, boolean isSilent)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+        public LightningStrike strikeLightning(Location loc, boolean isSilent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        /**
+         * Strikes lightning at the given {@link Location} without doing damage and possibly without sound
+         *
+         * @param loc      The location to strike lightning
+         * @param isSilent Whether this strike makes no sound
+         * @return The lightning entity.
+         */
+        public LightningStrike strikeLightningEffect(Location loc, boolean isSilent) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
@@ -1669,7 +1663,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
             this.id = id;
         }
 
-        public static void registerEnvironment(Environment env){
+        public static void registerEnvironment(Environment env) {
             lookup.put(env.getId(), env);
         }
 

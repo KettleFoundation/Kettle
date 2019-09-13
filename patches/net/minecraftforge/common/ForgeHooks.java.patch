@@ -1,6 +1,163 @@
 --- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
 +++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
-@@ -450,7 +450,7 @@
+@@ -19,33 +19,17 @@
+ 
+ package net.minecraftforge.common;
+ 
+-import java.io.BufferedReader;
+-import java.io.IOException;
+-import java.net.URI;
+-import java.net.URISyntaxException;
+-import java.nio.file.Files;
+-import java.util.ArrayList;
+-import java.util.Deque;
+-import java.util.HashSet;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Random;
+-import java.util.Set;
+-import java.util.regex.Matcher;
+-import java.util.regex.Pattern;
+-import java.util.stream.Collectors;
+-
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Queues;
+ import com.google.common.collect.Sets;
+ import com.google.gson.Gson;
+ import com.google.gson.JsonObject;
+ import com.google.gson.JsonParseException;
+-
+ import net.minecraft.advancements.Advancement;
+ import net.minecraft.advancements.AdvancementManager;
+ import net.minecraft.block.Block;
+-import net.minecraft.block.BlockFarmland;
++import net.minecraft.block.BlockDoor;
++import net.minecraft.block.BlockJukebox;
+ import net.minecraft.block.BlockLiquid;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.state.IBlockState;
+@@ -66,16 +50,7 @@
+ import net.minecraft.inventory.ContainerRepair;
+ import net.minecraft.inventory.IInventory;
+ import net.minecraft.inventory.InventoryCrafting;
+-import net.minecraft.item.Item;
+-import net.minecraft.item.ItemAxe;
+-import net.minecraft.item.ItemBucket;
+-import net.minecraft.item.ItemEnchantedBook;
+-import net.minecraft.item.ItemMonsterPlacer;
+-import net.minecraft.item.ItemPickaxe;
+-import net.minecraft.item.ItemPotion;
+-import net.minecraft.item.ItemSpade;
+-import net.minecraft.item.ItemStack;
+-import net.minecraft.item.ItemTippedArrow;
++import net.minecraft.item.*;
+ import net.minecraft.item.crafting.IRecipe;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.nbt.NBTTagList;
+@@ -90,81 +65,58 @@
+ import net.minecraft.stats.StatList;
+ import net.minecraft.tileentity.TileEntity;
+ import net.minecraft.tileentity.TileEntityNote;
+-import net.minecraft.util.DamageSource;
+-import net.minecraft.util.EnumActionResult;
+-import net.minecraft.util.EnumFacing;
+-import net.minecraft.util.EnumHand;
+-import net.minecraft.util.IntIdentityHashBiMap;
+-import net.minecraft.util.JsonUtils;
+-import net.minecraft.util.NonNullList;
+-import net.minecraft.util.ResourceLocation;
+-import net.minecraft.util.WeightedRandom;
+-import net.minecraft.util.math.AxisAlignedBB;
+-import net.minecraft.util.math.BlockPos;
+-import net.minecraft.util.math.MathHelper;
+-import net.minecraft.util.math.RayTraceResult;
+-import net.minecraft.util.math.Vec3d;
++import net.minecraft.tileentity.TileEntitySkull;
++import net.minecraft.util.*;
++import net.minecraft.util.math.*;
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraft.util.text.TextComponentString;
+ import net.minecraft.util.text.TextFormatting;
+ import net.minecraft.util.text.event.ClickEvent;
+-import net.minecraft.world.IBlockAccess;
+-import net.minecraft.world.World;
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.GameType;
++import net.minecraft.world.IBlockAccess;
++import net.minecraft.world.World;
+ import net.minecraft.world.storage.loot.LootEntry;
+ import net.minecraft.world.storage.loot.LootTable;
+ import net.minecraft.world.storage.loot.LootTableManager;
+ import net.minecraft.world.storage.loot.conditions.LootCondition;
+ import net.minecraftforge.common.crafting.CraftingHelper;
+ import net.minecraftforge.common.util.BlockSnapshot;
++import net.minecraftforge.common.util.FakePlayer;
+ import net.minecraftforge.event.AnvilUpdateEvent;
+ import net.minecraftforge.event.DifficultyChangeEvent;
+ import net.minecraftforge.event.ForgeEventFactory;
+ import net.minecraftforge.event.ServerChatEvent;
+ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+ import net.minecraftforge.event.entity.item.ItemTossEvent;
+-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+-import net.minecraftforge.event.entity.living.LivingDeathEvent;
+-import net.minecraftforge.event.entity.living.LivingDropsEvent;
++import net.minecraftforge.event.entity.living.*;
+ import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
+ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+-import net.minecraftforge.event.entity.living.LivingFallEvent;
+-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+-import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+-import net.minecraftforge.event.entity.living.LootingLevelEvent;
+-import net.minecraftforge.event.entity.player.AnvilRepairEvent;
+-import net.minecraftforge.event.entity.player.AttackEntityEvent;
+-import net.minecraftforge.event.entity.player.CriticalHitEvent;
+-import net.minecraftforge.event.entity.player.PlayerEvent;
+-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+-import net.minecraftforge.event.entity.player.AdvancementEvent;
++import net.minecraftforge.event.entity.player.*;
+ import net.minecraftforge.event.world.BlockEvent;
+ import net.minecraftforge.event.world.NoteBlockEvent;
+ import net.minecraftforge.fluids.IFluidBlock;
+-import net.minecraftforge.fml.common.FMLLog;
+-import net.minecraftforge.fml.common.Loader;
+-import net.minecraftforge.fml.common.LoaderState;
+-import net.minecraftforge.fml.common.ModContainer;
+-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
++import net.minecraftforge.fml.common.*;
+ import net.minecraftforge.fml.common.eventhandler.Event;
+ import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
+ import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.ConnectionType;
+ import net.minecraftforge.fml.common.registry.ForgeRegistries;
+-import net.minecraftforge.registries.DataSerializerEntry;
+-import net.minecraftforge.registries.ForgeRegistry;
+-import net.minecraftforge.registries.GameData;
+-import net.minecraftforge.registries.IForgeRegistry;
+-import net.minecraftforge.registries.RegistryManager;
++import net.minecraftforge.registries.*;
++import org.apache.commons.io.FilenameUtils;
++import org.apache.commons.io.IOUtils;
+ 
+ import javax.annotation.Nonnull;
+ import javax.annotation.Nullable;
++import java.io.BufferedReader;
++import java.io.IOException;
++import java.net.URI;
++import java.net.URISyntaxException;
++import java.nio.file.Files;
++import java.util.*;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++import java.util.stream.Collectors;
+ 
+-import org.apache.commons.io.FilenameUtils;
+-import org.apache.commons.io.IOUtils;
+-
+ public class ForgeHooks
+ {
+     //TODO: Loot tables?
+@@ -450,7 +402,7 @@
                  }
                  else
                  {
@@ -9,7 +166,7 @@
  
                      if (resourcelocation == null || !EntityList.ENTITY_EGGS.containsKey(resourcelocation))
                      {
-@@ -472,7 +472,7 @@
+@@ -472,7 +424,7 @@
                  }
                  else if (this.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
                  {
@@ -18,7 +175,101 @@
                  }
  
                  LOGGER.warn("Picking on: [{}] {} gave null item", new Object[] {this.objectMouseOver.typeOfHit, s});
-@@ -993,7 +993,7 @@
+@@ -816,27 +768,8 @@
+ 
+     public static int onBlockBreakEvent(World world, GameType gameType, EntityPlayerMP entityPlayer, BlockPos pos)
+     {
+-        // Logic from tryHarvestBlock for pre-canceling the event
+-        boolean preCancelEvent = false;
+-        ItemStack itemstack = entityPlayer.getHeldItemMainhand();
+-        if (gameType.isCreative() && !itemstack.isEmpty()
+-                && !itemstack.getItem().canDestroyBlockInCreative(world, pos, itemstack, entityPlayer))
+-            preCancelEvent = true;
+-
+-        if (gameType.hasLimitedInteractions())
+-        {
+-            if (gameType == GameType.SPECTATOR)
+-                preCancelEvent = true;
+-
+-            if (!entityPlayer.isAllowEdit())
+-            {
+-                if (itemstack.isEmpty() || !itemstack.canDestroy(world.getBlockState(pos).getBlock()))
+-                    preCancelEvent = true;
+-            }
+-        }
+-
+         // Tell client the block is gone immediately then process events
+-        if (world.getTileEntity(pos) == null)
++        if (world.getTileEntity(pos) == null && !(entityPlayer instanceof FakePlayer))
+         {
+             SPacketBlockChange packet = new SPacketBlockChange(world, pos);
+             packet.blockState = Blocks.AIR.getDefaultState();
+@@ -846,11 +779,11 @@
+         // Post the block break event
+         IBlockState state = world.getBlockState(pos);
+         BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, state, entityPlayer);
+-        event.setCanceled(preCancelEvent);
++        // event.setCanceled(preCancelEvent);
+         MinecraftForge.EVENT_BUS.post(event);
+ 
+         // Handle if the event is canceled
+-        if (event.isCanceled())
++        if (event.isCanceled() && !(entityPlayer instanceof FakePlayer))
+         {
+             // Let the client know the block still exists
+             entityPlayer.connection.sendPacket(new SPacketBlockChange(world, pos));
+@@ -865,6 +798,11 @@
+                     entityPlayer.connection.sendPacket(pkt);
+                 }
+             }
++            // Update the visual error caused by the broken door
++            if (state.getBlock() instanceof BlockDoor) {
++                Boolean bottom = state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
++                entityPlayer.connection.sendPacket(new SPacketBlockChange(world, bottom ? pos.up() : pos.down()));
++            }
+         }
+         return event.isCanceled() ? -1 : event.getExpToDrop();
+     }
+@@ -929,6 +867,7 @@
+                     blocksnapshot.restore(true, false);
+                     world.restoringBlockSnapshots = false;
+                 }
++                ((org.bukkit.craftbukkit.entity.CraftPlayer) player.getBukkitEntity()).updateInventory();
+             }
+             else
+             {
+@@ -953,6 +892,30 @@
+                     world.markAndNotifyBlock(snap.getPos(), null, oldBlock, newBlock, updateFlag);
+                 }
+                 player.addStat(StatList.getObjectUseStats(itemstack.getItem()));
++
++                if (itemstack.item instanceof ItemRecord) {
++                    ((BlockJukebox) Blocks.JUKEBOX).insertRecord(world, pos, world.getBlockState(pos), itemstack);
++                    world.playEvent(null, 1010, pos, Item.getIdFromItem(itemstack.item));
++                    itemstack.shrink(1);
++                    player.addStat(StatList.RECORD_PLAYED);
++                }
++
++                if (itemstack.item == Items.SKULL) {
++                    BlockPos bp = pos;
++                    if (!world.getBlockState(pos).getMaterial().isReplaceable()) {
++                        if (!world.getBlockState(pos).getMaterial().isSolid()) {
++                            bp = null;
++                        } else {
++                            bp = bp.offset(side);
++                        }
++                    }
++                    if (bp != null) {
++                        TileEntity te = world.getTileEntity(bp);
++                        if (te instanceof TileEntitySkull) {
++                            Blocks.SKULL.checkWitherSpawn(world, bp, (TileEntitySkull) te);
++                        }
++                    }
++                }
+             }
+         }
+         world.capturedBlockSnapshots.clear();
+@@ -992,7 +955,7 @@
      }
  
      /**

@@ -28,16 +28,16 @@ public enum PermissionDefault {
      */
     public boolean getValue(boolean op) {
         switch (this) {
-        case TRUE:
-            return true;
-        case FALSE:
-            return false;
-        case OP:
-            return op;
-        case NOT_OP:
-            return !op;
-        default:
-            return false;
+            case TRUE:
+                return true;
+            case FALSE:
+                return false;
+            case OP:
+                return op;
+            case NOT_OP:
+                return !op;
+            default:
+                return false;
         }
     }
 

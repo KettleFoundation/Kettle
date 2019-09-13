@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/network/rcon/RConConsoleSource.java
 +++ ../src-work/minecraft/net/minecraft/network/rcon/RConConsoleSource.java
-@@ -22,6 +22,10 @@
+@@ -22,11 +22,20 @@
          return "Rcon";
      }
  
@@ -11,3 +11,13 @@
      public void sendMessage(ITextComponent component)
      {
          this.buffer.append(component.getUnformattedText());
+     }
+ 
++    public boolean canUseCommand(int permLevel, String commandName, String perm)
++    {
++        return true;
++    }
++
+     public boolean canUseCommand(int permLevel, String commandName)
+     {
+         return true;

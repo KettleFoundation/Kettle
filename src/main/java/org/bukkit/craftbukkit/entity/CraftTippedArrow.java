@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.potion.Potion;
 import org.apache.commons.lang3.Validate;
@@ -15,7 +14,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 public class CraftTippedArrow extends CraftArrow implements TippedArrow {
 

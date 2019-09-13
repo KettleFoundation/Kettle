@@ -17,7 +17,18 @@
          public String getName()
          {
              return FunctionManager.this.currentGameLoopFunctionId;
-@@ -101,7 +104,7 @@
+@@ -39,6 +42,10 @@
+         {
+             return permLevel <= 2;
+         }
++        public boolean canUseCommand(int permLevel, String commandName, String perm)
++        {
++            return permLevel <= 2;
++        }
+         public World getEntityWorld()
+         {
+             return FunctionManager.this.server.worlds[0];
+@@ -101,7 +108,7 @@
          {
              if (this.commandQueue.size() < i)
              {
@@ -26,7 +37,7 @@
              }
  
              return 0;
-@@ -118,7 +121,7 @@
+@@ -118,7 +125,7 @@
  
                  for (int k = afunctionobject$entry.length - 1; k >= 0; --k)
                  {
@@ -35,7 +46,7 @@
                  }
  
                  while (true)
-@@ -192,26 +195,26 @@
+@@ -192,26 +199,26 @@
      }
  
      public static class QueuedCommand

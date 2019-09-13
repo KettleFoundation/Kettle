@@ -1,21 +1,21 @@
 package org.bukkit.event.player;
 
-import java.net.InetAddress;
-import java.util.UUID;
-
 import org.bukkit.Warning;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import java.net.InetAddress;
+import java.util.UUID;
 
 /**
  * Stores details for players attempting to log in
  *
  * @deprecated This event causes synchronization from the login thread; {@link
- *     AsyncPlayerPreLoginEvent} is preferred to keep the secondary threads
- *     asynchronous.
+ * AsyncPlayerPreLoginEvent} is preferred to keep the secondary threads
+ * asynchronous.
  */
 @Deprecated
-@Warning(reason="This event causes a login thread to synchronize with the main thread")
+@Warning(reason = "This event causes a login thread to synchronize with the main thread")
 public class PlayerPreLoginEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private Result result;
@@ -85,7 +85,7 @@ public class PlayerPreLoginEvent extends Event {
     /**
      * Disallows the player from logging in, with the given reason
      *
-     * @param result New result for disallowing the player
+     * @param result  New result for disallowing the player
      * @param message Kick message to display to the user
      */
     public void disallow(final Result result, final String message) {

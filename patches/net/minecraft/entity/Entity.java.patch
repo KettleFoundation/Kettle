@@ -344,12 +344,16 @@
              this.setFire(15);
          }
      }
-@@ -579,6 +677,22 @@
+@@ -579,6 +677,26 @@
          }
          else
          {
 +            // CraftBukkit start - Don't do anything if we aren't moving
 +            // We need to do this regardless of whether or not we are moving thanks to portals
++            double d2 = x;
++            double d3 = y;
++            double d4 = z;
++
 +            try {
 +                this.doBlockCollisions();
 +            } catch (Throwable throwable) {
@@ -367,6 +371,17 @@
              if (type == MoverType.PISTON)
              {
                  long i = this.world.getTotalWorldTime();
+@@ -648,10 +766,6 @@
+                 this.motionZ = 0.0D;
+             }
+ 
+-            double d2 = x;
+-            double d3 = y;
+-            double d4 = z;
+-
+             if ((type == MoverType.SELF || type == MoverType.PLAYER) && this.onGround && this.isSneaking() && this instanceof EntityPlayer)
+             {
+                 for (double d5 = 0.05D; x != 0.0D && this.world.getCollisionBoxes(this, this.getEntityBoundingBox().offset(x, (double)(-this.stepHeight), 0.0D)).isEmpty(); d2 = x)
 @@ -912,6 +1026,26 @@
                  block.onLanded(this.world, this);
              }

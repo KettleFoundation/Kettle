@@ -1,14 +1,14 @@
 package org.bukkit.craftbukkit.advancement;
 
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.advancements.PlayerAdvancements;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 
 public class CraftAdvancementProgress implements AdvancementProgress {
 

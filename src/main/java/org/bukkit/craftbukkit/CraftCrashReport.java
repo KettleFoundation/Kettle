@@ -1,16 +1,15 @@
 package org.bukkit.craftbukkit;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.Map;
-
 import net.minecraft.crash.ICrashReportDetail;
+import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 
-import net.minecraft.server.MinecraftServer;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.Map;
 
 public class CraftCrashReport implements ICrashReportDetail<Object> {
 

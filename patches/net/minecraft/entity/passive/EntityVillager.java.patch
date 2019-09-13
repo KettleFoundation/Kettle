@@ -48,7 +48,7 @@
          this.setSize(0.6F, 1.95F);
          ((PathNavigateGround)this.getNavigator()).setBreakDoors(true);
 -        this.setCanPickUpLoot(true);
-+        this.idkwhyreyoudoingthis(true);
++        this.setCanPickupLoot(true);
      }
  
      protected void initEntityAI()
@@ -96,7 +96,7 @@
          }
  
 -        this.setCanPickUpLoot(true);
-+        this.idkwhyreyoudoingthis(true);
++        this.setCanPickupLoot(true);
          this.setAdditionalAItasks();
      }
  

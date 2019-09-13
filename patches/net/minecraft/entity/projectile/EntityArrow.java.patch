@@ -8,10 +8,12 @@
  import net.minecraft.entity.monster.EntityEnderman;
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
-@@ -36,6 +37,10 @@
+@@ -36,32 +37,44 @@
  import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
++import net.techcable.tacospigot.event.entity.ArrowCollideEvent;
++import org.bukkit.entity.Arrow;
 +import org.bukkit.entity.LivingEntity;
 +import org.bukkit.event.entity.EntityCombustByEntityEvent;
 +import org.bukkit.event.entity.EntityCombustEvent;
@@ -19,9 +21,14 @@
  
  public abstract class EntityArrow extends Entity implements IProjectile
  {
-@@ -47,21 +52,33 @@
-         }
-     });
+-    private static final Predicate<Entity> ARROW_TARGETS = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate<Entity>()
+-    {
+-        public boolean apply(@Nullable Entity p_apply_1_)
+-        {
+-            return p_apply_1_.canBeCollidedWith();
+-        }
+-    });
++    private static final Predicate<Entity> ARROW_TARGETS = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, Entity::canBeCollidedWith);
      private static final DataParameter<Byte> CRITICAL = EntityDataManager.<Byte>createKey(EntityArrow.class, DataSerializers.BYTE);
 -    private int xTile;
 -    private int yTile;
@@ -59,7 +66,7 @@
      public EntityArrow(World worldIn)
      {
          super(worldIn);
-@@ -83,6 +100,7 @@
+@@ -83,6 +96,7 @@
      {
          this(worldIn, shooter.posX, shooter.posY + (double)shooter.getEyeHeight() - 0.10000000149011612D, shooter.posZ);
          this.shootingEntity = shooter;
@@ -67,7 +74,25 @@
  
          if (shooter instanceof EntityPlayer)
          {
-@@ -222,7 +240,7 @@
+@@ -106,7 +120,7 @@
+ 
+     protected void entityInit()
+     {
+-        this.dataManager.register(CRITICAL, Byte.valueOf((byte)0));
++        this.dataManager.register(CRITICAL, (byte) 0);
+     }
+ 
+     public void shoot(Entity shooter, float pitch, float yaw, float p_184547_4_, float velocity, float inaccuracy)
+@@ -114,7 +128,7 @@
+         float f = -MathHelper.sin(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
+         float f1 = -MathHelper.sin(pitch * 0.017453292F);
+         float f2 = MathHelper.cos(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
+-        this.shoot((double)f, (double)f1, (double)f2, velocity, inaccuracy);
++        this.shoot(f, f1, f2, velocity, inaccuracy);
+         this.motionX += shooter.motionX;
+         this.motionZ += shooter.motionZ;
+ 
+@@ -222,7 +236,7 @@
              {
                  ++this.ticksInGround;
  
@@ -76,7 +101,24 @@
                  {
                      this.setDead();
                  }
-@@ -339,7 +357,7 @@
+@@ -262,6 +276,16 @@
+                 }
+             }
+ 
++            // TacoSpigot start - fire collide event
++            if (raytraceresult != null && raytraceresult.entityHit != null) {
++                ArrowCollideEvent event = new ArrowCollideEvent((Arrow) this.getBukkitEntity(), raytraceresult.entityHit.getBukkitEntity());
++                this.world.getServer().getPluginManager().callEvent(event);
++                if (event.isCancelled()) {
++                    raytraceresult = null;
++                }
++            }
++            // TacoSpigot end
++
+             if (raytraceresult != null && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, raytraceresult))
+             {
+                 this.onHit(raytraceresult);
+@@ -339,7 +363,7 @@
      protected void onHit(RayTraceResult raytraceResultIn)
      {
          Entity entity = raytraceResultIn.entityHit;
@@ -85,7 +127,7 @@
          if (entity != null)
          {
              float f = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-@@ -363,7 +381,12 @@
+@@ -363,7 +387,12 @@
  
              if (this.isBurning() && !(entity instanceof EntityEnderman))
              {
@@ -99,7 +141,7 @@
              }
  
              if (entity.attackEntityFrom(damagesource, (float)i))
-@@ -570,9 +593,20 @@
+@@ -570,9 +599,20 @@
      {
          if (!this.world.isRemote && this.inGround && this.arrowShake <= 0)
          {
@@ -108,7 +150,7 @@
 +            EntityItem item = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
 +            if (this.pickupStatus == PickupStatus.ALLOWED && entityIn.inventory.canHold(itemstack) > 0) {
 +                PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((org.bukkit.entity.Player) entityIn.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.world.getServer(), this, item), (org.bukkit.entity.Arrow) this.getBukkitEntity());
-+                // event.setCancelled(!entityhuman.thisisatest); TODO
++                event.setCancelled(!entityIn.canPickupLoot);
 +                this.world.getServer().getPluginManager().callEvent(event);
  
 -            if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && !entityIn.inventory.addItemStackToInventory(this.getArrowStack()))
@@ -122,7 +164,7 @@
              {
                  flag = false;
              }
-@@ -655,7 +689,13 @@
+@@ -655,7 +695,13 @@
  
          if (EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, p_190547_1_) > 0)
          {

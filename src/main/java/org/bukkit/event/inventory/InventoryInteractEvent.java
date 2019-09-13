@@ -2,7 +2,6 @@ package org.bukkit.event.inventory;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event.Result;
 import org.bukkit.inventory.InventoryView;
 
 /**
@@ -29,8 +28,8 @@ public abstract class InventoryInteractEvent extends InventoryEvent implements C
      * Sets the result of this event. This will change whether or not this
      * event is considered cancelled.
      *
-     * @see #isCancelled()
      * @param newResult the new {@link Result} for this event
+     * @see #isCancelled()
      */
     public void setResult(Result newResult) {
         result = newResult;

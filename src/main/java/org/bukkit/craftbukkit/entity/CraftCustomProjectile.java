@@ -16,7 +16,7 @@ public class CraftCustomProjectile extends CraftCustomEntity implements Projecti
         super(server, entity);
     }
 
-    public static final GameProfile dropper =  new GameProfile(UUID.nameUUIDFromBytes("[Dropper]".getBytes()), "[Dropper]");
+    public static final GameProfile dropper = new GameProfile(UUID.nameUUIDFromBytes("[Dropper]".getBytes()), "[Dropper]");
 
     @Override
     public ProjectileSource getShooter() {

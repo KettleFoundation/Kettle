@@ -10,7 +10,7 @@ import java.util.List;
  * response from the user.
  */
 public abstract class FixedSetPrompt extends ValidatingPrompt {
-    
+
     protected List<String> fixedSet;
 
     /**
@@ -19,14 +19,15 @@ public abstract class FixedSetPrompt extends ValidatingPrompt {
      * foo = new FixedSetPrompt("bar", "cheese", "panda");
      *
      * @param fixedSet A fixed set of strings, one of which the user must
-     *     type.
+     *                 type.
      */
     public FixedSetPrompt(String... fixedSet) {
         super();
         this.fixedSet = Arrays.asList(fixedSet);
     }
 
-    private FixedSetPrompt() {}
+    private FixedSetPrompt() {
+    }
 
     @Override
     protected boolean isInputValid(ConversationContext context, String input) {
@@ -38,7 +39,7 @@ public abstract class FixedSetPrompt extends ValidatingPrompt {
      * options declared in the constructor.
      *
      * @return the options formatted like "[bar, cheese, panda]" if bar,
-     *     cheese, and panda were the options used
+     * cheese, and panda were the options used
      */
     protected String formatFixedSet() {
         return "[" + StringUtils.join(fixedSet, ", ") + "]";

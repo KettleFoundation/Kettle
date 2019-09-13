@@ -63,6 +63,6 @@ public class PlayerLeashEntityEvent extends Event implements Cancellable {
     }
 
     public void setCancelled(boolean cancel) {
-        this.cancelled  = cancel;
+        this.cancelled = cancel;
     }
 }

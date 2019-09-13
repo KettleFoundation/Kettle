@@ -1,0 +1,28 @@
+--- ../src-base/minecraft/net/minecraft/block/state/BlockStateBase.java
++++ ../src-work/minecraft/net/minecraft/block/state/BlockStateBase.java
+@@ -6,6 +6,7 @@
+ import java.util.Collection;
+ import java.util.Iterator;
+ import java.util.Map.Entry;
++import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
+ import net.minecraft.block.Block;
+ import net.minecraft.block.properties.IProperty;
+@@ -24,7 +25,7 @@
+             }
+             else
+             {
+-                IProperty<?> iproperty = (IProperty)p_apply_1_.getKey();
++                IProperty<?> iproperty = p_apply_1_.getKey();
+                 return iproperty.getName() + "=" + this.getPropertyName(iproperty, p_apply_1_.getValue());
+             }
+         }
+@@ -67,7 +68,7 @@
+         if (!this.getProperties().isEmpty())
+         {
+             stringbuilder.append("[");
+-            COMMA_JOINER.appendTo(stringbuilder, Iterables.transform(this.getProperties().entrySet(), MAP_ENTRY_TO_STRING));
++            COMMA_JOINER.appendTo(stringbuilder, this.getProperties().entrySet().stream().map(MAP_ENTRY_TO_STRING).collect(Collectors.toList()));
+             stringbuilder.append("]");
+         }
+ 

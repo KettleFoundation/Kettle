@@ -12,7 +12,8 @@ public final class PaperLegacyStatusClient implements StatusClient {
 
     private final InetSocketAddress address;
     private final int protocolVersion;
-    @Nullable private final InetSocketAddress virtualHost;
+    @Nullable
+    private final InetSocketAddress virtualHost;
 
     private PaperLegacyStatusClient(InetSocketAddress address, int protocolVersion, @Nullable InetSocketAddress virtualHost) {
         this.address = address;
@@ -42,9 +43,9 @@ public final class PaperLegacyStatusClient implements StatusClient {
     }
 
     public static PaperServerListPingEvent processRequest(MinecraftServer server,
-            InetSocketAddress address, int protocolVersion, @Nullable InetSocketAddress virtualHost) {
+                                                          InetSocketAddress address, int protocolVersion, @Nullable InetSocketAddress virtualHost) {
 
-        PaperServerListPingEvent event =  new PaperServerListPingEventImpl(server,
+        PaperServerListPingEvent event = new PaperServerListPingEventImpl(server,
                 new PaperLegacyStatusClient(address, protocolVersion, virtualHost), Byte.MAX_VALUE, null);
         server.server.getPluginManager().callEvent(event);
 

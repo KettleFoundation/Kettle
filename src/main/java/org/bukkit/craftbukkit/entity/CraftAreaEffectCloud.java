@@ -1,7 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
-import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -15,12 +14,12 @@ import org.bukkit.craftbukkit.potion.CraftPotionUtil;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.potion.PotionData;
 
-import com.google.common.collect.ImmutableList;
+import java.util.List;
 
 public class CraftAreaEffectCloud extends CraftEntity implements AreaEffectCloud {
 

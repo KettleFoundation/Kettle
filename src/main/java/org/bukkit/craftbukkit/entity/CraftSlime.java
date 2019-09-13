@@ -31,7 +31,7 @@ public class CraftSlime extends CraftLivingEntity implements Slime {
 
     @Override
     public LivingEntity getTarget() {
-        return getHandle().getAttackTarget() == null ? null : (LivingEntity)getHandle().getAttackTarget().getBukkitEntity();
+        return getHandle().getAttackTarget() == null ? null : (LivingEntity) getHandle().getAttackTarget().getBukkitEntity();
     }
 
     @Override

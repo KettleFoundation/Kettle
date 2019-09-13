@@ -11,7 +11,7 @@ public class CraftInventoryHorse extends CraftInventoryAbstractHorse implements 
     }
 
     public ItemStack getArmor() {
-       return getItem(1);
+        return getItem(1);
     }
 
     public void setArmor(ItemStack stack) {

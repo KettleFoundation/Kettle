@@ -1,7 +1,8 @@
 package org.bukkit.map;
 
-import java.util.List;
 import org.bukkit.World;
+
+import java.util.List;
 
 /**
  * Represents a map item.
@@ -34,12 +35,18 @@ public interface MapView {
         @Deprecated
         public static Scale valueOf(byte value) {
             switch (value) {
-            case 0: return CLOSEST;
-            case 1: return CLOSE;
-            case 2: return NORMAL;
-            case 3: return FAR;
-            case 4: return FARTHEST;
-            default: return null;
+                case 0:
+                    return CLOSEST;
+                case 1:
+                    return CLOSE;
+                case 2:
+                    return NORMAL;
+                case 3:
+                    return FAR;
+                case 4:
+                    return FARTHEST;
+                default:
+                    return null;
             }
         }
 

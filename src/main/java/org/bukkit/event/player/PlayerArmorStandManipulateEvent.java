@@ -1,9 +1,9 @@
 package org.bukkit.event.player;
 
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -31,6 +31,7 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
      * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
      * If both items are not null, the items will be swapped.
      * In the case that the event is cancelled the original items will remain the same.
+     *
      * @return the item held by the player.
      */
     public ItemStack getPlayerItem() {
@@ -44,6 +45,7 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
      * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
      * If both items are not null, the items will be swapped.
      * In the case that the event is cancelled the original items will remain the same.
+     *
      * @return the item held by the armor stand.
      */
     public ItemStack getArmorStandItem() {

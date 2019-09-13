@@ -1,8 +1,8 @@
 package org.bukkit;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 /**
  * Represents the different growth states of crops
@@ -65,7 +65,7 @@ public enum CropState {
      *
      * @param data Data value to fetch
      * @return The {@link CropState} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @deprecated Magic value
      */
     @Deprecated
