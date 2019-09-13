@@ -1,19 +1,21 @@
 **If you are looking for an updated version, please view the KettleJava branch**
 
-**:warning: Kettle is still __very raw__ and you may encounter issues in using it with your server. You have been warned!**
+**:warning: Kettle is still __raw__ and you may encounter issues with using it as your server software. This software is not yet ready for Production use. You have been warned!**
 
 ![Kettle](https://i.imgur.com/gkmTKvR.png)
 
 # Kettle
 
-![](https://img.shields.io/badge/Minecraft%20Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
+![](https://img.shields.io/badge/Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
+![Jenkins](https://img.shields.io/jenkins/build/https/ci.openprocesses.ml/Kettle?label=Build&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/KettleFoundation/Kettle?label=Latest%20Version&style=for-the-badge)
 
 ### What's Kettle?
 
 Kettle is the next link in the hybrid server chain:
 **Kettle** :arrow_right: Contigo :arrow_right: Thermos :arrow_right: KCauldron :arrow_right: Cauldron :arrow_right: MCPC+
 
-Kettle was initially concieved as a fork of Contigo, but after a few iterations got rid of Contigo's dependencies and can no longer be concidered it's fork, but a standalone hybrid server.
+Kettle was initially conceived as a fork of Contigo, but after a few iterations got rid of Contigo's dependencies and can no longer be concidered it's fork, but a standalone hybrid server.
 
 Kettle is dependent on custom Forge and Paper builds, meaning it can run both Craftbukkit/spigot-based plugins and forge-based mods.
 
