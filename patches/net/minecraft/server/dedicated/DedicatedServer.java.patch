@@ -12,7 +12,7 @@
  import java.net.InetAddress;
  import java.net.Proxy;
  import java.nio.charset.StandardCharsets;
-@@ -43,30 +40,43 @@
+@@ -43,30 +40,44 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldSettings;
  import net.minecraft.world.WorldType;
@@ -31,6 +31,7 @@
 +import org.bukkit.event.server.RemoteServerCommandEvent;
 +import org.bukkit.event.server.ServerCommandEvent;
  
++import org.kettlemc.configuration.KettleConfig;
 +import org.spigotmc.SpigotConfig;
 +
  @SideOnly(Side.SERVER)
@@ -61,7 +62,7 @@
          Thread thread = new Thread("Server Infinisleeper")
          {
              {
-@@ -96,15 +106,23 @@
+@@ -96,15 +107,23 @@
          {
              public void run()
              {
@@ -92,7 +93,7 @@
                      }
                  }
                  catch (IOException ioexception1)
-@@ -113,6 +131,27 @@
+@@ -113,6 +132,27 @@
                  }
              }
          };
@@ -120,7 +121,7 @@
          thread.setDaemon(true);
          thread.start();
          LOGGER.info("Starting minecraft server version 1.12.2");
-@@ -125,7 +164,7 @@
+@@ -125,7 +165,7 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStart(this);
  
          LOGGER.info("Loading properties");
@@ -129,7 +130,7 @@
          this.eula = new ServerEula(new File("eula.txt"));
  
          if (!this.eula.hasAcceptedEULA())
-@@ -144,7 +183,7 @@
+@@ -144,7 +184,7 @@
              {
                  this.setOnlineMode(this.settings.getBooleanProperty("online-mode", true));
                  this.setPreventProxyConnections(this.settings.getBooleanProperty("prevent-proxy-connections", false));
@@ -138,7 +139,7 @@
              }
  
              this.setCanSpawnAnimals(this.settings.getBooleanProperty("spawn-animals", true));
-@@ -180,11 +219,17 @@
+@@ -180,11 +220,22 @@
              {
                  this.setServerPort(this.settings.getIntProperty("server-port", 25565));
              }
@@ -148,6 +149,11 @@
 +            SpigotConfig.registerCommands();
 +            // Spigot end
  
++            // Kettle start
++            KettleConfig.init((File) options.valueOf("kettle-settings"));
++            KettleConfig.registerCommands();
++            // Kettle end
++
              LOGGER.info("Generating keypair");
              this.setKeyPair(CryptManager.generateKeyPair());
              LOGGER.info("Starting Minecraft server on {}:{}", this.getServerHostname().isEmpty() ? "*" : this.getServerHostname(), Integer.valueOf(this.getServerPort()));
@@ -156,7 +162,7 @@
              try
              {
                  this.getNetworkSystem().addLanEndpoint(inetaddress, this.getServerPort());
-@@ -196,13 +241,6 @@
+@@ -196,15 +247,11 @@
                  LOGGER.warn("Perhaps a server is already running on that port?");
                  return false;
              }
@@ -169,8 +175,13 @@
 -                LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
              }
  
++		    server.loadPlugins();
++		    server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
++
              if (this.convertFiles())
-@@ -217,8 +255,7 @@
+             {
+                 this.getPlayerProfileCache().save();
+@@ -217,8 +264,7 @@
              else
              {
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStarted();
@@ -180,7 +191,7 @@
  
                  if (this.getFolderName() == null)
                  {
-@@ -268,11 +305,11 @@
+@@ -268,11 +314,11 @@
                  if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerAboutToStart(this)) return false;
                  LOGGER.info("Preparing level \"{}\"", (Object)this.getFolderName());
                  this.loadAllWorlds(this.getFolderName(), this.getFolderName(), k, worldtype, s2);
@@ -194,7 +205,7 @@
                  if (this.settings.hasProperty("announce-player-achievements"))
                  {
                      this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
-@@ -287,21 +324,32 @@
+@@ -287,21 +333,32 @@
                      this.rconQueryThread.startThread();
                  }
  
@@ -235,7 +246,7 @@
                  Items.AIR.getSubItems(CreativeTabs.SEARCH, NonNullList.create());
                  // <3 you Grum for this, saves us ~30 patch files! --^
                  return net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarting(this);
-@@ -427,11 +475,19 @@
+@@ -427,11 +484,19 @@
  
      public void executePendingCommands()
      {
@@ -259,7 +270,7 @@
      }
  
      public boolean isDedicatedServer()
-@@ -684,13 +740,65 @@
+@@ -684,13 +749,65 @@
  
      public String getPlugins()
      {

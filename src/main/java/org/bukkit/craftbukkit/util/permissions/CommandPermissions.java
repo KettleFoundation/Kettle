@@ -8,7 +8,8 @@ public final class CommandPermissions {
     private static final String ROOT = "minecraft.command";
     private static final String PREFIX = ROOT + ".";
 
-    private CommandPermissions() {}
+    private CommandPermissions() {
+    }
 
     public static Permission registerPermissions(Permission parent) {
         Permission commands = DefaultPermissions.registerPermission(ROOT, "Gives the user the ability to use all vanilla minecraft commands", parent);

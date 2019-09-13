@@ -1,12 +1,11 @@
 package org.bukkit.craftbukkit.help;
 
+import com.google.common.base.Charsets;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.help.HelpTopic;
-
-import com.google.common.base.Charsets;
 
 import java.io.File;
 import java.io.IOException;

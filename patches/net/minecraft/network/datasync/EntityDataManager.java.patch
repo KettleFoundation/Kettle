@@ -1,19 +1,55 @@
 --- ../src-base/minecraft/net/minecraft/network/datasync/EntityDataManager.java
 +++ ../src-work/minecraft/net/minecraft/network/datasync/EntityDataManager.java
-@@ -4,6 +4,7 @@
+@@ -4,6 +4,8 @@
  import com.google.common.collect.Maps;
  import io.netty.handler.codec.DecoderException;
  import io.netty.handler.codec.EncoderException;
++import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 +import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  import java.io.IOException;
  import java.util.List;
  import java.util.Map;
-@@ -26,7 +27,7 @@
+@@ -17,17 +19,20 @@
+ import net.minecraft.util.ReportedException;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import net.techcable.tacospigot.ArrayMap;
++import net.techcable.tacospigot.NoOpReadWriteLock;
+ import org.apache.commons.lang3.ObjectUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.kettlemc.configuration.KettleConfig;
+ 
+ public class EntityDataManager
+ {
      private static final Logger LOGGER = LogManager.getLogger();
      private static final Map < Class <? extends Entity > , Integer > NEXT_ID_MAP = Maps. < Class <? extends Entity > , Integer > newHashMap();
      private final Entity entity;
 -    private final Map < Integer, EntityDataManager.DataEntry<? >> entries = Maps. < Integer, EntityDataManager.DataEntry<? >> newHashMap();
-+    private final Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>(); // Paper
-     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
++    private final Int2ObjectMap<DataEntry<?>> entries = KettleConfig.useArraysForDatawatcher ? new ArrayMap<>() : new Int2ObjectOpenHashMap<>(); // Paper // TacoSpigot - use 'Int2ObjectMap' and use 'ArrayMap' if useArraysForDatawatcher
++    private final ReadWriteLock lock = KettleConfig.disableDataWatcherReadLocking && KettleConfig.useArraysForDatawatcher ? NoOpReadWriteLock.INSTANCE : new ReentrantReadWriteLock(); // TacoSpigot - don't lock if we're using ArrayMap
      private boolean empty = true;
      private boolean dirty;
+ 
+@@ -117,9 +122,9 @@
+ 
+     private <T> void setEntry(DataParameter<T> key, T value)
+     {
+-        EntityDataManager.DataEntry<T> dataentry = new EntityDataManager.DataEntry<T>(key, value);
++        EntityDataManager.DataEntry<T> dataentry = new EntityDataManager.DataEntry<>(key, value);
+         this.lock.writeLock().lock();
+-        this.entries.put(Integer.valueOf(key.getId()), dataentry);
++        this.entries.put(key.getId(), dataentry); // TacoSpigot - primatives
+         this.empty = false;
+         this.lock.writeLock().unlock();
+     }
+@@ -131,7 +136,7 @@
+ 
+         try
+         {
+-            dataentry = (EntityDataManager.DataEntry)this.entries.get(Integer.valueOf(key.getId()));
++            dataentry = (EntityDataManager.DataEntry) this.entries.get(key.getId());
+         }
+         catch (Throwable throwable)
+         {

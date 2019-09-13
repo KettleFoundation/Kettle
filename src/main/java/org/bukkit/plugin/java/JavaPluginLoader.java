@@ -1,24 +1,6 @@
 package org.bukkit.plugin.java;
 
 import com.google.common.collect.ImmutableList;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
 import org.bukkit.Warning;
@@ -26,27 +8,37 @@ import org.bukkit.Warning.WarningState;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.*;
-import org.spigotmc.CustomTimingsHandler; // Spigot
 import org.yaml.snakeyaml.error.YAMLException;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 /**
  * Represents a Java plugin loader, allowing plugins in the form of .jar
  */
 public class JavaPluginLoader implements PluginLoader {
     Server server;
-    private Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$"), };
+    private Pattern[] fileFilters = new Pattern[]{Pattern.compile("\\.jar$"),};
     private Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
     private List<PluginClassLoader> loaders = new CopyOnWriteArrayList<PluginClassLoader>();
 
     /**
      * This class was not meant to be constructed explicitly
-     * 
+     *
      * @param instance the server instance
      */
     public JavaPluginLoader(Server instance) {
@@ -77,31 +69,31 @@ public class JavaPluginLoader implements PluginLoader {
             // They are equal -- nothing needs to be done!
         } else if (dataFolder.isDirectory() && oldDataFolder.isDirectory()) {
             server.getLogger().warning(String.format(
-                "While loading %s (%s) found old-data folder: `%s' next to the new one `%s'",
-                description.getFullName(),
-                file,
-                oldDataFolder,
-                dataFolder
+                    "While loading %s (%s) found old-data folder: `%s' next to the new one `%s'",
+                    description.getFullName(),
+                    file,
+                    oldDataFolder,
+                    dataFolder
             ));
         } else if (oldDataFolder.isDirectory() && !dataFolder.exists()) {
             if (!oldDataFolder.renameTo(dataFolder)) {
                 throw new InvalidPluginException("Unable to rename old data folder: `" + oldDataFolder + "' to: `" + dataFolder + "'");
             }
             server.getLogger().log(Level.INFO, String.format(
-                "While loading %s (%s) renamed data folder: `%s' to `%s'",
-                description.getFullName(),
-                file,
-                oldDataFolder,
-                dataFolder
+                    "While loading %s (%s) renamed data folder: `%s' to `%s'",
+                    description.getFullName(),
+                    file,
+                    oldDataFolder,
+                    dataFolder
             ));
         }
 
         if (dataFolder.exists() && !dataFolder.isDirectory()) {
             throw new InvalidPluginException(String.format(
-                "Projected datafolder: `%s' for %s (%s) exists and is not a directory",
-                dataFolder,
-                description.getFullName(),
-                file
+                    "Projected datafolder: `%s' for %s (%s) exists and is not a directory",
+                    dataFolder,
+                    description.getFullName(),
+                    file
             ));
         }
 
@@ -200,7 +192,8 @@ public class JavaPluginLoader implements PluginLoader {
             for (PluginClassLoader loader : loaders) {
                 try {
                     cachedClass = loader.findClass(name, false);
-                } catch (ClassNotFoundException cnfe) {}
+                } catch (ClassNotFoundException cnfe) {
+                }
                 if (cachedClass != null) {
                     return cachedClass;
                 }
@@ -291,7 +284,7 @@ public class JavaPluginLoader implements PluginLoader {
                             Level.WARNING,
                             String.format(
                                     "\"%s\" has registered a listener for %s on method \"%s\", but the event is Deprecated." +
-                                    " \"%s\"; please notify the authors %s.",
+                                            " \"%s\"; please notify the authors %s.",
                                     plugin.getDescription().getFullName(),
                                     clazz.getName(),
                                     method.toGenericString(),
@@ -303,15 +296,14 @@ public class JavaPluginLoader implements PluginLoader {
             }
 
             EventExecutor executor;
-                    try {
+            try {
                 executor = EventExecutor.create(method, eventClass);
-                        }
-            catch (Exception e2) {
+            } catch (Exception e2) {
                 executor = new EventExecutor1(method, eventClass);
-                    }
-            // Spigot // Paper - Use factory method `EventExecutor.create()`
-                eventSet.add(new RegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
             }
+            // Spigot // Paper - Use factory method `EventExecutor.create()`
+            eventSet.add(new RegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
+        }
         return ret;
     }
 

@@ -1,11 +1,6 @@
 package org.bukkit.craftbukkit.generator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import net.minecraft.entity.EnumCreatureType;
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -13,6 +8,10 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BlockPopulator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class NormalChunkGenerator extends InternalChunkGenerator {
     private final IChunkGenerator generator;

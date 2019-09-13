@@ -1,19 +1,17 @@
 package org.bukkit.craftbukkit.scoreboard;
 
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team.EnumVisible;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
-import com.google.common.collect.ImmutableSet;
-
-import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.util.CraftChatMessage;
+import java.util.Set;
 
 final class CraftTeam extends CraftScoreboardComponent implements Team {
     private final ScorePlayerTeam team;
@@ -138,7 +136,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         CraftScoreboard scoreboard = checkState();
 
         ImmutableSet.Builder<String> entries = ImmutableSet.builder();
-        for (String playerName: team.getMembershipCollection()){
+        for (String playerName : team.getMembershipCollection()) {
             entries.add(playerName);
         }
         return entries.build();

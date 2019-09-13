@@ -1,10 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nullable;
-
 import net.minecraft.entity.passive.EntityVillager;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.CraftServer;
@@ -16,6 +11,11 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.MerchantRecipe;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CraftVillager extends CraftAgeable implements Villager, InventoryHolder {
 

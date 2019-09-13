@@ -7,8 +7,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.BlockSnapshot;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -45,15 +43,13 @@ public class CraftBlockState implements BlockState {
 
         createData(block.getData());
         TileEntity te = world.getHandle().getTileEntity(new BlockPos(this.x, this.y, this.z));
-        if (te != null)
-        {
+        if (te != null) {
             nbt = new NBTTagCompound();
             te.writeToNBT(nbt);
-        }
-        else nbt = null;
+        } else nbt = null;
     }
 
-	public CraftBlockState(final Block block, int flag) {
+    public CraftBlockState(final Block block, int flag) {
         this(block);
         this.flag = flag;
     }
@@ -66,8 +62,7 @@ public class CraftBlockState implements BlockState {
         this.nbt = null;
     }
 
-    public CraftBlockState(BlockSnapshot blocksnapshot)
-    {
+    public CraftBlockState(BlockSnapshot blocksnapshot) {
         this.world = blocksnapshot.getWorld().getWorld();
         this.x = blocksnapshot.getPos().getX();
         this.y = blocksnapshot.getPos().getY();
@@ -79,7 +74,6 @@ public class CraftBlockState implements BlockState {
 
         this.createData((byte) blocksnapshot.getMeta());
     }
-
 
 
     public static CraftBlockState getBlockState(net.minecraft.world.World world, int x, int y, int z) {
@@ -204,11 +198,9 @@ public class CraftBlockState implements BlockState {
             world.getHandle().notifyNeighborsOfStateChange(pos.offset(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock(), false);
         }
 
-        if (nbt != null)
-        {
+        if (nbt != null) {
             TileEntity te = world.getHandle().getTileEntity(new BlockPos(this.x, this.y, this.z));
-            if (te != null)
-            {
+            if (te != null) {
                 te.readFromNBT(nbt);
             }
         }
@@ -291,7 +283,7 @@ public class CraftBlockState implements BlockState {
         hash = 73 * hash + this.z;
         hash = 73 * hash + this.type;
         hash = 73 * hash + (this.data != null ? this.data.hashCode() : 0);
- 		hash = 73 * hash + (this.nbt != null ? this.nbt.hashCode() : 0);
+        hash = 73 * hash + (this.nbt != null ? this.nbt.hashCode() : 0);
         return hash;
     }
 

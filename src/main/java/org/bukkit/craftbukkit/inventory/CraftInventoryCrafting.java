@@ -1,18 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
 
-import java.util.Arrays;
-import java.util.List;
-
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.crafting.IRecipe;
-import org.bukkit.inventory.CraftingInventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
 
 public class CraftInventoryCrafting extends CraftInventory implements CraftingInventory {
     private final IInventory resultInventory;
@@ -49,7 +44,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
         List<net.minecraft.item.ItemStack> mcResultItems = getResultInventory().getContents();
 
         int i = 0;
-        for (i = 0; i < mcResultItems.size(); i++ ) {
+        for (i = 0; i < mcResultItems.size(); i++) {
             items[i] = CraftItemStack.asCraftMirror(mcResultItems.get(i));
         }
 
@@ -120,7 +115,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
 
     @Nullable
     public Recipe getRecipe() {
-        IRecipe recipe = ((InventoryCrafting)getInventory()).currentRecipe;
+        IRecipe recipe = ((InventoryCrafting) getInventory()).currentRecipe;
         if (recipe != null) {
             if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
                 return recipe.toBukkitRecipe();

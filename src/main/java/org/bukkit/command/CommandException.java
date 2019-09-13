@@ -10,7 +10,8 @@ public class CommandException extends RuntimeException {
      * Creates a new instance of <code>CommandException</code> without detail
      * message.
      */
-    public CommandException() {}
+    public CommandException() {
+    }
 
     /**
      * Constructs an instance of <code>CommandException</code> with the

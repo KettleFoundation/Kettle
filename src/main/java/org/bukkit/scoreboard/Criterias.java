@@ -10,11 +10,12 @@ public class Criterias {
     public static final String DEATHS;
 
     static {
-        HEALTH="health";
-        PLAYER_KILLS="playerKillCount";
-        TOTAL_KILLS="totalKillCount";
-        DEATHS="deathCount";
+        HEALTH = "health";
+        PLAYER_KILLS = "playerKillCount";
+        TOTAL_KILLS = "totalKillCount";
+        DEATHS = "deathCount";
     }
 
-    private Criterias() {}
+    private Criterias() {
+    }
 }

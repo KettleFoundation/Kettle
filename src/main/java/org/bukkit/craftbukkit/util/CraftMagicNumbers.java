@@ -15,12 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
-import org.bukkit.Achievement;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Statistic;
-import org.bukkit.UnsafeValues;
+import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -40,7 +35,8 @@ import java.util.logging.Logger;
 public final class CraftMagicNumbers implements UnsafeValues {
     public static final UnsafeValues INSTANCE = new CraftMagicNumbers();
 
-    private CraftMagicNumbers() {}
+    private CraftMagicNumbers() {
+    }
 
     public static Block getBlock(org.bukkit.block.Block block) {
         return getBlock(block.getType());

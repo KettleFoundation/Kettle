@@ -5,12 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class PluginsCommand extends BukkitCommand {
     public PluginsCommand(String name) {
@@ -32,7 +27,7 @@ public class PluginsCommand extends BukkitCommand {
             return false;
         }
 
-        switch (args[0].toLowerCase(Locale.ENGLISH))  {
+        switch (args[0].toLowerCase(Locale.ENGLISH)) {
 //            case "load":
 //                PluginManagers.loadPluginCommand(sender, currentAlias, args);
 //                break;
@@ -58,8 +53,7 @@ public class PluginsCommand extends BukkitCommand {
                 for (Plugin plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
                     tabs.add(plugin.getName());
                 }
-            }
-            else if (action.equals("reload")) {
+            } else if (action.equals("reload")) {
                 for (Plugin plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
                     tabs.add(plugin.getName());
                 }

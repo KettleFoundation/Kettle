@@ -1,9 +1,9 @@
 package org.bukkit.material;
 
+import org.bukkit.Material;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bukkit.Material;
 
 /**
  * Represents the different types of monster eggs
@@ -11,6 +11,7 @@ import org.bukkit.Material;
 public class MonsterEggs extends TexturedMaterial {
 
     private static final List<Material> textures = new ArrayList<Material>();
+
     static {
         textures.add(Material.STONE);
         textures.add(Material.COBBLESTONE);

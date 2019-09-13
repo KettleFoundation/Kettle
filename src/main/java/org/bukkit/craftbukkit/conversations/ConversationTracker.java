@@ -1,14 +1,15 @@
 package org.bukkit.craftbukkit.conversations;
 
-import java.util.LinkedList;
-import java.util.logging.Level;
-
 import org.bukkit.Bukkit;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.conversations.ManuallyAbandonedConversationCanceller;
 
+import java.util.LinkedList;
+import java.util.logging.Level;
+
 /**
+ *
  */
 public class ConversationTracker {
 
@@ -60,9 +61,9 @@ public class ConversationTracker {
                 conversation.acceptInput(input);
             } catch (Throwable t) {
                 conversation.getContext().getPlugin().getLogger().log(Level.WARNING,
-                    String.format("Plugin %s generated an exception whilst handling conversation input",
-                        conversation.getContext().getPlugin().getDescription().getFullName()
-                    ), t);
+                        String.format("Plugin %s generated an exception whilst handling conversation input",
+                                conversation.getContext().getPlugin().getDescription().getFullName()
+                        ), t);
             }
         }
     }

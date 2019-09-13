@@ -35,8 +35,7 @@ public interface Horse extends AbstractHorse {
         /**
          * Not really a horse :)
          */
-        LLAMA
-        ;
+        LLAMA;
     }
 
     /**

@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.scoreboard;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -11,9 +13,6 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
 import java.util.Collection;
 

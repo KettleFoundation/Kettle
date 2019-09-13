@@ -1,8 +1,8 @@
 package org.bukkit;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 /**
  * Represents the three different types of Sandstone
@@ -35,7 +35,7 @@ public enum SandstoneType {
      *
      * @param data Data value to fetch
      * @return The {@link SandstoneType} representing the given value, or null
-     *     if it doesn't exist
+     * if it doesn't exist
      * @deprecated Magic value
      */
     @Deprecated

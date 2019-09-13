@@ -25,7 +25,6 @@ public class Comparator extends MaterialData implements Directional, Redstone {
      * Constructs a comparator switched off, with the default mode (normal) and facing the specified direction.
      *
      * @param facingDirection the direction the comparator is facing
-     *
      * @see BlockFace
      */
     public Comparator(BlockFace facingDirection) {
@@ -36,8 +35,7 @@ public class Comparator extends MaterialData implements Directional, Redstone {
      * Constructs a comparator switched off, with the specified mode and facing the specified direction.
      *
      * @param facingDirection the direction the comparator is facing
-     * @param isSubtraction True if the comparator is in subtraction mode, false for normal comparator operation
-     *
+     * @param isSubtraction   True if the comparator is in subtraction mode, false for normal comparator operation
      * @see BlockFace
      */
     public Comparator(BlockFace facingDirection, boolean isSubtraction) {
@@ -48,9 +46,8 @@ public class Comparator extends MaterialData implements Directional, Redstone {
      * Constructs a comparator switched on or off, with the specified mode and facing the specified direction.
      *
      * @param facingDirection the direction the comparator is facing
-     * @param isSubtraction True if the comparator is in subtraction mode, false for normal comparator operation
-     * @param state True if the comparator is in the on state
-     *
+     * @param isSubtraction   True if the comparator is in subtraction mode, false for normal comparator operation
+     * @param state           True if the comparator is in the on state
      * @see BlockFace
      */
     public Comparator(BlockFace facingDirection, boolean isSubtraction, boolean state) {
@@ -114,7 +111,6 @@ public class Comparator extends MaterialData implements Directional, Redstone {
      * Sets the direction this comparator is facing
      *
      * @param face The direction to set this comparator to
-     *
      * @see BlockFace
      */
     @Override
@@ -122,21 +118,21 @@ public class Comparator extends MaterialData implements Directional, Redstone {
         int data = getData() & 0xC;
 
         switch (face) {
-        case EAST:
-            data |= 0x1;
-            break;
+            case EAST:
+                data |= 0x1;
+                break;
 
-        case SOUTH:
-            data |= 0x2;
-            break;
+            case SOUTH:
+                data |= 0x2;
+                break;
 
-        case WEST:
-            data |= 0x3;
-            break;
+            case WEST:
+                data |= 0x3;
+                break;
 
-        case NORTH:
-        default:
-            data |= 0x0;
+            case NORTH:
+            default:
+                data |= 0x0;
         }
 
         setData((byte) data);
@@ -146,7 +142,6 @@ public class Comparator extends MaterialData implements Directional, Redstone {
      * Gets the direction this comparator is facing
      *
      * @return The direction this comparator is facing
-     *
      * @see BlockFace
      */
     @Override
@@ -154,18 +149,18 @@ public class Comparator extends MaterialData implements Directional, Redstone {
         byte data = (byte) (getData() & 0x3);
 
         switch (data) {
-        case 0x0:
-        default:
-            return BlockFace.NORTH;
+            case 0x0:
+            default:
+                return BlockFace.NORTH;
 
-        case 0x1:
-            return BlockFace.EAST;
+            case 0x1:
+                return BlockFace.EAST;
 
-        case 0x2:
-            return BlockFace.SOUTH;
+            case 0x2:
+                return BlockFace.SOUTH;
 
-        case 0x3:
-            return BlockFace.WEST;
+            case 0x3:
+                return BlockFace.WEST;
         }
     }
 

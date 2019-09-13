@@ -1,15 +1,11 @@
 package org.bukkit.permissions;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
+
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Represents a unique permission that may be attached to a {@link
@@ -175,7 +171,7 @@ public class Permission {
      * If the parent permission does not exist, it will be created and
      * registered.
      *
-     * @param name Name of the parent permission
+     * @param name  Name of the parent permission
      * @param value The value to set this permission to
      * @return Parent permission it created or loaded
      */
@@ -198,7 +194,7 @@ public class Permission {
     /**
      * Adds this permission to the specified parent permission.
      *
-     * @param perm Parent permission to register with
+     * @param perm  Parent permission to register with
      * @param value The value to set this permission to
      */
     public void addParent(Permission perm, boolean value) {
@@ -220,9 +216,9 @@ public class Permission {
      *     this description. If not specified, empty string.
      * </ul>
      *
-     * @param data Map of permissions
+     * @param data  Map of permissions
      * @param error An error message to show if a permission is invalid.
-     * @param def Default permission value to use if missing
+     * @param def   Default permission value to use if missing
      * @return Permission object
      */
     public static List<Permission> loadPermissions(Map<?, ?> data, String error, PermissionDefault def) {
@@ -273,9 +269,9 @@ public class Permission {
      *     this description. If not specified, empty string.
      * </ul>
      *
-     * @param name Name of the permission
-     * @param data Map of keys
-     * @param def Default permission value to use if not set
+     * @param name   Name of the permission
+     * @param data   Map of keys
+     * @param def    Default permission value to use if not set
      * @param output A list to append any created child-Permissions to, may be null
      * @return Permission object
      */

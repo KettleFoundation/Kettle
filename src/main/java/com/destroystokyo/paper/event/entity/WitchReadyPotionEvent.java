@@ -17,7 +17,8 @@ public class WitchReadyPotionEvent extends EntityEvent implements Cancellable {
 
     /**
      * Fires thee event, returning the desired potion, or air of cancelled
-     * @param witch the witch whom is readying to use a potion
+     *
+     * @param witch  the witch whom is readying to use a potion
      * @param potion the potion to be used
      * @return The ItemStack to be used
      */
@@ -43,6 +44,7 @@ public class WitchReadyPotionEvent extends EntityEvent implements Cancellable {
 
     /**
      * Sets the potion the which is going to hold and use
+     *
      * @param potion The potion
      */
     public void setPotion(ItemStack potion) {

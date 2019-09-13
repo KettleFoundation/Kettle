@@ -1,26 +1,24 @@
 package org.bukkit.craftbukkit;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
-
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-
-import com.google.common.collect.ImmutableSet;
-import com.mojang.authlib.GameProfile;
-import java.util.logging.Level;
 import org.bukkit.Bukkit;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Set;
+import java.util.logging.Level;
 
 public class CraftProfileBanList implements org.bukkit.BanList {
     private final UserListBans list;
 
-    public CraftProfileBanList(UserListBans list){
+    public CraftProfileBanList(UserListBans list) {
         this.list = list;
     }
 
@@ -68,7 +66,7 @@ public class CraftProfileBanList implements org.bukkit.BanList {
     @Override
     public Set<org.bukkit.BanEntry> getBanEntries() {
         ImmutableSet.Builder<org.bukkit.BanEntry> builder = ImmutableSet.builder();
-        
+
         for (UserListEntry entry : list.getValuesCB()) {
             GameProfile profile = (GameProfile) entry.getValue();
             builder.add(new CraftProfileBanEntry(profile, (UserListBansEntry) entry, list));

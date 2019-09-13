@@ -15,18 +15,18 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class CraftCustomContainer extends CraftBlockState implements InventoryHolder {
 
-  private final CraftWorld world;
-  private final IInventory container;
+    private final CraftWorld world;
+    private final IInventory container;
 
-  public CraftCustomContainer(Block block){
-    super(block);
-    world = (CraftWorld) block.getWorld();
-    container = (IInventory) world.getTileEntityAt(getX(), getY(), getZ());
-  }
+    public CraftCustomContainer(Block block) {
+        super(block);
+        world = (CraftWorld) block.getWorld();
+        container = (IInventory) world.getTileEntityAt(getX(), getY(), getZ());
+    }
 
-  @Override
-  public Inventory getInventory() {
-    CraftInventory inventory = new CraftInventory(container);
-    return inventory;
-  }
+    @Override
+    public Inventory getInventory() {
+        CraftInventory inventory = new CraftInventory(container);
+        return inventory;
+    }
 }

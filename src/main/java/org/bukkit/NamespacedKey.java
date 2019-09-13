@@ -1,11 +1,11 @@
 package org.bukkit;
 
 import com.google.common.base.Preconditions;
+import org.bukkit.plugin.Plugin;
+
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import org.bukkit.plugin.Plugin;
 
 /**
  * Represents a String based key which consists of two components - a namespace
@@ -15,7 +15,6 @@ import org.bukkit.plugin.Plugin;
  * <p>
  * Keys may only contain lowercase alphanumeric characters, periods,
  * underscores, hyphens, and forward slashes.
- *
  */
 public final class NamespacedKey {
 
@@ -58,7 +57,7 @@ public final class NamespacedKey {
      * Create a key in the plugin's namespace.
      *
      * @param plugin the plugin to use for the namespace
-     * @param key the key to create
+     * @param key    the key to create
      */
     public NamespacedKey(Plugin plugin, String key) {
         Preconditions.checkArgument(plugin != null, "plugin");

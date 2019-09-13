@@ -7,7 +7,7 @@ import org.bukkit.entity.LivingEntity;
  * Called when an Entity targets a {@link LivingEntity} and can only target
  * LivingEntity's.
  */
-public class EntityTargetLivingEntityEvent extends EntityTargetEvent{
+public class EntityTargetLivingEntityEvent extends EntityTargetEvent {
     public EntityTargetLivingEntityEvent(final Entity entity, final LivingEntity target, final TargetReason reason) {
         super(entity, target, reason);
     }

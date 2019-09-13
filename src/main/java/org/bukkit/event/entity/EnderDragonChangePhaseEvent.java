@@ -27,9 +27,9 @@ public class EnderDragonChangePhaseEvent extends EntityEvent implements Cancella
     }
 
     /**
-     * Gets the current phase that the dragon is in. This method will return null 
+     * Gets the current phase that the dragon is in. This method will return null
      * when a dragon is first spawned and hasn't yet been assigned a phase.
-     * 
+     *
      * @return the current dragon phase
      */
     public EnderDragon.Phase getCurrentPhase() {
@@ -38,7 +38,7 @@ public class EnderDragonChangePhaseEvent extends EntityEvent implements Cancella
 
     /**
      * Gets the new phase that the dragon will switch to.
-     * 
+     *
      * @return the new dragon phase
      */
     public EnderDragon.Phase getNewPhase() {
@@ -47,7 +47,7 @@ public class EnderDragonChangePhaseEvent extends EntityEvent implements Cancella
 
     /**
      * Sets the new phase for the ender dragon.
-     * 
+     *
      * @param newPhase the new dragon phase
      */
     public void setNewPhase(EnderDragon.Phase newPhase) {

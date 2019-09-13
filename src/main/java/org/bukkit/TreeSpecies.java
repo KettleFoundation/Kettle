@@ -1,8 +1,8 @@
 package org.bukkit;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 /**
  * Represents the different species of trees regardless of size.
@@ -58,7 +58,7 @@ public enum TreeSpecies {
      *
      * @param data Data value to fetch
      * @return The {@link TreeSpecies} representing the given value, or null
-     *     if it doesn't exist
+     * if it doesn't exist
      * @deprecated Magic value
      */
     @Deprecated

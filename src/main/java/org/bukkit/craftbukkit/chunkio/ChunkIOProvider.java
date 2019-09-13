@@ -1,13 +1,12 @@
 package org.bukkit.craftbukkit.chunkio;
 
-import java.io.IOException;
-
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.bukkit.craftbukkit.util.AsynchronousExecutor;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChunk, Chunk, Runnable, RuntimeException> {
@@ -18,7 +17,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
         try {
             AnvilChunkLoader loader = queuedChunk.loader;
             Object[] data = loader.loadChunk__Async(queuedChunk.world, queuedChunk.x, queuedChunk.z);
-            
+
             if (data != null) {
                 queuedChunk.compound = (NBTTagCompound) data[1];
                 return (Chunk) data[0];

@@ -1,96 +1,60 @@
 package org.bukkit.craftbukkit;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
-
+import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.maxqia.remapper.Transformer;
+import com.mojang.authlib.GameProfile;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.base64.Base64;
 import jline.console.ConsoleReader;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandSenderWrapper;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.server.*;
-
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PendingCommand;
-import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.UserListEntry;
-import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryNamespaced;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameType;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.ServerWorldEventHandler;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.storage.AnvilSaveConverter;
-import net.minecraft.world.chunk.storage.AnvilSaveHandler;
-import net.minecraft.world.storage.ISaveFormat;
-import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.*;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.UnsafeValues;
-import org.bukkit.Warning.WarningState;
+import org.apache.commons.lang3.Validate;
+import org.bukkit.*;
 import org.bukkit.World;
+import org.bukkit.Warning.WarningState;
 import org.bukkit.World.Environment;
-import org.bukkit.WorldCreator;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.command.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -102,14 +66,7 @@ import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.generator.CraftChunkData;
 import org.bukkit.craftbukkit.help.SimpleHelpMap;
-import org.bukkit.craftbukkit.inventory.CraftFurnaceRecipe;
-import org.bukkit.craftbukkit.inventory.CraftInventoryCustom;
-import org.bukkit.craftbukkit.inventory.CraftItemFactory;
-import org.bukkit.craftbukkit.inventory.CraftMerchantCustom;
-import org.bukkit.craftbukkit.inventory.CraftRecipe;
-import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
-import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe;
-import org.bukkit.craftbukkit.inventory.RecipeIterator;
+import org.bukkit.craftbukkit.inventory.*;
 import org.bukkit.craftbukkit.map.CraftMapView;
 import org.bukkit.craftbukkit.metadata.EntityMetadataStore;
 import org.bukkit.craftbukkit.metadata.PlayerMetadataStore;
@@ -117,69 +74,41 @@ import org.bukkit.craftbukkit.metadata.WorldMetadataStore;
 import org.bukkit.craftbukkit.potion.CraftPotionBrewer;
 import org.bukkit.craftbukkit.scheduler.CraftScheduler;
 import org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager;
-import org.bukkit.craftbukkit.util.CraftIconCache;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.util.DatFileFilter;
-import org.bukkit.craftbukkit.util.Versioning;
+import org.bukkit.craftbukkit.util.*;
 import org.bukkit.craftbukkit.util.permissions.CraftDefaultPermissions;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.server.BroadcastMessageEvent;
+import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.help.HelpMap;
-import org.bukkit.inventory.FurnaceRecipe;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Merchant;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginLoadOrder;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.ServicesManager;
-import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.plugin.SimpleServicesManager;
+import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.Messenger;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.plugin.messaging.StandardMessenger;
-import org.bukkit.scheduler.BukkitWorker;
+import org.bukkit.potion.Potion;
 import org.bukkit.util.StringUtil;
 import org.bukkit.util.permissions.DefaultPermissions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
-import org.apache.commons.lang3.Validate;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.mojang.authlib.GameProfile;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
-//import jline.console.ConsoleReader;
-import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.util.CraftNamespacedKey;
-import org.bukkit.event.server.TabCompleteEvent;
-import net.md_5.bungee.api.chat.BaseComponent;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class CraftServer implements Server {
     private final String serverName = "Kettle";
@@ -233,13 +162,7 @@ public final class CraftServer implements Server {
     public CraftServer(MinecraftServer console, PlayerList playerList) {
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
-        this.playerView = Collections
-                .unmodifiableList(Lists.transform(playerList.getPlayers(), new Function<EntityPlayerMP, CraftPlayer>() {
-                    @Override
-                    public CraftPlayer apply(EntityPlayerMP player) {
-                        return player.getBukkitEntity();
-                    }
-                }));
+        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.getPlayers(), EntityPlayerMP::getBukkitEntity));
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
         online.value = console.getPropertyManager().getBooleanProperty("online-mode", true);
 
@@ -347,6 +270,7 @@ public final class CraftServer implements Server {
     }
 
     public void loadPlugins() {
+        Transformer.init();
         pluginManager.registerInterface(JavaPluginLoader.class);
 
         File pluginFolder = (File) console.options.valueOf("plugins");
@@ -483,8 +407,8 @@ public final class CraftServer implements Server {
                 }
                 if (curDelta == 0) {
                     break;
+                }
             }
-        }
         }
         return found;
     }
@@ -758,7 +682,7 @@ public final class CraftServer implements Server {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "finally" })
+    @SuppressWarnings({"unchecked", "finally"})
     private void loadCustomPermissions() {
         File file = new File(configuration.getString("settings.permissions-file"));
         FileInputStream stream;
@@ -924,11 +848,11 @@ public final class CraftServer implements Server {
                 getLogger().log(Level.SEVERE, null, ex);
             }
         }
-		MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
+        MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
         worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
         DimensionManager.setWorld(handle.provider.getDimension(), null, FMLCommonHandler.instance().getMinecraftServerInstance()); // remove world from DimensionManager
 
-		return true;
+        return true;
     }
 
     public MinecraftServer getServer() {
@@ -945,7 +869,8 @@ public final class CraftServer implements Server {
                 dimension = Integer.valueOf(name.substring(3));
                 WorldServer worldserver = console.getWorld(dimension);
                 if (worldserver != null) world = worldserver.getWorld();
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
         }
         return world;
     }
@@ -1214,12 +1139,12 @@ public final class CraftServer implements Server {
     public UUID getPlayerUniqueId(String name) {
         Player player = Bukkit.getPlayerExact(name);
         if (player != null) {
-                return player.getUniqueId();
-            }
+            return player.getUniqueId();
+        }
         GameProfile profile;
         // Only fetch an online UUID in online mode
         if (MinecraftServer.getServerCB().isServerInOnlineMode() || (org.spigotmc.SpigotConfig.bungee)) {
-            profile = console.getPlayerProfileCache().getGameProfileForUsername( name );
+            profile = console.getPlayerProfileCache().getGameProfileForUsername(name);
         } else {
             // Make an OfflinePlayer using an offline mode UUID since the name has no profile
             profile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(Charsets.UTF_8)), name);
@@ -1312,11 +1237,11 @@ public final class CraftServer implements Server {
         Validate.notNull(type, "Type cannot be null");
 
         switch (type) {
-        case IP:
-            return new CraftIpBanList(playerList.getBannedIPs());
-        case NAME:
-        default:
-            return new CraftProfileBanList(playerList.getBannedPlayers());
+            case IP:
+                return new CraftIpBanList(playerList.getBannedIPs());
+            case NAME:
+            default:
+                return new CraftProfileBanList(playerList.getBannedPlayers());
         }
     }
 
@@ -1388,7 +1313,7 @@ public final class CraftServer implements Server {
     public File getWorldContainer() {
         // Cauldron start - return the proper container
         if (DimensionManager.getWorld(0) != null) {
-            return ((SaveHandler)DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
+            return ((SaveHandler) DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
         }
         // Cauldron end
         if (this.getServer().anvilFile != null) {
@@ -1706,7 +1631,7 @@ public final class CraftServer implements Server {
     // Paper - Add getTPS API - Further improve tick loop
     @Override
     public double[] getTPS() {
-        return new double[] {
+        return new double[]{
                 MinecraftServer.getServerCB().tps1.getAverage(),
                 MinecraftServer.getServerCB().tps5.getAverage(),
                 MinecraftServer.getServerCB().tps15.getAverage()
@@ -1714,12 +1639,10 @@ public final class CraftServer implements Server {
     }
     // Paper end
 
-    private final Spigot spigot = new Spigot()
-    {
+    private final Spigot spigot = new Spigot() {
 
         @Override
-        public YamlConfiguration getConfig()
-        {
+        public YamlConfiguration getConfig() {
             return org.spigotmc.SpigotConfig.config;
         }
 
@@ -1754,7 +1677,7 @@ public final class CraftServer implements Server {
     public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name) {
         Player player = uuid != null ? Bukkit.getPlayer(uuid) : (name != null ? Bukkit.getPlayerExact(name) : null);
         if (player != null) {
-            return new com.destroystokyo.paper.profile.CraftPlayerProfile((CraftPlayer)player);
+            return new com.destroystokyo.paper.profile.CraftPlayerProfile((CraftPlayer) player);
         }
         return new com.destroystokyo.paper.profile.CraftPlayerProfile(uuid, name);
     }

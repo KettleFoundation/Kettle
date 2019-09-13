@@ -1,4 +1,3 @@
-
 package org.bukkit.event.inventory;
 
 import org.bukkit.entity.HumanEntity;

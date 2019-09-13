@@ -12,23 +12,27 @@ public class HelpTopicComparator implements Comparator<HelpTopic> {
 
     // Singleton implementations
     private static final TopicNameComparator tnc = new TopicNameComparator();
+
     public static TopicNameComparator topicNameComparatorInstance() {
         return tnc;
     }
 
     private static final HelpTopicComparator htc = new HelpTopicComparator();
+
     public static HelpTopicComparator helpTopicComparatorInstance() {
         return htc;
     }
 
-    private HelpTopicComparator() {}
+    private HelpTopicComparator() {
+    }
 
     public int compare(HelpTopic lhs, HelpTopic rhs) {
         return tnc.compare(lhs.getName(), rhs.getName());
     }
 
     public static class TopicNameComparator implements Comparator<String> {
-        private TopicNameComparator(){}
+        private TopicNameComparator() {
+        }
 
         public int compare(String lhs, String rhs) {
             boolean lhsStartSlash = lhs.startsWith("/");

@@ -19,21 +19,51 @@
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.ChunkPos;
-@@ -40,11 +44,12 @@
+@@ -20,31 +24,23 @@
+ import net.minecraft.world.WorldProvider;
+ import net.minecraft.world.WorldServer;
+ import net.minecraft.world.chunk.Chunk;
++import org.spigotmc.AsyncCatcher;
+ 
+ public class PlayerChunkMap
+ {
+-    private static final Predicate<EntityPlayerMP> NOT_SPECTATOR = new Predicate<EntityPlayerMP>()
+-    {
+-        public boolean apply(@Nullable EntityPlayerMP p_apply_1_)
+-        {
+-            return p_apply_1_ != null && !p_apply_1_.isSpectator();
+-        }
+-    };
+-    private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = new Predicate<EntityPlayerMP>()
+-    {
+-        public boolean apply(@Nullable EntityPlayerMP p_apply_1_)
+-        {
+-            return p_apply_1_ != null && (!p_apply_1_.isSpectator() || p_apply_1_.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
+-        }
+-    };
++    private static final Predicate<EntityPlayerMP> NOT_SPECTATOR = p_apply_1_ -> p_apply_1_ != null && !p_apply_1_.isSpectator();
++    private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = p_apply_1_ -> p_apply_1_ != null && (!p_apply_1_.isSpectator() || p_apply_1_.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
      private final WorldServer world;
-     private final List<EntityPlayerMP> players = Lists.<EntityPlayerMP>newArrayList();
-     private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<PlayerChunkMapEntry>(4096);
+-    private final List<EntityPlayerMP> players = Lists.<EntityPlayerMP>newArrayList();
+-    private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<PlayerChunkMapEntry>(4096);
 -    private final Set<PlayerChunkMapEntry> dirtyEntries = Sets.<PlayerChunkMapEntry>newHashSet();
-+    private final Set<PlayerChunkMapEntry> dirtyEntries = new ConcurrentSet<>();
-     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.<PlayerChunkMapEntry>newLinkedList();
-     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.<PlayerChunkMapEntry>newLinkedList();
-     private final List<PlayerChunkMapEntry> entries = Lists.<PlayerChunkMapEntry>newArrayList();
+-    private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.<PlayerChunkMapEntry>newLinkedList();
+-    private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.<PlayerChunkMapEntry>newLinkedList();
+-    private final List<PlayerChunkMapEntry> entries = Lists.<PlayerChunkMapEntry>newArrayList();
++    // TacoSpigot start - catch async access
++    private final List<EntityPlayerMP> players = AsyncCatcher.catchAsyncUsage(Lists.newArrayList(), "list access PlayerChunkMap.players");
++    private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<>(4096);
++    private final Set<PlayerChunkMapEntry> dirtyEntries = AsyncCatcher.catchAsyncUsage(Sets.newHashSet(), "set access PlayerChunkMap.dirtyEntries");
++    private final List<PlayerChunkMapEntry> pendingSendToPlayers = AsyncCatcher.catchAsyncUsage(Lists.newLinkedList(), "list access PlayerChunkMap.pendingSendToPlayers");
++    private final List<PlayerChunkMapEntry> entriesWithoutChunks = AsyncCatcher.catchAsyncUsage(Lists.newLinkedList(), "list access PlayerChunkMap.entriesWithoutChunks");
++    private final List<PlayerChunkMapEntry> entries = AsyncCatcher.catchAsyncUsage(Lists.newArrayList(), "list access PlayerChunkMap.entries");
++    // TacoSpigot end
      private int playerViewRadius;
 +    public int getViewDistance() { return playerViewRadius; } // Paper OBFHELPER
      private long previousTotalWorldTime;
      private boolean sortMissingChunks = true;
      private boolean sortSendToPlayers = true;
-@@ -52,7 +57,7 @@
+@@ -52,7 +48,7 @@
      public PlayerChunkMap(WorldServer serverWorld)
      {
          this.world = serverWorld;
@@ -42,7 +72,7 @@
      }
  
      public WorldServer getWorldServer()
-@@ -155,7 +160,7 @@
+@@ -155,7 +151,7 @@
  
          if (!this.entriesWithoutChunks.isEmpty())
          {
@@ -51,7 +81,7 @@
              int k = 49;
              Iterator<PlayerChunkMapEntry> iterator = this.entriesWithoutChunks.iterator();
  
-@@ -183,6 +188,9 @@
+@@ -183,6 +179,9 @@
                              break;
                          }
                      }
@@ -61,7 +91,7 @@
                  }
              }
          }
-@@ -213,7 +221,7 @@
+@@ -213,7 +212,7 @@
          {
              WorldProvider worldprovider = this.world.provider;
  
@@ -70,7 +100,7 @@
              {
                  this.world.getChunkProvider().queueUnloadAll();
              }
-@@ -257,6 +265,14 @@
+@@ -257,6 +256,14 @@
          return playerchunkmapentry;
      }
  
@@ -85,7 +115,7 @@
      public void markBlockForUpdate(BlockPos pos)
      {
          int i = pos.getX() >> 4;
-@@ -276,14 +292,22 @@
+@@ -276,14 +283,22 @@
          player.managedPosX = player.posX;
          player.managedPosZ = player.posZ;
  
@@ -109,7 +139,7 @@
          this.players.add(player);
          this.markSortPending();
      }
-@@ -341,6 +365,8 @@
+@@ -341,6 +356,8 @@
              int j1 = i - k;
              int k1 = j - l;
  
@@ -118,7 +148,7 @@
              if (j1 != 0 || k1 != 0)
              {
                  for (int l1 = i - i1; l1 <= i + i1; ++l1)
-@@ -349,7 +375,8 @@
+@@ -349,7 +366,8 @@
                      {
                          if (!this.overlaps(l1, i2, k, l, i1))
                          {
@@ -128,7 +158,7 @@
                          }
  
                          if (!this.overlaps(l1 - j1, i2 - k1, i, j, i1))
-@@ -367,6 +394,12 @@
+@@ -367,6 +385,12 @@
                  player.managedPosX = player.posX;
                  player.managedPosZ = player.posZ;
                  this.markSortPending();
@@ -141,7 +171,7 @@
              }
          }
      }
-@@ -425,6 +458,45 @@
+@@ -425,6 +449,45 @@
          }
      }
  
@@ -187,7 +217,7 @@
      private void markSortPending()
      {
          this.sortMissingChunks = true;
-@@ -446,6 +518,20 @@
+@@ -446,6 +509,20 @@
          this.dirtyEntries.add(entry);
      }
  
@@ -208,7 +238,7 @@
      public void removeEntry(PlayerChunkMapEntry entry)
      {
          ChunkPos chunkpos = entry.getPos();
-@@ -456,11 +542,48 @@
+@@ -456,11 +533,48 @@
          this.dirtyEntries.remove(entry);
          this.pendingSendToPlayers.remove(entry);
          this.entriesWithoutChunks.remove(entry);

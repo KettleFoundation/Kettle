@@ -27,7 +27,7 @@ public class CraftSkeleton extends CraftMonster implements Skeleton {
 
     @Override
     public SkeletonType getSkeletonType() {
-       return SkeletonType.NORMAL;
+        return SkeletonType.NORMAL;
     }
 
     @Override

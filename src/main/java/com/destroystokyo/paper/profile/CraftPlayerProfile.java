@@ -11,12 +11,7 @@ import org.spigotmc.SpigotConfig;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.AbstractSet;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class CraftPlayerProfile implements PlayerProfile {
 

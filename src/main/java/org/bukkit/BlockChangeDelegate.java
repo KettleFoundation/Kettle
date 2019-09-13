@@ -4,6 +4,7 @@ package org.bukkit;
  * A delegate for handling block changes. This serves as a direct interface
  * between generation algorithms in the server implementation and utilizing
  * code.
+ *
  * @deprecated rarely used API that was largely for implementation purposes
  */
 @Deprecated
@@ -16,9 +17,9 @@ public interface BlockChangeDelegate {
      * It is safe to have this call World.setTypeId, but it may be slower than
      * World.setRawTypeId.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
+     * @param x      X coordinate
+     * @param y      Y coordinate
+     * @param z      Z coordinate
      * @param typeId New block ID
      * @return true if the block was set successfully
      * @deprecated Magic value
@@ -33,11 +34,11 @@ public interface BlockChangeDelegate {
      * It is safe to have this call World.setTypeId, but it may be slower than
      * World.setRawTypeId.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
+     * @param x      X coordinate
+     * @param y      Y coordinate
+     * @param z      Z coordinate
      * @param typeId New block ID
-     * @param data Block data
+     * @param data   Block data
      * @return true if the block was set successfully
      * @deprecated Magic value
      */
@@ -49,9 +50,9 @@ public interface BlockChangeDelegate {
      * <p>
      * This method cannot call World.setRawTypeId, a full update is needed.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
+     * @param x      X coordinate
+     * @param y      Y coordinate
+     * @param z      Z coordinate
      * @param typeId New block ID
      * @return true if the block was set successfully
      * @deprecated Magic value
@@ -64,11 +65,11 @@ public interface BlockChangeDelegate {
      * <p>
      * This method cannot call World.setRawTypeId, a full update is needed.
      *
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param z Z coordinate
+     * @param x      X coordinate
+     * @param y      Y coordinate
+     * @param z      Z coordinate
      * @param typeId New block ID
-     * @param data Block data
+     * @param data   Block data
      * @return true if the block was set successfully
      * @deprecated Magic value
      */

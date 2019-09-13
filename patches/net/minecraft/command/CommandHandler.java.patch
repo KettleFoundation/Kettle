@@ -13,24 +13,28 @@
  import net.minecraft.entity.Entity;
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.util.math.BlockPos;
-@@ -16,7 +10,16 @@
+@@ -16,26 +10,37 @@
  import net.minecraft.util.text.TextFormatting;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
 +import org.bukkit.craftbukkit.command.CraftSimpleCommandMap;
 +import org.bukkit.craftbukkit.command.ModCustomCommand;
++import org.kettlemc.commands.CommandWrapper;
  
 +import javax.annotation.Nullable;
-+import java.util.Collections;
-+import java.util.List;
-+import java.util.Map;
++import java.util.*;
 +import java.util.Map.Entry;
-+import java.util.Set;
 +
  public abstract class CommandHandler implements ICommandManager
  {
      private static final Logger LOGGER = LogManager.getLogger();
-@@ -27,10 +30,10 @@
+-    private final Map<String, ICommand> commandMap = Maps.<String, ICommand>newHashMap();
+-    private final Set<ICommand> commandSet = Sets.<ICommand>newHashSet();
++    private final Map<String, ICommand> commandMap = Maps.newHashMap();
++    private final Map<String, ICommand> modCommandMap = new HashMap<>();
++    private final Set<ICommand> commandSet = Sets.newHashSet();
+ 
+     public int executeCommand(ICommandSender sender, String rawCommand)
      {
          rawCommand = rawCommand.trim();
  
@@ -45,39 +49,60 @@
  
          String[] astring = rawCommand.split(" ");
          String s = astring[0];
-@@ -144,9 +147,8 @@
+         astring = dropFirstString(astring);
+         ICommand icommand = this.commandMap.get(s);
++        if (icommand == null) {
++            icommand = CommandWrapper.toNMSCommand(sender, s);
++        }
+         int i = 0;
+ 
+         try
+@@ -44,7 +49,7 @@
+ 
+             if (icommand == null)
+             {
+-                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
++                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound");
+                 textcomponenttranslation1.getStyle().setColor(TextFormatting.RED);
+                 sender.sendMessage(textcomponenttranslation1);
+             }
+@@ -144,21 +149,40 @@
  
      protected abstract MinecraftServer getServer();
  
 -    public ICommand registerCommand(ICommand command)
 -    {
 -        this.commandMap.put(command.getName(), command);
+-        this.commandSet.add(command);
 +    public ICommand registerCommand(ICommand command) {
-+        /*this.commandMap.put(command.getName(), command);
-         this.commandSet.add(command);
- 
-         for (String s : command.getAliases())
-@@ -159,6 +161,34 @@
-             }
-         }
- 
-+        return command;*/
-+        // register commands with permission nodes, defaulting to class name
-+        return registerCommand(command, command.getClass().getName());
++        String pre = command.getClass().getName().substring(command.getClass().getName().lastIndexOf('.') + 1).toLowerCase() + "." + command.getName();
++        if (command instanceof CommandBase) {
++            if (!((CommandBase) command).defaultPermissionNode.equals("minecraft")) {
++                pre = ((CommandBase) command).defaultPermissionNode;
++                this.modCommandMap.put(command.getName(), command);
++            }
++        }
++        return registerCommand(command, pre);
 +    }
-+
+ 
+-        for (String s : command.getAliases())
+-        {
+-            ICommand icommand = this.commandMap.get(s);
 +    private ICommand registerCommand(String permissionGroup, ICommand command) {
 +        return registerCommand(command, permissionGroup + "." + command.getName());
 +    }
-+
+ 
+-            if (icommand == null || !icommand.getName().equals(s))
+-            {
+-                this.commandMap.put(s, command);
 +    public ICommand registerCommand(ICommand command, String permissionNode) {
++        List<String> list = command.getAliases();
 +        this.commandMap.put(command.getName(), command);
 +        this.commandSet.add(command);
 +        // register vanilla commands with Bukkit to support permissions.
 +        CraftSimpleCommandMap commandMap = MinecraftServer.getServerCB().server.getCraftCommandMap();
 +        ModCustomCommand customCommand = new ModCustomCommand(command.getName());
 +        customCommand.setPermission(permissionNode);
-+        List<String> list = command.getAliases();
 +        if (list != null) customCommand.setAliases(list);
 +        commandMap.register(command.getName(), customCommand);
 +        LogManager.getLogger().info("Registered command " + command.getName() + " with permission node " + permissionNode);
@@ -87,8 +112,20 @@
 +                if (icommand == null || !icommand.getName().equals(s)) {
 +                    this.commandMap.put(s, command);
 +                }
-+            }
-+        }
+             }
+         }
+-
          return command;
      }
  
+@@ -224,6 +248,10 @@
+         return this.commandMap;
+     }
+ 
++    public Map<String, ICommand> getModCommands() {
++        return this.modCommandMap;
++    }
++
+     private int getUsernameIndex(ICommand command, String[] args) throws CommandException
+     {
+         if (command == null)

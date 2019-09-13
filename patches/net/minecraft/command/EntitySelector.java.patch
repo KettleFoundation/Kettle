@@ -1,0 +1,60 @@
+--- ../src-base/minecraft/net/minecraft/command/EntitySelector.java
++++ ../src-work/minecraft/net/minecraft/command/EntitySelector.java
+@@ -64,13 +64,7 @@
+     private static final String ARGUMENT_PLAYER_NAME = addArgument("name");
+     private static final String ARGUMENT_ENTITY_TYPE = addArgument("type");
+     private static final String ARGUMENT_ENTITY_TAG = addArgument("tag");
+-    private static final Predicate<String> IS_VALID_ARGUMENT = new Predicate<String>()
+-    {
+-        public boolean apply(@Nullable String p_apply_1_)
+-        {
+-            return p_apply_1_ != null && (EntitySelector.VALID_ARGUMENTS.contains(p_apply_1_) || p_apply_1_.length() > "score_".length() && p_apply_1_.startsWith("score_"));
+-        }
+-    };
++    private static final Predicate<String> IS_VALID_ARGUMENT = p_apply_1_ -> p_apply_1_ != null && (EntitySelector.VALID_ARGUMENTS.contains(p_apply_1_) || p_apply_1_.length() > "score_".length() && p_apply_1_.startsWith("score_"));
+     private static final Set<String> WORLD_BINDING_ARGS = Sets.newHashSet(ARGUMENT_COORDINATE_X, ARGUMENT_COORDINATE_Y, ARGUMENT_COORDINATE_Z, ARGUMENT_DELTA_X, ARGUMENT_DELTA_Y, ARGUMENT_DELTA_Z, ARGUMENT_RANGE_MIN, ARGUMENT_RANGE_MAX);
+ 
+     public static String addArgument(String argument)
+@@ -82,7 +76,7 @@
+     @Nullable
+     public static EntityPlayerMP matchOnePlayer(ICommandSender sender, String token) throws CommandException
+     {
+-        return (EntityPlayerMP)matchOneEntity(sender, token, EntityPlayerMP.class);
++        return matchOneEntity(sender, token, EntityPlayerMP.class);
+     }
+ 
+     public static List<EntityPlayerMP> getPlayers(ICommandSender sender, String token) throws CommandException
+@@ -94,7 +88,7 @@
+     public static <T extends Entity> T matchOneEntity(ICommandSender sender, String token, Class <? extends T > targetClass) throws CommandException
+     {
+         List<T> list = matchEntities(sender, token, targetClass);
+-        return (T)(list.size() == 1 ? (Entity)list.get(0) : null);
++        return list.size() == 1 ? list.get(0) : null;
+     }
+ 
+     @Nullable
+@@ -128,13 +122,13 @@
+     {
+         Matcher matcher = TOKEN_PATTERN.matcher(token);
+ 
+-        if (matcher.matches() && sender.canUseCommand(1, "@"))
++        if (matcher.matches() && sender.canUseCommand(1, "@") || sender.canUseCommand(1, "@", "minecraft"))
+         {
+             Map<String, String> map = getArgumentMap(matcher.group(2));
+ 
+             if (!isEntityTypeValid(sender, map))
+             {
+-                return Collections.<T>emptyList();
++                return Collections.emptyList();
+             }
+             else
+             {
+@@ -142,7 +136,7 @@
+                 BlockPos blockpos = getBlockPosFromArguments(map, sender.getPosition());
+                 Vec3d vec3d = getPosFromArguments(map, sender.getPositionVector());
+                 List<World> list = getWorlds(sender, map);
+-                List<T> list1 = Lists.<T>newArrayList();
++                List<T> list1 = Lists.newArrayList();
+ 
+                 for (World world : list)
+                 {

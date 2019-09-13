@@ -32,8 +32,7 @@ public class CraftLightningStrike extends CraftEntity implements LightningStrike
     private final LightningStrike.Spigot spigot = new LightningStrike.Spigot() {
 
         @Override
-        public boolean isSilent()
-        {
+        public boolean isSilent() {
             return getHandle().isSilent;
         }
     };

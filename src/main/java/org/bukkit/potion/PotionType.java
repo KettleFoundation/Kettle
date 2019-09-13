@@ -23,8 +23,7 @@ public enum PotionType {
     REGEN(PotionEffectType.REGENERATION, true, true),
     STRENGTH(PotionEffectType.INCREASE_DAMAGE, true, true),
     WEAKNESS(PotionEffectType.WEAKNESS, false, true),
-    LUCK(PotionEffectType.LUCK, false, false);
-    ;
+    LUCK(PotionEffectType.LUCK, false, false);;
 
     private final PotionEffectType effect;
     private final boolean upgradeable;
@@ -48,7 +47,7 @@ public enum PotionType {
      * Checks if the potion type has an upgraded state.
      * This refers to whether or not the potion type can be Tier 2,
      * such as Potion of Fire Resistance II.
-     * 
+     *
      * @return true if the potion type can be upgraded;
      */
     public boolean isUpgradeable() {
@@ -58,7 +57,7 @@ public enum PotionType {
     /**
      * Checks if the potion type has an extended state.
      * This refers to the extended duration potions
-     * 
+     *
      * @return true if the potion type can be extended
      */
     public boolean isExtendable() {

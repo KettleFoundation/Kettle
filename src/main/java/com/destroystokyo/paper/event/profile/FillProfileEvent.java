@@ -53,8 +53,8 @@ public class FillProfileEvent extends Event {
     /**
      * Same as .getPlayerProfile().getProperties()
      *
-     * @see PlayerProfile#getProperties()
      * @return The new properties on the profile.
+     * @see PlayerProfile#getProperties()
      */
     public Set<ProfileProperty> getProperties() {
         return profile.getProperties();

@@ -63,7 +63,7 @@ public class CraftMinecart extends CraftVehicle implements Minecart {
     }
 
     public void setDisplayBlock(MaterialData material) {
-        if(material != null) {
+        if (material != null) {
             IBlockState block = CraftMagicNumbers.getBlock(material.getItemTypeId()).getStateFromMeta(material.getData());
             this.getHandle().setDisplayTile(block);
         } else {

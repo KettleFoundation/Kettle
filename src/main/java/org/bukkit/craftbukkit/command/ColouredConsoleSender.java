@@ -4,7 +4,6 @@ import jline.Terminal;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.craftbukkit.command.CraftConsoleCommandSender;
 import org.fusesource.jansi.Ansi;
 
 import java.util.EnumMap;
@@ -13,6 +12,7 @@ import java.util.Map;
 public class ColouredConsoleSender extends CraftConsoleCommandSender {
 
     private static final Map<ChatColor, String> replacements = new EnumMap<ChatColor, String>(ChatColor.class);
+
     static {
         replacements.put(ChatColor.BLACK, Ansi.ansi().a(Ansi.Attribute.RESET).fg(Ansi.Color.BLACK).boldOff().toString());
         replacements.put(ChatColor.DARK_BLUE, Ansi.ansi().a(Ansi.Attribute.RESET).fg(Ansi.Color.BLUE).boldOff().toString());
@@ -41,7 +41,8 @@ public class ColouredConsoleSender extends CraftConsoleCommandSender {
     private static final ChatColor[] colors = ChatColor.values();
     private static Terminal terminal = null;
 
-    protected ColouredConsoleSender() {}
+    protected ColouredConsoleSender() {
+    }
 
     @Override
     public void sendMessage(final String message) {
