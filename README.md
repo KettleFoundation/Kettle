@@ -50,7 +50,7 @@ All builds are available in `build/distributions`
     - Linux / Git Bash / MacOS
       - `./gradlew clean launch4j`
     - Windows
-      - `.\gradlew.bat clean launch4j`
+      - `./gradlew.bat clean launch4j`
 
 ## Chat
 
