@@ -1,4 +1,4 @@
-**If you are looking for an updated version, please view the KettleJava branch**
+**If you are looking for an updated version, please view the [KettleJava](https://github.com/KettleFoundation/Kettle/tree/KettleJava) branch**
 
 **:warning: Kettle is still __raw__ and you may encounter issues with using it as your server software. This software is not yet ready for Production use. You have been warned!**
 
