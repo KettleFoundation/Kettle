@@ -1,3 +1,5 @@
+**If you are looking for an updated version, please view the KettleJava branch**
+
 **:warning: Kettle is still __very raw__ and you may encounter issues in using it with your server. You have been warned!**
 
 ![Kettle](https://i.imgur.com/onGk0dK.png)
