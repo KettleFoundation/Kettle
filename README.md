@@ -23,7 +23,7 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ## Deployment
 
-### Installation
+### [Installation](https://github.com/KettleFoundation/Kettle/wiki/Installation)
 
 1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
 2. Make a new folder for the server
