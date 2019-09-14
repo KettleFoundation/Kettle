@@ -20,18 +20,18 @@ cache:
 setup:
   stage: setup
   script:
-  - chmod +x gradlew && ./gradlew setup
+  - bash gradlew setup
   - mv src/main/java/org* projects/Kettle/src/main/java
 
 test:
   stage: test
   script:
-  - chmod +x gradlew && ./gradlew check
+  - bash gradlew check
 
 build:
   stage: build
   script:
-  - chmod +x gradlew && ./gradlew build githubRelease
+  - bash gradlew build githubRelease
   only:
   - master
   artifacts:
@@ -39,4 +39,4 @@ build:
       - build/distributions/*.jar
 
 after_script:
-- echo "End CI"
+- echo "Finished - Ending CI"
