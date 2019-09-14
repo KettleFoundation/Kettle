@@ -52,4 +52,4 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 
 ## Unstable/Test builds
 
-For unstable/test builds you can check __this repository__ (how handy)
+For unstable/test builds you can check __[KettleDev](https://github.com/KettleFoundation/KettleDev)__
