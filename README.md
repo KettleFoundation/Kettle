@@ -48,6 +48,8 @@ All builds are available in `build/distributions`
 
 You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM).
 
-## Unstable/Test builds
+## More Kettle!
 
-For unstable/test builds you can check __this repository__ (how handy)
+For unstable/test builds, you can check __[KettleDev](https://github.com/KettleFoundation/KettleDev)__!
+
+For 1.14.4 builds, you can check __[Kettle-1.14.4](https://github.com/KettleFoundation/Kettle-1.14.4)__!
