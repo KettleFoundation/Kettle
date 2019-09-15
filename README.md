@@ -34,15 +34,12 @@ All builds are available in `build/distributions`
 
 - Clone the Project
   - You can use GitHub Desktop/GitKraken or clone using the terminal 
-    - `git clone https://github.com/KettleFoundation/Kettle` 
+    - `git clone https://github.com/KettleFoundation/Kettle -b KettleJava` 
   - Next you are gonna want to clone the submodule
     - `git submodule update --init --recursive` 
 - Building
-  - First you want to setup the project
-    - `./gradlew setup`
-  - After you have setup the project you are going to want to run the build
-    - `./gradlew build`
-  - Now go and get a drink this may take some time
+  - To build the project use the following command
+    - `./gradlew launch4j`
 
 ## Chat
 
