@@ -44,7 +44,7 @@ All builds are available in `build/distributions`
     - `./gradlew setup`
   - After you have setup the project you are going to want to run the build
     - `./gradlew build`
-  - Now go and get a drink this may take some time
+  - Now go and get a [drink](https://github.com/KettleFoundation/Kettle/wiki/Drinks) this may take some time
 
 ## Chat
 
