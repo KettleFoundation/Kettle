@@ -40,6 +40,7 @@ All builds are available in `build/distributions`
 - Building
   - To build the project use the following command
     - `./gradlew launch4j`
+  - Now go and get a [drink](https://github.com/KettleFoundation/Kettle/wiki/Drinks) this may take some time
 
 ## Chat
 
