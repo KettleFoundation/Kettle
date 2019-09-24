@@ -1,1 +1,6 @@
 rootProject.name = 'Kettle'
+
+include ':projects'
+include ':Kettle'
+
+project(":Kettle").projectDir = file("projects/Kettle")
