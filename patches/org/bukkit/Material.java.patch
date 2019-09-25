@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/org/bukkit/Material.java
++++ ../src-work/minecraft/org/bukkit/Material.java
+@@ -540,8 +540,8 @@
+ 
+     private final int id;
+     private final Constructor<? extends MaterialData> ctor;
+-    private static Material[] byId = new Material[383];
+-    private final static Map<String, Material> BY_NAME = Maps.newHashMap();
++    private static Material[] byId = new Material[32000]; // Kettle - Bump material id cap
++    private static Map<String, Material> BY_NAME = Maps.newHashMap(); // Kettle - remove final
+     private final int maxStack;
+     private final short durability;
+ 
