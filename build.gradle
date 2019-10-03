@@ -8,7 +8,7 @@ buildscript {
 
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
-        classpath 'net.nemerosa:versioning:2.7.1'
+        classpath 'net.nemerosa:versioning:2.8.2'
         classpath 'edu.sc.seis.launch4j:launch4j:2.4.6'
     }
 }
@@ -33,11 +33,9 @@ repositories {
     maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
 }
 
-
-sourceCompatibility = 1.8
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
+compileJava.options.encoding = 'UTF-8'
 
 configurations.all {
     transitive = false
@@ -71,22 +69,11 @@ minecraft {
             with common
         }
 
-        bukkit {
-            rootDir "bukkit/"
-            patchDir "patches/"
-            patchAfter "forge"
-            genPatchesFrom "forge"
-            genMcpPatches = false
-            applyMcpPatches = false
-            s2sKeepImports = true
-            with common
-        }
-
         kettle {
             rootDir "."
             patchDir "patches/"
-            patchAfter "bukkit"
-            genPatchesFrom "bukkit"
+            patchAfter "forge"
+            genPatchesFrom "forge"
             genMcpPatches = true
             applyMcpPatches = true
             s2sKeepImports = true
@@ -95,7 +82,6 @@ minecraft {
     }
 }
 
-sourceCompatibility = 1.8
 tasks.generateXmlConfig.dependsOn installer
 tasks.compileJava.enabled = false
 tasks.build.dependsOn 'launch4j'
@@ -115,10 +101,6 @@ launch4j {
     jreMinVersion = '1.8.0'
     initialHeapPercent = 5
     maxHeapPercent = 100
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
 }
 
 task signUniversal(type: SignJar, dependsOn: 'outputJar') {
