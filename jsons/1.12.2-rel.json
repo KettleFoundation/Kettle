@@ -183,7 +183,7 @@
     {
       "name": "net.md-5:SpecialSource:1.8.5",
       "url" : "https://hub.spigotmc.org/nexus/content/groups/public/",
-      "clientreq":true,
+      "clientreq":false,
       "serverreq":true
     },
     {
@@ -195,13 +195,13 @@
     {
       "name": "net.md-5:bungeecord-chat:1.12-SNAPSHOT",
       "url" : "https://hub.spigotmc.org/nexus/content/groups/public/",
-      "clientreq":true,
+      "clientreq":false,
       "serverreq":true
     },
     {
       "name": "co.aikar:fastutil-lite:1.0",
       "url" : "https://papermc.io/repo/repository/maven-public/",
-      "clientreq":true,
+      "clientreq":false,
       "serverreq":true
     },
     {
