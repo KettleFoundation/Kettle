@@ -21,7 +21,7 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 
 ## Deployment
 
-### Installation
+### [Installation](https://github.com/KettleFoundation/Kettle/wiki/Installation)
 
 1. Download the server from the [**Releases** section](https://github.com/KettleFoundation/Kettle/releases)
 2. Make a new folder for the server
@@ -38,8 +38,11 @@ All builds are available in `build/distributions`
   - Next you are gonna want to clone the submodule
     - `git submodule update --init --recursive` 
 - Building
+  - First you want to setup the project
+    - `./gradlew setup`
   - To build the project use the following command
     - `./gradlew launch4j`
+
   - Now go and get a [drink](https://github.com/KettleFoundation/Kettle/wiki/Drinks) this may take some time
 
 ## Chat
