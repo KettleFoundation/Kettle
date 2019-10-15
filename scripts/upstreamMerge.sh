@@ -30,7 +30,7 @@ update Spigot
 
 if [[ "$2" = "all" || "$2" = "a" ]] ; then
 	update BuildData
-	update Paperclip
+	update Kettleclip
 fi
 if [ "$updated" == "1" ]; then
     echo "Rebuilding patches without filtering to improve apply ability"

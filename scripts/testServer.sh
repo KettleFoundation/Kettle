@@ -69,7 +69,7 @@ if [ ! -d "$folder" ]; then
 (
     echo "Building Patched Repo"
     cd "$basedir"
-    ./paper patch
+    ./kettle patch
 )
 fi
 
@@ -130,8 +130,8 @@ fi
 # START / LOG
 #
 
-if [ ! -z "$PAPER_TEST_COMMAND_WRAPPER" ]; then
-    $PAPER_TEST_COMMAND_WRAPPER $cmd
+if [ ! -z "$KETTLE_TEST_COMMAND_WRAPPER" ]; then
+    $KETTLE_TEST_COMMAND_WRAPPER $cmd
 else
     echo "Running command: $cmd"
     echo "In directory: $(pwd)"

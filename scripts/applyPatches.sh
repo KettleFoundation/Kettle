@@ -91,13 +91,13 @@ echo "Importing MC Dev"
 
 ./scripts/importmcdev.sh "$basedir" || exit 1
 
-# Apply paper
+# Apply kettle
 cd "$basedir"
 (
     applyPatch "work/Spigot/Spigot-API" Paper-API HEAD &&
     applyPatch "work/Spigot/Spigot-Server" Paper-Server HEAD
 
-    # if we have previously ran ./paper mcdev, update it
+    # if we have previously ran ./kettle mcdev, update it
     if [ -d "$workdir/Minecraft/$minecraftversion/src" ]; then
         $basedir/scripts/makemcdevsrc.sh $basedir
     fi
