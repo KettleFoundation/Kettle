@@ -92,7 +92,7 @@ fi
 #    rm -rf "$forgedecompiledir/net"
 #fi
 
-## Forge (for Paper mc-dev imports, and dev src folders for unimported files)
+## Forge (for kettle mc-dev imports, and dev src folders for unimported files)
 #if [ ! -d "$forgedecompiledir/net" ] ; then
 #    echo "Decompiling classes (stage 1)..."
 #    cd "$basedir"

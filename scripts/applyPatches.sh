@@ -102,7 +102,7 @@ cd "$basedir"
         $basedir/scripts/makemcdevsrc.sh $basedir
     fi
 ) || (
-    echo "Failed to apply Paper Patches"
+    echo "Failed to apply Kettle Patches"
     exit 1
 ) || exit 1
 ) || exit 1

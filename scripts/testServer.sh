@@ -13,15 +13,15 @@ gitcmd="git -c commit.gpgsign=false"
 source $basedir/scripts/functions.sh
 
 updateTest() {
-    paperstash
+    kettlestash
     $gitcmd reset --hard origin/master
-    paperunstash
+    kettleunstash
 }
 
-papertestdir="${PAPER_TEST_DIR:-$workdir/test-server}"
+kettletestdir="${KETTLE_TEST_DIR:-$workdir/test-server}"
 
-mkdir -p "$papertestdir"
-cd "$papertestdir"
+mkdir -p "$kettletestdir"
+cd "$kettletestdir"
 
 #
 # SKELETON CHECK
@@ -63,8 +63,8 @@ fi
 # JAR CHECK
 #
 
-folder="$basedir/Paper-Server"
-jar="$folder/target/paper-${minecraftversion}.jar"
+folder="$basedir/Kettle-Server"
+jar="$folder/target/kettle-${minecraftversion}.jar"
 if [ ! -d "$folder" ]; then
 (
     echo "Building Patched Repo"
@@ -75,7 +75,7 @@ fi
 
 if [ ! -f "$jar" ] || [ "$2" == "build" ] || [ "$3" == "build" ]; then
 (
-    echo "Building Paper"
+    echo "Building Kettle"
     cd "$basedir"
     mvn package
 )
@@ -85,21 +85,21 @@ fi
 # JVM FLAGS
 #
 
-baseargs="-server -Xms${PAPER_MIN_TEST_MEMORY:-512M} -Xmx${PAPER_TEST_MEMORY:-2G} -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=150 -XX:+UseG1GC "
+baseargs="-server -Xms${KETTLE_MIN_TEST_MEMORY:-512M} -Xmx${KETTLE_TEST_MEMORY:-2G} -Dfile.encoding=UTF-8 -XX:MaxGCPauseMillis=150 -XX:+UseG1GC "
 baseargs="$baseargs -DIReallyKnowWhatIAmDoingISwear=1 -XX:TargetSurvivorRatio=90 "
 baseargs="$baseargs -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -XX:G1MaxNewSizePercent=80 "
 baseargs="$baseargs -XX:InitiatingHeapOccupancyPercent=10 -XX:G1MixedGCLiveThresholdPercent=20 "
 baseargs="$baseargs -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5100"
 
-cmd="java ${PAPER_TEST_BASE_JVM_ARGS:-$baseargs} ${PAPER_TEST_EXTRA_JVM_ARGS} -jar $jar"
-screen_command="screen -DURS papertest $cmd"
-tmux_command="tmux new-session -A -s Paper -n 'Paper Test' -c '$(pwd)' '$cmd'"
+cmd="java ${KETTLE_TEST_BASE_JVM_ARGS:-$baseargs} ${KETTLE_TEST_EXTRA_JVM_ARGS} -jar $jar"
+screen_command="screen -DURS kettletest $cmd"
+tmux_command="tmux new-session -A -s Kettle -n 'Kettle Test' -c '$(pwd)' '$cmd'"
 
 #
 # MULTIPLEXER CHOICE
 #
 
-multiplex=${PAPER_TEST_MULTIPLEXER}
+multiplex=${KETTLE_TEST_MULTIPLEXER}
 
 if [ "$multiplex" == "screen" ]; then
     if command -v "screen" >/dev/null 2>&1 ; then

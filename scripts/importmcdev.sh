@@ -88,8 +88,8 @@ done
 ########################################################
 ########################################################
 #                   NMS IMPORTS
-# Temporarily add new NMS dev imports here before you run paper patch
-# but after you have paper rb'd your changes, remove the line from this file before committing.
+# Temporarily add new NMS dev imports here before you run kettle patch
+# but after you have kettle rb'd your changes, remove the line from this file before committing.
 # we do not need any lines added to this file for NMS
 
 # import FileName
