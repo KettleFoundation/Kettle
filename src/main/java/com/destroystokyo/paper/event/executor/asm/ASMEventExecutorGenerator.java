@@ -8,16 +8,12 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.V1_8;
+import static org.objectweb.asm.Opcodes.*;
 
 public class ASMEventExecutorGenerator {
     public static byte[] generateEventExecutor(Method m, String name) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        writer.visit(V1_8, ACC_PUBLIC, name.replace('.', '/'), null, Type.getInternalName(Object.class), new String[] {Type.getInternalName(EventExecutor.class)});
+        writer.visit(V1_8, ACC_PUBLIC, name.replace('.', '/'), null, Type.getInternalName(Object.class), new String[]{Type.getInternalName(EventExecutor.class)});
         // Generate constructor
         GeneratorAdapter methodGenerator = new GeneratorAdapter(writer.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null), ACC_PUBLIC, "<init>", "()V");
         methodGenerator.loadThis();
@@ -41,6 +37,7 @@ public class ASMEventExecutorGenerator {
     }
 
     public static AtomicInteger NEXT_ID = new AtomicInteger(1);
+
     public static String generateName() {
         int id = NEXT_ID.getAndIncrement();
         return "com.destroystokyo.paper.event.executor.asm.generated.GeneratedEventExecutor" + id;

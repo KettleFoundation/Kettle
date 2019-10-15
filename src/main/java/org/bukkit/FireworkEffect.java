@@ -1,14 +1,13 @@
 package org.bukkit;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a single firework effect.
@@ -64,7 +63,8 @@ public final class FireworkEffect implements ConfigurationSerializable {
         ImmutableList.Builder<Color> fadeColors = null;
         Type type = Type.BALL;
 
-        Builder() {}
+        Builder() {
+        }
 
         /**
          * Specify the type of the firework effect.
@@ -143,7 +143,7 @@ public final class FireworkEffect implements ConfigurationSerializable {
          * @return This object, for chaining
          * @throws IllegalArgumentException If colors is null
          * @throws IllegalArgumentException If any color is null (may be
-         *     thrown after changes have occurred)
+         *                                  thrown after changes have occurred)
          */
         public Builder withColor(Color... colors) throws IllegalArgumentException {
             Validate.notNull(colors, "Cannot have null colors");
@@ -164,11 +164,11 @@ public final class FireworkEffect implements ConfigurationSerializable {
          * Add several primary colors to the firework effect.
          *
          * @param colors An iterable object whose iterator yields the desired
-         *     colors
+         *               colors
          * @return This object, for chaining
          * @throws IllegalArgumentException If colors is null
          * @throws IllegalArgumentException If any color is null (may be
-         *     thrown after changes have occurred)
+         *                                  thrown after changes have occurred)
          */
         public Builder withColor(Iterable<?> colors) throws IllegalArgumentException {
             Validate.notNull(colors, "Cannot have null colors");
@@ -191,7 +191,7 @@ public final class FireworkEffect implements ConfigurationSerializable {
          * @return This object, for chaining
          * @throws IllegalArgumentException If colors is null
          * @throws IllegalArgumentException If any color is null (may be
-         *     thrown after changes have occurred)
+         *                                  thrown after changes have occurred)
          */
         public Builder withFade(Color color) throws IllegalArgumentException {
             Validate.notNull(color, "Cannot have null color");
@@ -212,7 +212,7 @@ public final class FireworkEffect implements ConfigurationSerializable {
          * @return This object, for chaining
          * @throws IllegalArgumentException If colors is null
          * @throws IllegalArgumentException If any color is null (may be
-         *     thrown after changes have occurred)
+         *                                  thrown after changes have occurred)
          */
         public Builder withFade(Color... colors) throws IllegalArgumentException {
             Validate.notNull(colors, "Cannot have null colors");
@@ -237,11 +237,11 @@ public final class FireworkEffect implements ConfigurationSerializable {
          * Add several fade colors to the firework effect.
          *
          * @param colors An iterable object whose iterator yields the desired
-         *     colors
+         *               colors
          * @return This object, for chaining
          * @throws IllegalArgumentException If colors is null
          * @throws IllegalArgumentException If any color is null (may be
-         *     thrown after changes have occurred)
+         *                                  thrown after changes have occurred)
          */
         public Builder withFade(Iterable<?> colors) throws IllegalArgumentException {
             Validate.notNull(colors, "Cannot have null colors");
@@ -271,11 +271,11 @@ public final class FireworkEffect implements ConfigurationSerializable {
          */
         public FireworkEffect build() {
             return new FireworkEffect(
-                flicker,
-                trail,
-                colors.build(),
-                fadeColors == null ? ImmutableList.<Color>of() : fadeColors.build(),
-                type
+                    flicker,
+                    trail,
+                    colors.build(),
+                    fadeColors == null ? ImmutableList.<Color>of() : fadeColors.build(),
+                    type
             );
         }
     }
@@ -350,30 +350,30 @@ public final class FireworkEffect implements ConfigurationSerializable {
     }
 
     /**
-     * @see ConfigurationSerializable
      * @param map the map to deserialize
      * @return the resulting serializable
+     * @see ConfigurationSerializable
      */
     public static ConfigurationSerializable deserialize(Map<String, Object> map) {
         Type type = Type.valueOf((String) map.get(TYPE));
 
         return builder()
-            .flicker((Boolean) map.get(FLICKER))
-            .trail((Boolean) map.get(TRAIL))
-            .withColor((Iterable<?>) map.get(COLORS))
-            .withFade((Iterable<?>) map.get(FADE_COLORS))
-            .with(type)
-            .build();
+                .flicker((Boolean) map.get(FLICKER))
+                .trail((Boolean) map.get(TRAIL))
+                .withColor((Iterable<?>) map.get(COLORS))
+                .withFade((Iterable<?>) map.get(FADE_COLORS))
+                .with(type)
+                .build();
     }
 
     @Override
     public Map<String, Object> serialize() {
         return ImmutableMap.<String, Object>of(
-            FLICKER, flicker,
-            TRAIL, trail,
-            COLORS, colors,
-            FADE_COLORS, fadeColors,
-            TYPE, type.name()
+                FLICKER, flicker,
+                TRAIL, trail,
+                COLORS, colors,
+                FADE_COLORS, fadeColors,
+                TYPE, type.name()
         );
     }
 

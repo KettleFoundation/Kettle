@@ -8,17 +8,17 @@ import org.bukkit.plugin.Plugin;
  * that displays the plugin name in front of conversation output.
  */
 public class PluginNameConversationPrefix implements ConversationPrefix {
-    
+
     protected String separator;
     protected ChatColor prefixColor;
     protected Plugin plugin;
-    
+
     private String cachedPrefix;
-    
+
     public PluginNameConversationPrefix(Plugin plugin) {
         this(plugin, " > ", ChatColor.LIGHT_PURPLE);
     }
-    
+
     public PluginNameConversationPrefix(Plugin plugin, String separator, ChatColor prefixColor) {
         this.separator = separator;
         this.prefixColor = prefixColor;

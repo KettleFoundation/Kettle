@@ -1,12 +1,12 @@
 package org.bukkit.inventory.meta;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This type represents the storage mechanism for auxiliary item data.
@@ -76,13 +76,13 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
      * <p>
      * Plugins should check if hasLore() returns <code>true</code> before
      * calling this method.
-     * 
+     *
      * @return a list of lore that is set
      */
     List<String> getLore();
 
     /**
-     * Sets the lore for this item. 
+     * Sets the lore for this item.
      * Removes lore when given null.
      *
      * @param lore the lore that will be set
@@ -113,7 +113,7 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
     int getEnchantLevel(Enchantment ench);
 
     /**
-     * Returns a copy the enchantments in this ItemMeta. <br> 
+     * Returns a copy the enchantments in this ItemMeta. <br>
      * Returns an empty map if none.
      *
      * @return An immutable copy of the enchantments
@@ -123,12 +123,12 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
     /**
      * Adds the specified enchantment to this item meta.
      *
-     * @param ench Enchantment to add
-     * @param level Level for the enchantment
+     * @param ench                   Enchantment to add
+     * @param level                  Level for the enchantment
      * @param ignoreLevelRestriction this indicates the enchantment should be
-     *     applied, ignoring the level limit
+     *                               applied, ignoring the level limit
      * @return true if the item meta changed as a result of this call, false
-     *     otherwise
+     * otherwise
      */
     boolean addEnchant(Enchantment ench, int level, boolean ignoreLevelRestriction);
 
@@ -137,7 +137,7 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
      *
      * @param ench Enchantment to remove
      * @return true if the item meta changed as a result of this call, false
-     *     otherwise
+     * otherwise
      */
     boolean removeEnchant(Enchantment ench);
 
@@ -198,8 +198,7 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
     ItemMeta clone();
 
     // Spigot start
-    public class Spigot
-    {
+    public class Spigot {
 
         /**
          * Sets the unbreakable tag
@@ -208,9 +207,8 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
          * @deprecated see {@link ItemMeta#setUnbreakable(boolean)}
          */
         @Deprecated
-        public void setUnbreakable(boolean unbreakable)
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+        public void setUnbreakable(boolean unbreakable) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         /**
@@ -220,9 +218,8 @@ public interface ItemMeta extends Cloneable, ConfigurationSerializable {
          * @deprecated see {@link ItemMeta#isUnbreakable()}
          */
         @Deprecated
-        public boolean isUnbreakable()
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+        public boolean isUnbreakable() {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 

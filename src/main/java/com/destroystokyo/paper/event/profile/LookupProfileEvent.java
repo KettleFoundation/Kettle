@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
 /**
  * Allows a plugin to be notified anytime AFTER a Profile has been looked up from the Mojang API
  * This is an opportunity to view the response and potentially cache things.
- *
+ * <p>
  * No guarantees are made about thread execution context for this event. If you need to know, check
  * event.isAsync()
  */

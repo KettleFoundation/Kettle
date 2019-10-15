@@ -23,7 +23,6 @@ public class Banner extends MaterialData implements Attachable {
     }
 
     /**
-     *
      * @param type the type
      * @param data the raw data value
      * @deprecated Magic value
@@ -33,7 +32,7 @@ public class Banner extends MaterialData implements Attachable {
         super(type, data);
     }
 
-    /**     *
+    /**
      * @param type the raw type id
      * @param data the raw data value
      * @deprecated Magic value

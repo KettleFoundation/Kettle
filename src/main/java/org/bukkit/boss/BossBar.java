@@ -130,6 +130,7 @@ public interface BossBar {
 
     /**
      * Shows the previously hidden boss bar to all attached players
+     *
      * @deprecated {@link #setVisible(boolean)}
      */
     @Deprecated
@@ -137,6 +138,7 @@ public interface BossBar {
 
     /**
      * Hides this boss bar from all attached players
+     *
      * @deprecated {@link #setVisible(boolean)}
      */
     @Deprecated

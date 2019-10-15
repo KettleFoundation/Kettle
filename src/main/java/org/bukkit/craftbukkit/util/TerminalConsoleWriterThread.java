@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TerminalConsoleWriterThread implements Runnable {
-    private static final byte[] RESET_LINE = String.valueOf('\r').getBytes();
+    private final static byte[] RESET_LINE = String.valueOf(ConsoleReader.RESET_LINE).getBytes();
     final private ConsoleReader reader;
     final private OutputStream output;
 

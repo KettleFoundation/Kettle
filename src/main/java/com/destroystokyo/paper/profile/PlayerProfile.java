@@ -16,7 +16,8 @@ public interface PlayerProfile {
     /**
      * @return The players name, if set
      */
-    @Nullable String getName();
+    @Nullable
+    String getName();
 
     /**
      * Sets this profiles Name
@@ -29,7 +30,8 @@ public interface PlayerProfile {
     /**
      * @return The players unique identifier, if set
      */
-    @Nullable UUID getId();
+    @Nullable
+    UUID getId();
 
     /**
      * Sets this profiles UUID
@@ -43,10 +45,12 @@ public interface PlayerProfile {
      * @return A Mutable set of this players properties, such as textures.
      * Values specified here are subject to implementation details.
      */
-    @Nonnull Set<ProfileProperty> getProperties();
+    @Nonnull
+    Set<ProfileProperty> getProperties();
 
     /**
      * Check if the Profile has the specified property
+     *
      * @param property Property name to check
      * @return If the property is set
      */
@@ -54,18 +58,21 @@ public interface PlayerProfile {
 
     /**
      * Sets a property. If the property already exists, the previous one will be replaced
+     *
      * @param property Property to set.
      */
     void setProperty(ProfileProperty property);
 
     /**
      * Sets multiple properties. If any of the set properties already exist, it will be replaced
+     *
      * @param properties The properties to set
      */
     void setProperties(Collection<ProfileProperty> properties);
 
     /**
      * Removes a specific property from this profile
+     *
      * @param property The property to remove
      * @return If a property was removed
      */
@@ -73,6 +80,7 @@ public interface PlayerProfile {
 
     /**
      * Removes a specific property from this profile
+     *
      * @param property The property to remove
      * @return If a property was removed
      */
@@ -82,6 +90,7 @@ public interface PlayerProfile {
 
     /**
      * Removes all properties in the collection
+     *
      * @param properties The properties to remove
      * @return If any property was removed
      */
@@ -116,8 +125,9 @@ public interface PlayerProfile {
     /**
      * If this profile is not complete, then make the API call to complete it.
      * This is a blocking operation and should be done asynchronously.
-     *
+     * <p>
      * This will also complete textures. If you do not want to load textures, use {{@link #complete(boolean)}}
+     *
      * @return If the profile is now complete (has UUID and Name) (if you get rate limited, this operation may fail)
      */
     default boolean complete() {
@@ -127,8 +137,9 @@ public interface PlayerProfile {
     /**
      * If this profile is not complete, then make the API call to complete it.
      * This is a blocking operation and should be done asynchronously.
-     *
+     * <p>
      * Optionally will also fill textures.
+     *
      * @param textures controls if we should fill the profile with texture properties
      * @return If the profile is now complete (has UUID and Name) (if you get rate limited, this operation may fail)
      */
@@ -136,6 +147,7 @@ public interface PlayerProfile {
 
     /**
      * Whether or not this Profile has textures associated to it
+     *
      * @return If has a textures property
      */
     default boolean hasTextures() {
@@ -143,8 +155,8 @@ public interface PlayerProfile {
     }
 
     /**
-     * @deprecated Will be removed in 1.13
      * @return the GameProfile for this PlayerProfile
+     * @deprecated Will be removed in 1.13
      */
     @Deprecated
     GameProfile getGameProfile();

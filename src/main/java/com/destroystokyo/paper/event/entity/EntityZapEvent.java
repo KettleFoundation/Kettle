@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityEvent;
 import javax.annotation.Nonnull;
 
 /**
- *  Fired when lightning strikes an entity
+ * Fired when lightning strikes an entity
  */
 public class EntityZapEvent extends EntityEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
@@ -38,6 +38,7 @@ public class EntityZapEvent extends EntityEvent implements Cancellable {
 
     /**
      * Gets the lightning bolt that is striking the entity.
+     *
      * @return The lightning bolt responsible for this event
      */
     @Nonnull
@@ -47,6 +48,7 @@ public class EntityZapEvent extends EntityEvent implements Cancellable {
 
     /**
      * Gets the entity that will replace the struck entity.
+     *
      * @return The entity that will replace the struck entity
      */
     @Nonnull

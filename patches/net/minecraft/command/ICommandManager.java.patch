@@ -5,5 +5,5 @@
  
      Map<String, ICommand> getCommands();
 +
-+
++    Map<String, ICommand> getModCommands();
  }

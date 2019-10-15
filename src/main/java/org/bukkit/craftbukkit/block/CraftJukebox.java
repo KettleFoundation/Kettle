@@ -32,12 +32,12 @@ public class CraftJukebox extends CraftBlockEntityState<TileEntityJukebox> imple
             Material record = this.getPlaying();
             if (record == Material.AIR) {
                 world.getHandle().setBlockState(new BlockPos(this.getX(), this.getY(), this.getZ()),
-                    Blocks.JUKEBOX.getDefaultState()
-                        .withProperty(BlockJukebox.HAS_RECORD, false), 3);
+                        Blocks.JUKEBOX.getDefaultState()
+                                .withProperty(BlockJukebox.HAS_RECORD, false), 3);
             } else {
                 world.getHandle().setBlockState(new BlockPos(this.getX(), this.getY(), this.getZ()),
-                    Blocks.JUKEBOX.getDefaultState()
-                        .withProperty(BlockJukebox.HAS_RECORD, true), 3);
+                        Blocks.JUKEBOX.getDefaultState()
+                                .withProperty(BlockJukebox.HAS_RECORD, true), 3);
             }
             world.playEffect(this.getLocation(), Effect.RECORD_PLAY, record.getId());
         }

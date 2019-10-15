@@ -1,7 +1,7 @@
 package org.bukkit.event.block;
 
-import org.bukkit.block.Block;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.HandlerList;
 
 /**
@@ -20,18 +20,16 @@ public class BlockCanBuildEvent extends BlockEvent {
     protected boolean buildable;
 
     /**
-     *
      * @deprecated Magic value
      */
     @Deprecated
     protected int material;
 
     /**
-     *
+     * @param block    the block involved in this event
+     * @param id       the id of the block to place
+     * @param canBuild whether we can build
      * @deprecated Magic value
-     * @param block the block involved in this event
-     * @param id the id of the block to place
-     * @param canBuild whether we can build 
      */
     @Deprecated
     public BlockCanBuildEvent(final Block block, final int id, final boolean canBuild) {
@@ -56,7 +54,7 @@ public class BlockCanBuildEvent extends BlockEvent {
      * Sets whether the block can be built here or not.
      *
      * @param cancel true if you want to allow the block to be built here
-     *     despite Minecraft's default behaviour
+     *               despite Minecraft's default behaviour
      */
     public void setBuildable(boolean cancel) {
         this.buildable = cancel;

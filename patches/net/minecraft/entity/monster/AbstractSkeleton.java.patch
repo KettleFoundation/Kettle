@@ -28,7 +28,7 @@
          this.setEnchantmentBasedOnDifficulty(difficulty);
          this.setCombatTask();
 -        this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * difficulty.getClampedAdditionalDifficulty());
-+        this.idkwhyreyoudoingthis(this.rand.nextFloat() < 0.55F * difficulty.getClampedAdditionalDifficulty());
++        this.setCanPickupLoot(this.rand.nextFloat() < 0.55F * difficulty.getClampedAdditionalDifficulty());
  
          if (this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
          {

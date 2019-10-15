@@ -1,0 +1,39 @@
+--- ../src-base/minecraft/net/minecraft/block/state/BlockStateContainer.java
++++ ../src-work/minecraft/net/minecraft/block/state/BlockStateContainer.java
+@@ -95,7 +95,7 @@
+             blockstatecontainer$stateimplementation1.buildPropertyValueTable(map2);
+         }
+ 
+-        this.validStates = ImmutableList.<IBlockState>copyOf(list1);
++        this.validStates = ImmutableList.copyOf(list1);
+     }
+ 
+     public static <T extends Comparable<T>> String validateProperty(Block block, IProperty<T> property)
+@@ -129,14 +129,12 @@
+ 
+     private List < Iterable < Comparable<? >>> getAllowedValues()
+     {
+-        List < Iterable < Comparable<? >>> list = Lists. < Iterable < Comparable<? >>> newArrayList();
++        List < Iterable < Comparable<? >>> list = Lists.newArrayList();
+         ImmutableCollection < IProperty<? >> immutablecollection = this.properties.values();
+-        UnmodifiableIterator unmodifiableiterator = immutablecollection.iterator();
+ 
+-        while (unmodifiableiterator.hasNext())
+-        {
+-            IProperty<?> iproperty = (IProperty)unmodifiableiterator.next();
+-            list.add(((IProperty)iproperty).getAllowedValues());
++        for (IProperty<?> iProperty : immutablecollection) {
++            IProperty<?> iproperty = iProperty;
++            list.add(((IProperty) iproperty).getAllowedValues());
+         }
+ 
+         return list;
+@@ -144,7 +142,7 @@
+ 
+     public IBlockState getBaseState()
+     {
+-        return (IBlockState)this.validStates.get(0);
++        return this.validStates.get(0);
+     }
+ 
+     public Block getBlock()

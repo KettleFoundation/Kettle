@@ -46,7 +46,7 @@ public class PlayerEggThrowEvent extends PlayerEvent {
      * Sets whether the egg will hatch or not.
      *
      * @param hatching true if you want the egg to hatch, false if you want it
-     *     not to
+     *                 not to
      */
     public void setHatching(boolean hatching) {
         this.hatching = hatching;
@@ -67,7 +67,7 @@ public class PlayerEggThrowEvent extends PlayerEvent {
      * @param hatchType The type of the mob being hatched by the egg
      */
     public void setHatchingType(EntityType hatchType) {
-        if(!hatchType.isSpawnable()) throw new IllegalArgumentException("Can't spawn that entity type from an egg!");
+        if (!hatchType.isSpawnable()) throw new IllegalArgumentException("Can't spawn that entity type from an egg!");
         this.hatchType = hatchType;
     }
 

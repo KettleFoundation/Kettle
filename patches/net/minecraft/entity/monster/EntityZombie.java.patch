@@ -93,7 +93,7 @@
          livingdata = super.onInitialSpawn(difficulty, livingdata);
          float f = difficulty.getClampedAdditionalDifficulty();
 -        this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * f);
-+        this.idkwhyreyoudoingthis(this.rand.nextFloat() < 0.55F * f);
++        this.setCanPickupLoot(this.rand.nextFloat() < 0.55F * f);
  
          if (livingdata == null)
          {

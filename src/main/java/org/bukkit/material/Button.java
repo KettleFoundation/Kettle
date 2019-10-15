@@ -1,7 +1,7 @@
 package org.bukkit.material;
 
-import org.bukkit.block.BlockFace;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 
 /**
  * Represents a button
@@ -57,8 +57,7 @@ public class Button extends SimpleAttachableMaterialData implements Redstone {
     /**
      * Sets the current state of this button
      *
-     * @param bool
-     *            whether or not the button is powered
+     * @param bool whether or not the button is powered
      */
     public void setPowered(boolean bool) {
         setData((byte) (bool ? (getData() | 0x8) : (getData() & ~0x8)));
@@ -73,23 +72,23 @@ public class Button extends SimpleAttachableMaterialData implements Redstone {
         byte data = (byte) (getData() & 0x7);
 
         switch (data) {
-        case 0x0:
-            return BlockFace.UP;
+            case 0x0:
+                return BlockFace.UP;
 
-        case 0x1:
-            return BlockFace.WEST;
+            case 0x1:
+                return BlockFace.WEST;
 
-        case 0x2:
-            return BlockFace.EAST;
+            case 0x2:
+                return BlockFace.EAST;
 
-        case 0x3:
-            return BlockFace.NORTH;
+            case 0x3:
+                return BlockFace.NORTH;
 
-        case 0x4:
-            return BlockFace.SOUTH;
+            case 0x4:
+                return BlockFace.SOUTH;
 
-        case 0x5:
-            return BlockFace.DOWN;
+            case 0x5:
+                return BlockFace.DOWN;
         }
 
         return null;
@@ -102,29 +101,29 @@ public class Button extends SimpleAttachableMaterialData implements Redstone {
         byte data = (byte) (getData() & 0x8);
 
         switch (face) {
-        case DOWN:
-            data |= 0x0;
-            break;
+            case DOWN:
+                data |= 0x0;
+                break;
 
-        case EAST:
-            data |= 0x1;
-            break;
+            case EAST:
+                data |= 0x1;
+                break;
 
-        case WEST:
-            data |= 0x2;
-            break;
+            case WEST:
+                data |= 0x2;
+                break;
 
-        case SOUTH:
-            data |= 0x3;
-            break;
+            case SOUTH:
+                data |= 0x3;
+                break;
 
-        case NORTH:
-            data |= 0x4;
-            break;
+            case NORTH:
+                data |= 0x4;
+                break;
 
-        case UP:
-            data |= 0x5;
-            break;
+            case UP:
+                data |= 0x5;
+                break;
         }
 
         setData(data);

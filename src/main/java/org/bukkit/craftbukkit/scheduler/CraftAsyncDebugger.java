@@ -9,7 +9,7 @@ class CraftAsyncDebugger {
     private final Plugin plugin;
     private final Class<? extends Runnable> clazz;
 
-    CraftAsyncDebugger(final int expiry, final  Plugin plugin, final Class<? extends Runnable> clazz) {
+    CraftAsyncDebugger(final int expiry, final Plugin plugin, final Class<? extends Runnable> clazz) {
         this.expiry = expiry;
         this.plugin = plugin;
         this.clazz = clazz;

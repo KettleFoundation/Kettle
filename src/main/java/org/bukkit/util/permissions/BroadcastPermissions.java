@@ -7,7 +7,8 @@ public final class BroadcastPermissions {
     private static final String ROOT = "bukkit.broadcast";
     private static final String PREFIX = ROOT + ".";
 
-    private BroadcastPermissions() {}
+    private BroadcastPermissions() {
+    }
 
     public static Permission registerPermissions(Permission parent) {
         Permission broadcasts = DefaultPermissions.registerPermission(ROOT, "Allows the user to receive all broadcast messages", parent);

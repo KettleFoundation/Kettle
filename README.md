@@ -1,5 +1,3 @@
-**If you are looking for an updated version, please view the [KettleJava](https://github.com/KettleFoundation/Kettle/tree/KettleJava) branch**
-
 **:warning: Kettle is still __raw__ and you may encounter issues with using it as your server software. This software is not yet ready for Production use. You have been warned!**
 
 ![Kettle](https://i.imgur.com/gkmTKvR.png)
@@ -36,14 +34,15 @@ All builds are available in `build/distributions`
 
 - Clone the Project
   - You can use GitHub Desktop/GitKraken or clone using the terminal 
-    - `git clone https://github.com/KettleFoundation/Kettle` 
+    - `git clone https://github.com/KettleFoundation/Kettle -b KettleJava` 
   - Next you are gonna want to clone the submodule
     - `git submodule update --init --recursive` 
 - Building
   - First you want to setup the project
     - `./gradlew setup`
-  - After you have setup the project you are going to want to run the build
-    - `./gradlew build`
+  - To build the project use the following command
+    - `./gradlew launch4j`
+
   - Now go and get a [drink](https://github.com/KettleFoundation/Kettle/wiki/Drinks) this may take some time
 
 ## Chat

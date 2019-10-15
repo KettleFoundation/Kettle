@@ -1,0 +1,35 @@
+--- ../src-base/minecraft/net/minecraftforge/fluids/BlockFluidClassic.java
++++ ../src-work/minecraft/net/minecraftforge/fluids/BlockFluidClassic.java
+@@ -35,6 +35,10 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.common.util.Constants;
+ import net.minecraftforge.event.ForgeEventFactory;
++import org.bukkit.Server;
++import org.bukkit.block.Block;
++import org.bukkit.block.BlockFace;
++import org.bukkit.event.block.BlockFromToEvent;
+ 
+ import javax.annotation.Nonnull;
+ import javax.annotation.Nullable;
+@@ -166,9 +170,21 @@
+             }
+         }
+ 
++        Server server = world.getServer();
++        org.bukkit.World bukkitWorld = world.getWorld();
++        Block source = bukkitWorld == null ? null : bukkitWorld.getBlockAt(pos.getX(), pos.getY(), pos.getZ());
++
+         // Flow vertically if possible
+         if (canDisplace(world, pos.up(densityDir)))
+         {
++            BlockFace face = densityDir < 0 ? BlockFace.DOWN : BlockFace.UP;
++            BlockFromToEvent event = new BlockFromToEvent(source, face);
++            if (server != null) {
++                server.getPluginManager().callEvent(event);
++            }
++            if (event.isCancelled()) {
++                return;
++            }
+             flowIntoBlock(world, pos.up(densityDir), 1);
+             return;
+         }

@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.util;
 
+import org.apache.commons.lang3.Validate;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import org.apache.commons.lang3.Validate;
 
 public final class WeakCollection<T> implements Collection<T> {
     static final Object NO_VALUE = new Object();
@@ -36,7 +36,7 @@ public final class WeakCollection<T> implements Collection<T> {
     }
 
     public boolean contains(Object object) {
-        if (object  == null) {
+        if (object == null) {
             return false;
         }
         for (T compare : this) {

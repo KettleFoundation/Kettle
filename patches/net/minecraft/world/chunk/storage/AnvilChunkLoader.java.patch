@@ -1,41 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
-@@ -1,8 +1,6 @@
+@@ -1,8 +1,8 @@
  package net.minecraft.world.chunk.storage;
  
  import com.google.common.collect.Maps;
--import java.io.DataInputStream;
++
+ import java.io.DataInputStream;
 -import java.io.DataOutputStream;
  import java.io.File;
  import java.io.IOException;
  import java.util.Collections;
-@@ -13,7 +11,6 @@
- import net.minecraft.block.Block;
- import net.minecraft.entity.Entity;
- import net.minecraft.entity.EntityList;
--import net.minecraft.nbt.CompressedStreamTools;
- import net.minecraft.nbt.NBTTagCompound;
- import net.minecraft.nbt.NBTTagList;
- import net.minecraft.tileentity.TileEntity;
-@@ -79,14 +76,14 @@
- 
-         if (nbttagcompound == null)
-         {
--            DataInputStream datainputstream = RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z);
-+            NBTTagCompound nbtTagCompound = RegionFileCache.getChunkInputStreamCB(this.chunkSaveLocation, x, z);
- 
--            if (datainputstream == null)
-+            if (nbtTagCompound == null)
-             {
-                 return null;
-             }
- 
--            nbttagcompound = this.fixer.process(FixTypes.CHUNK, CompressedStreamTools.read(datainputstream));
-+            nbttagcompound = this.fixer.process(FixTypes.CHUNK, nbtTagCompound);
-         }
- 
-         return this.checkedReadChunkFromNBT__Async(worldIn, x, z, nbttagcompound);
-@@ -237,9 +234,10 @@
+@@ -238,9 +238,10 @@
  
      private void writeChunkData(ChunkPos pos, NBTTagCompound compound) throws IOException
      {
@@ -49,7 +24,7 @@
      }
  
      public void saveExtraChunkData(World worldIn, Chunk chunkIn) throws IOException
-@@ -608,8 +606,11 @@
+@@ -609,8 +610,11 @@
  
      public static void spawnEntity(Entity entityIn, World worldIn)
      {

@@ -129,12 +129,19 @@
      public boolean canAttackClass(Class <? extends EntityLivingBase > cls)
      {
          return cls != EntityGhast.class;
-@@ -355,7 +381,7 @@
+@@ -349,13 +375,13 @@
+ 
+     public static void registerFixesMob(DataFixer fixer, Class<?> name)
+     {
+-        fixer.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(name, new String[] {"ArmorItems", "HandItems"}));
++        fixer.registerWalker(FixTypes.ENTITY, new ItemStackDataLists(name, "ArmorItems", "HandItems"));
+     }
+ 
      public void writeEntityToNBT(NBTTagCompound compound)
      {
          super.writeEntityToNBT(compound);
 -        compound.setBoolean("CanPickUpLoot", this.canPickUpLoot());
-+        compound.setBoolean("CanPickUpLoot", this.thisisatestof());
++        compound.setBoolean("CanPickUpLoot", this.canPickupLoot());
          compound.setBoolean("PersistenceRequired", this.persistenceRequired);
          NBTTagList nbttaglist = new NBTTagList();
  
@@ -146,10 +153,10 @@
          if (compound.hasKey("CanPickUpLoot", 1))
          {
 -            this.setCanPickUpLoot(compound.getBoolean("CanPickUpLoot"));
-+            // this.idkwhyreyoudoingthis(compound.getBoolean("CanPickUpLoot"));
++            // this.setCanPickupLoot(compound.getBoolean("CanPickUpLoot"));
 +            boolean data = compound.getBoolean("CanPickUpLoot");
 +            if (isLevelAtLeast(compound, 1) || data) {
-+                this.idkwhyreyoudoingthis(data);
++                this.setCanPickupLoot(data);
 +            }
          }
  
@@ -167,7 +174,7 @@
          this.world.profiler.startSection("looting");
  
 -        if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this))
-+        if (!this.world.isRemote && this.thisisatestof() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this))
++        if (!this.world.isRemote && this.canPickupLoot() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this))
          {
              for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(1.0D, 0.0D, 1.0D)))
              {
@@ -230,17 +237,17 @@
      }
  
 -    public boolean canPickUpLoot()
-+    public boolean thisisatestof()
++    public boolean canPickupLoot()
      {
 -        return this.canPickUpLoot;
-+        return thisisatest;
++        return super.canPickupLoot;
      }
  
 -    public void setCanPickUpLoot(boolean canPickup)
-+    public void idkwhyreyoudoingthis(boolean canPickup)
++    public void setCanPickupLoot(boolean canPickup)
      {
 -        this.canPickUpLoot = canPickup;
-+        thisisatest = canPickup;
++        super.canPickupLoot = canPickup;
      }
  
      public boolean isNoDespawnRequired()

@@ -1,13 +1,13 @@
 package org.bukkit.block;
 
-import java.util.Collection;
-
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.Metadatable;
+
+import java.util.Collection;
 
 /**
  * Represents a block. This is a live object, and only one Block may exist for
@@ -59,7 +59,7 @@ public interface Block extends Metadatable {
      * shower.setType(Material.WATER);
      * </pre>
      *
-     * @param face Face of this block to return
+     * @param face     Face of this block to return
      * @param distance Distance to get the block at
      * @return Block at the given face
      */
@@ -172,7 +172,7 @@ public interface Block extends Metadatable {
     /**
      * Sets the metadata for this block
      *
-     * @param data New block specific metadata
+     * @param data         New block specific metadata
      * @param applyPhysics False to cancel physics from the changed block.
      * @deprecated Magic value
      */
@@ -189,7 +189,7 @@ public interface Block extends Metadatable {
     /**
      * Sets the type of this block
      *
-     * @param type Material to change this block to
+     * @param type         Material to change this block to
      * @param applyPhysics False to cancel physics on the changed block.
      */
     void setType(Material type, boolean applyPhysics);
@@ -207,7 +207,7 @@ public interface Block extends Metadatable {
     /**
      * Sets the type-id of this block
      *
-     * @param type Type-Id to change this block to
+     * @param type         Type-Id to change this block to
      * @param applyPhysics False to cancel physics on the changed block.
      * @return whether the block was changed
      * @deprecated Magic value
@@ -218,8 +218,8 @@ public interface Block extends Metadatable {
     /**
      * Sets the type-id of this block
      *
-     * @param type Type-Id to change this block to
-     * @param data The data value to change this block to
+     * @param type         Type-Id to change this block to
+     * @param data         The data value to change this block to
      * @param applyPhysics False to cancel physics on the changed block
      * @return whether the block was changed
      * @deprecated Magic value
@@ -230,7 +230,7 @@ public interface Block extends Metadatable {
     /**
      * Gets the face relation of this block compared to the given block.
      * <p>
-     * For example: 
+     * For example:
      * <pre>{@code
      * Block current = world.getBlockAt(100, 100, 100);
      * Block target = world.getBlockAt(100, 101, 100);
@@ -304,7 +304,7 @@ public interface Block extends Metadatable {
      * Returns the redstone power being provided to this block face
      *
      * @param face the face of the block to query or BlockFace.SELF for the
-     *     block itself
+     *             block itself
      * @return The power level.
      */
     int getBlockPower(BlockFace face);

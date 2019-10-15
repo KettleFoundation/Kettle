@@ -1,16 +1,37 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/common/registry/EntityRegistry.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/common/registry/EntityRegistry.java
-@@ -19,6 +19,9 @@
+@@ -19,6 +19,7 @@
  
  package net.minecraftforge.fml.common.registry;
  
-+import com.google.common.collect.Maps;
-+import net.minecraftforge.fml.common.Loader;
-+
++import com.google.common.collect.*;
  import net.minecraft.entity.Entity;
  import net.minecraft.entity.EntityList.EntityEggInfo;
  import net.minecraft.entity.EntityLiving;
-@@ -148,6 +151,9 @@
+@@ -30,20 +31,16 @@
+ import net.minecraft.world.biome.Biome.SpawnListEntry;
+ import net.minecraftforge.fml.common.FMLCommonHandler;
+ import net.minecraftforge.fml.common.FMLLog;
++import net.minecraftforge.fml.common.Loader;
+ import net.minecraftforge.fml.common.ModContainer;
+ import net.minecraftforge.fml.common.network.internal.FMLMessage.EntitySpawnMessage;
+ import net.minecraftforge.registries.GameData;
+ 
++import javax.annotation.Nullable;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.function.Function;
+-import com.google.common.collect.ArrayListMultimap;
+-import com.google.common.collect.BiMap;
+-import com.google.common.collect.HashBiMap;
+-import com.google.common.collect.ListMultimap;
+ 
+-import javax.annotation.Nullable;
+-
+ public class EntityRegistry
+ {
+     public class EntityRegistration
+@@ -148,6 +145,9 @@
      private final BiMap<Class<? extends Entity>, EntityRegistration> entityClassRegistrations = HashBiMap.create();
      private final Map<Class<? extends Entity>, EntityEntry> entityClassEntries = GameData.getEntityClassMap();
  
@@ -20,7 +41,7 @@
      public static EntityRegistry instance()
      {
          return INSTANCE;
-@@ -171,6 +177,7 @@
+@@ -171,6 +171,7 @@
      public static void registerModEntity(ResourceLocation registryName, Class<? extends Entity> entityClass, String entityName, int id, Object mod, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates)
      {
          instance().doModEntityRegistration(registryName, entityClass, entityName, id, mod, trackingRange, updateFrequency, sendsVelocityUpdates);
@@ -28,7 +49,7 @@
      }
  
      /**
-@@ -191,6 +198,7 @@
+@@ -191,6 +192,7 @@
      {
          instance().doModEntityRegistration(registryName, entityClass, entityName, id, mod, trackingRange, updateFrequency, sendsVelocityUpdates);
          EntityRegistry.registerEgg(registryName, eggPrimary, eggSecondary);
@@ -36,7 +57,7 @@
      }
  
      private void doModEntityRegistration(ResourceLocation registryName, Class<? extends Entity> entityClass, String entityName, int id, Object mod, int trackingRange, int updateFrequency, boolean sendsVelocityUpdates)
-@@ -385,4 +393,23 @@
+@@ -385,4 +387,30 @@
          this.entityClassRegistrations.put(entity, registration);
          this.entityRegistrations.put(registration.container, registration);
      }
@@ -46,17 +67,24 @@
 +        String modId = "unknown";
 +        // fixup bad entity names from mods
 +        if (entityName.contains(".")) {
-+            if ((entityName.indexOf(".") + 1) < entityName.length())
-+                entityName = entityName.substring(entityName.indexOf(".") + 1, entityName.length());
++            if ((entityName.indexOf(".") + 1) < entityName.length()) {
++                entityName = entityName.substring(entityName.indexOf(".") + 1);
++            }
 +        }
 +        entityName = entityName.replace("entity", "");
-+        if (entityName.startsWith("ent"))
++        if (entityName.startsWith("ent")) {
 +            entityName = entityName.replace("ent", "");
++        }
 +        entityName = entityName.replaceAll("[^A-Za-z0-9]", ""); // remove all non-digits/alphanumeric
-+        if (activeModContainer != null)
++        if (activeModContainer != null) {
 +            modId = activeModContainer.getModId();
++        }
 +        entityName = modId + "-" + entityName;
 +        entityTypeMap.put(entityClass, entityName);
 +        entityClassMap.put(entityName, entityClass);
++    }
++
++    public static String getCustomEntityTypeName(Class<? extends Entity> entityClass) {
++        return entityTypeMap.get(entityClass);
 +    }
  }

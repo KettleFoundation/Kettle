@@ -5,11 +5,11 @@ import org.bukkit.plugin.PluginManager;
 
 /**
  * Represents an event.
- *
+ * <p>
  * All events require a static method named getHandlerList() which returns the same {@link HandlerList} as {@link #getHandlers()}.
  *
  * @see PluginManager#callEvent(Event)
- * @see PluginManager#registerEvents(Listener,Plugin)
+ * @see PluginManager#registerEvents(Listener, Plugin)
  */
 public abstract class Event {
     private String name;
@@ -28,13 +28,14 @@ public abstract class Event {
      * or asynchronous.
      *
      * @param isAsync true indicates the event will fire asynchronously, false
-     *     by default from default constructor
+     *                by default from default constructor
      */
     public Event(boolean isAsync) {
         this.async = isAsync;
     }
 
     // Paper start
+
     /**
      * Calls the event and tests if cancelled.
      *

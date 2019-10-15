@@ -188,17 +188,17 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
 
     private static EulerAngle fromNMS(Rotations old) {
         return new EulerAngle(
-            Math.toRadians(old.getX()),
-            Math.toRadians(old.getY()),
-            Math.toRadians(old.getZ())
+                Math.toRadians(old.getX()),
+                Math.toRadians(old.getY()),
+                Math.toRadians(old.getZ())
         );
     }
 
     private static Rotations toNMS(EulerAngle old) {
         return new Rotations(
-            (float) Math.toDegrees(old.getX()),
-            (float) Math.toDegrees(old.getY()),
-            (float) Math.toDegrees(old.getZ())
+                (float) Math.toDegrees(old.getX()),
+                (float) Math.toDegrees(old.getY()),
+                (float) Math.toDegrees(old.getZ())
         );
     }
 

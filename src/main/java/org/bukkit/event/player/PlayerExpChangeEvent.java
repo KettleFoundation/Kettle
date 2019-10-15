@@ -11,8 +11,8 @@ public class PlayerExpChangeEvent extends PlayerEvent {
     private int exp;
 
     public PlayerExpChangeEvent(final Player player, final int expAmount) {
-         super(player);
-         exp = expAmount;
+        super(player);
+        exp = expAmount;
     }
 
     /**

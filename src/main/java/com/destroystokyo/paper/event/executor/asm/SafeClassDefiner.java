@@ -8,7 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 public class SafeClassDefiner implements ClassDefiner {
     /* default */ static final SafeClassDefiner INSTANCE = new SafeClassDefiner();
 
-    private SafeClassDefiner() {}
+    private SafeClassDefiner() {
+    }
 
     private final ConcurrentMap<ClassLoader, GeneratedClassLoader> loaders = new MapMaker().weakKeys().makeMap();
 

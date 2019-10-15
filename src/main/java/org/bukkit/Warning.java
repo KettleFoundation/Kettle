@@ -1,12 +1,12 @@
 package org.bukkit;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
 
 /**
  * This designates the warning state for a specific item.
@@ -37,7 +37,7 @@ public @interface Warning {
          */
         DEFAULT;
 
-        private static final Map<String, WarningState> values = ImmutableMap.<String,WarningState>builder()
+        private static final Map<String, WarningState> values = ImmutableMap.<String, WarningState>builder()
                 .put("off", OFF)
                 .put("false", OFF)
                 .put("f", OFF)
@@ -59,11 +59,11 @@ public @interface Warning {
          *
          * @param warning The warning annotation added to a deprecated item
          * @return <ul>
-         *     <li>ON is always True
-         *     <li>OFF is always false
-         *     <li>DEFAULT is false if and only if annotation is not null and
-         *     specifies false for {@link Warning#value()}, true otherwise.
-         *     </ul>
+         * <li>ON is always True
+         * <li>OFF is always false
+         * <li>DEFAULT is false if and only if annotation is not null and
+         * specifies false for {@link Warning#value()}, true otherwise.
+         * </ul>
          */
         public boolean printFor(Warning warning) {
             if (this == DEFAULT) {
@@ -78,7 +78,7 @@ public @interface Warning {
          *
          * @param value The string value to check
          * @return {@link #DEFAULT} if not found, or the respective
-         *     WarningState
+         * WarningState
          */
         public static WarningState value(final String value) {
             if (value == null) {

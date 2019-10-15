@@ -38,7 +38,7 @@
  import net.minecraft.util.EnumParticleTypes;
  import net.minecraft.util.IProgressUpdate;
  import net.minecraft.util.IThreadListener;
-@@ -77,16 +73,20 @@
+@@ -77,50 +73,94 @@
  import net.minecraft.world.storage.WorldInfo;
  import net.minecraft.world.storage.WorldSavedDataCallableSave;
  import net.minecraft.world.storage.loot.LootTableManager;
@@ -58,20 +58,29 @@
 -    private final EntityTracker entityTracker;
 +    public EntityTracker entityTracker;
      private final PlayerChunkMap playerChunkMap;
-     private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.<NextTickListEntry>newHashSet();
-     private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<NextTickListEntry>();
-@@ -97,7 +97,7 @@
+-    private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.<NextTickListEntry>newHashSet();
+-    private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<NextTickListEntry>();
+-    private final Map<UUID, Entity> entitiesByUuid = Maps.<UUID, Entity>newHashMap();
++    private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.newHashSet();
++    private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<>();
++    private final Map<UUID, Entity> entitiesByUuid = Maps.newHashMap();
+     public boolean disableLevelSaving;
+     private boolean allPlayersSleeping;
+     private int updateEntityTick;
      private final Teleporter worldTeleporter;
      private final WorldEntitySpawner entitySpawner = new WorldEntitySpawner();
      protected final VillageSiege villageSiege = new VillageSiege(this);
 -    private final WorldServer.ServerBlockEventList[] blockEventQueue = new WorldServer.ServerBlockEventList[] {new WorldServer.ServerBlockEventList(), new WorldServer.ServerBlockEventList()};
 +    private final ServerBlockEventList[] blockEventQueue = new ServerBlockEventList[] {new ServerBlockEventList(), new ServerBlockEventList()};
      private int blockEventCacheIndex;
-     private final List<NextTickListEntry> pendingTickListEntriesThisTick = Lists.<NextTickListEntry>newArrayList();
+-    private final List<NextTickListEntry> pendingTickListEntriesThisTick = Lists.<NextTickListEntry>newArrayList();
++    private final List<NextTickListEntry> pendingTickListEntriesThisTick = Lists.newArrayList();
  
-@@ -105,22 +105,62 @@
-     protected Set<ChunkPos> doneChunks = new java.util.HashSet<ChunkPos>();
-     public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
+     /** Stores the recently processed (lighting) chunks */
+-    protected Set<ChunkPos> doneChunks = new java.util.HashSet<ChunkPos>();
+-    public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
++    protected Set<ChunkPos> doneChunks = new java.util.HashSet<>();
++    public List<Teleporter> customTeleporters = new ArrayList<>();
  
 +    public final int dimension;
 +
@@ -88,7 +97,7 @@
 +        this.provider.setWorld(this);
 +        this.provider.setDimension(providerDim);
 +        this.chunkProvider = this.createChunkProvider();
-+        this.worldTeleporter = new org.bukkit.craftbukkit.CraftTravelAgent(this); //// CraftBukkit
++        this.worldTeleporter = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
 +        this.calculateInitialSkylight();
 +        this.calculateInitialWeather();
 +        this.getWorldBorder().setSize(server.getMaxWorldSize());
@@ -175,7 +184,7 @@
 +        TileEntity result = super.getTileEntity(pos);
 +        Block type = getBlockState(pos).getBlock();
 +
-+        if (type == Blocks.CHEST) {
++        if (type == Blocks.CHEST || type == Blocks.TRAPPED_CHEST) {
 +            if (!(result instanceof TileEntityChest)) {
 +                result = fixTileEntity(pos, type, result);
 +            }

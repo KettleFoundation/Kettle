@@ -34,8 +34,7 @@ public interface CommandSender extends Permissible {
     public String getName();
 
     // Spigot start
-    public class Spigot
-    {
+    public class Spigot {
 
         /**
          * Sends this sender a chat component.

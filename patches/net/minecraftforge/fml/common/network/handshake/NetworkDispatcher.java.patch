@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/handshake/NetworkDispatcher.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/handshake/NetworkDispatcher.java
+@@ -103,7 +103,7 @@
+     public static final AttributeKey<Map<ResourceLocation, ForgeRegistry.Snapshot>> FML_GAMEDATA_SNAPSHOT = AttributeKey.valueOf("fml:gameDataSnapshot");
+     public final NetworkManager manager;
+     private final PlayerList scm;
+-    private EntityPlayerMP player;
++    public EntityPlayerMP player; // Kettle - private -> public
+     private ConnectionState state;
+     private ConnectionType connectionType;
+     private final Side side;
