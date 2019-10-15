@@ -104,49 +104,6 @@ case "$1" in
         rm -rf work
         echo "Cleaned build files"
     ;;
-    "e" | "edit")
-        case "$2" in
-            "s" | "server")
-            export PAPER_LAST_EDIT="$basedir/Paper-Server"
-            cd "$basedir/Paper-Server"
-            (
-                set -e
-
-                paperstash
-                $gitcmd rebase -i upstream/upstream
-                paperunstash
-            )
-            ;;
-            "a" | "api")
-            export PAPER_LAST_EDIT="$basedir/Paper-API"
-            cd "$basedir/Paper-API"
-            (
-                set -e
-
-                paperstash
-                $gitcmd rebase -i upstream/upstream
-                paperunstash
-            )
-            ;;
-            "c" | "continue")
-            cd "$PAPER_LAST_EDIT"
-            unset PAPER_LAST_EDIT
-            (
-                set -e
-
-                $gitcmd add .
-                $gitcmd commit --amend
-                $gitcmd rebase --continue
-
-                cd "$basedir"
-                scripts/rebuildPatches.sh "$basedir"
-            )
-            ;;
-            *)
-                echo "You must edit either the api or server."
-            ;;
-        esac
-    ;;
     "setup")
         if [[ -f "$RCPATH" ]] ; then
             NAME="paper"
@@ -175,12 +132,7 @@ case "$1" in
         echo ""
         echo " These commands require the setup command before use:"
         echo "  * r, root           | Change directory to the root of the project."
-        echo "  * a. api            | Move to the Paper-API directory."
-        echo "  * s, server         | Move to the Paper-Server directory."
         echo "  * td, testdirectory | Move to the test-server directory."
-        echo "  * e, edit           | Use to edit a specific patch, give it the argument \"server\" or \"api\""
-        echo "                      | respectively to edit the correct project. Use the argument \"continue\" after"
-        echo "                      | the changes have been made to finish and rebuild patches. Can be called from anywhere."
         echo ""
         echo "  * setup             | Add an alias to $RCPATH to allow full functionality of this script. Run as:"
         echo "                      |     . ./paper setup"
