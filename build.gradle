@@ -55,8 +55,8 @@ repositories {
         url 'https://mvnrepository.com/artifact/'
     }
     maven {
-    	name 'kettle'
-    	url 'https://repo.openprocesses.ml/repository/kettle-dev/'
+    	name 'josephworks'
+    	url 'https://repo.josephworks.net/repository/kettle-dev/'
     }
     flatDir {
         dirs 'src/main/resources'
