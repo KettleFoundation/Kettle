@@ -5,7 +5,7 @@
 # Kettle
 
 ![](https://img.shields.io/badge/Forge-1.12.2%20--%202838-orange.svg?style=for-the-badge)
-![Jenkins](https://img.shields.io/jenkins/build/https/ci.openprocesses.ml/Kettle?label=Build&style=for-the-badge)
+![Jenkins](https://img.shields.io/jenkins/build/http/ci.josephworks.net/Kettle?label=Build&style=for-the-badge)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/KettleFoundation/Kettle?label=Latest%20Version&style=for-the-badge)
 
 ### What's Kettle?
