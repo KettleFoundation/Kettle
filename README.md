@@ -1,5 +1,7 @@
 **🛑 «Kettle» *or* «KettleJava» is deprecated since 23.03.2021**
 
+For further development see: [KettleRed](https://github.com/KettleFoundation/KettleRed)
+
 ---
 
 <details>
