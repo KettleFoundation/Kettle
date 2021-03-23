@@ -1,3 +1,12 @@
+**🛑 «Kettle» *or* «KettleJava» is deprecated since 23.03.2021**
+
+---
+
+<details>
+  
+  <summary>Deprecated readme</summary>
+  
+
 **:warning: Kettle is still __raw__ and you may encounter issues with using it as your server software. This software is not yet ready for Production use. You have been warned!**
 
 ![Kettle](https://i.imgur.com/gkmTKvR.png)
@@ -54,3 +63,5 @@ You are welcome to visit Kettle Discord server [here](https://discord.gg/RqDjbcM
 For unstable/test builds, you can check __[KettleDev](https://github.com/KettleFoundation/KettleDev)__!
 
 For 1.14.4 builds, you can check __[Kettle-1.14.4](https://github.com/KettleFoundation/Kettle-1.14.4)__!
+
+</details>
